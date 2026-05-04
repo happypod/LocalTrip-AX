@@ -8,7 +8,11 @@ async function main() {
   // 1. Region: 소원권역 (Sowon)
   const sowonRegion = await prisma.region.upsert({
     where: { slug: "sowon" },
-    update: {},
+    update: {
+      name: "소원권역",
+      description: "주민과 여행자가 상생하는 소원면 지역관광 브랜드",
+      status: PublishStatus.published,
+    },
     create: {
       name: "소원권역",
       slug: "sowon",
