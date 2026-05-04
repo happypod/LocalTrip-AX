@@ -1,0 +1,289 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PublishStatus {
+  draft
+  published
+  inactive
+}
+
+enum LeadEventType {
+  phone_click
+  kakao_click
+  naver_booking_click
+  website_click
+  inquiry_submit
+  partner_apply_submit
+}
+
+enum CourseItemType {
+  accommodation
+  experience
+  local_income_program
+}
+
+enum InquiryStatus {
+  new
+  in_progress
+  resolved
+  archived
+}
+
+model Region {
+  id                  String                 @id @default(cuid())
+  name                String
+  slug                String                 @unique // slug 또는 code
+  description         String?
+  status              PublishStatus          @default(draft)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  businessProfiles    BusinessProfile[]
+  accommodations      Accommodation[]
+  experiences         Experience[]
+  localIncomePrograms LocalIncomeProgram[]
+  courses             Course[]
+  inquiries           Inquiry[]
+  partnerApplications PartnerApplication[]
+  leadEvents          LeadEvent[]
+  trainingCourses     TrainingCourse[]
+  certifications      Certification[]
+
+  @@index([status])
+}
+
+model BusinessProfile {
+  id                  String                 @id @default(cuid())
+  regionId            String
+  region              Region                 @relation(fields: [regionId], references: [id])
+  name                String
+  ownerName           String?
+  phone               String?
+  kakaoUrl            String?
+  naverBookingUrl     String?
+  websiteUrl          String?
+  address             String?
+  description         String?
+  status              PublishStatus          @default(draft)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  accommodations      Accommodation[]
+  experiences         Experience[]
+  localIncomePrograms LocalIncomeProgram[]
+
+  @@index([regionId, status])
+}
+
+model Accommodation {
+  id                  String                 @id @default(cuid())
+  regionId            String
+  region              Region                 @relation(fields: [regionId], references: [id])
+  businessProfileId   String?
+  businessProfile     BusinessProfile?       @relation(fields: [businessProfileId], references: [id])
+  title               String
+  slug                String
+  summary             String
+  description         String?
+  address             String?
+  priceText           String?
+  capacityText        String?
+  images              String[]               @default([])
+  phone               String?
+  kakaoUrl            String?
+  naverBookingUrl     String?
+  websiteUrl          String?
+  status              PublishStatus          @default(draft)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  courseItems         CourseItem[]
+
+  @@unique([regionId, slug])
+  @@index([regionId, status])
+}
+
+model Experience {
+  id                  String                 @id @default(cuid())
+  regionId            String
+  region              Region                 @relation(fields: [regionId], references: [id])
+  businessProfileId   String?
+  businessProfile     BusinessProfile?       @relation(fields: [businessProfileId], references: [id])
+  title               String
+  slug                String
+  summary             String
+  description         String?
+  location            String?
+  durationText        String?
+  priceText           String?
+  capacityText        String?
+  images              String[]               @default([])
+  phone               String?
+  kakaoUrl            String?
+  naverBookingUrl     String?
+  websiteUrl          String?
+  status              PublishStatus          @default(draft)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  courseItems         CourseItem[]
+
+  @@unique([regionId, slug])
+  @@index([regionId, status])
+}
+
+model LocalIncomeProgram {
+  id                  String                 @id @default(cuid())
+  regionId            String
+  region              Region                 @relation(fields: [regionId], references: [id])
+  businessProfileId   String?
+  businessProfile     BusinessProfile?       @relation(fields: [businessProfileId], references: [id])
+  title               String
+  slug                String
+  summary             String
+  description         String?
+  linkedLifeService   String
+  residentRole        String
+  revenueUse          String
+  location            String?
+  priceText           String?
+  images              String[]               @default([])
+  phone               String?
+  kakaoUrl            String?
+  naverBookingUrl     String?
+  websiteUrl          String?
+  status              PublishStatus          @default(draft)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  courseItems         CourseItem[]
+
+  @@unique([regionId, slug])
+  @@index([regionId, status])
+}
+
+model Course {
+  id                  String                 @id @default(cuid())
+  regionId            String
+  region              Region                 @relation(fields: [regionId], references: [id])
+  title               String
+  slug                String
+  summary             String
+  description         String?
+  images              String[]               @default([])
+  status              PublishStatus          @default(draft)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  courseItems         CourseItem[]
+
+  @@unique([regionId, slug])
+  @@index([regionId, status])
+}
+
+model CourseItem {
+  id                     String                 @id @default(cuid())
+  courseId               String
+  course                 Course                 @relation(fields: [courseId], references: [id])
+  itemType               CourseItemType
+  // 한 CourseItem은 accommodation, experience, localIncomeProgram 중 하나만 연결해야 함.
+  // Prisma에서 완전한 XOR 제약이 어렵기 때문에 앱 레벨에서 검증 예정입니다.
+  accommodationId        String?
+  accommodation          Accommodation?         @relation(fields: [accommodationId], references: [id])
+  experienceId           String?
+  experience             Experience?            @relation(fields: [experienceId], references: [id])
+  localIncomeProgramId   String?
+  localIncomeProgram     LocalIncomeProgram?    @relation(fields: [localIncomeProgramId], references: [id])
+  sortOrder              Int
+  note                   String?
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+
+  @@index([courseId, sortOrder])
+}
+
+model Inquiry {
+  id                  String                 @id @default(cuid())
+  regionId            String
+  region              Region                 @relation(fields: [regionId], references: [id])
+  targetType          String?
+  targetId            String?
+  name                String
+  phone               String?
+  email               String?
+  message             String
+  privacyConsent      Boolean
+  status              InquiryStatus          @default(new)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  // 개인정보 최소 수집 원칙 준수 (이름, 연락처 정도만 수집)
+
+  @@index([regionId, status, createdAt])
+}
+
+model PartnerApplication {
+  id                  String                 @id @default(cuid())
+  regionId            String
+  region              Region                 @relation(fields: [regionId], references: [id])
+  businessName        String
+  applicantName       String
+  phone               String
+  email               String?
+  businessType        String?
+  message             String?
+  privacyConsent      Boolean
+  status              InquiryStatus          @default(new)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  @@index([regionId, status, createdAt])
+}
+
+model LeadEvent {
+  id                  String                 @id @default(cuid())
+  regionId            String
+  region              Region                 @relation(fields: [regionId], references: [id])
+  eventType           LeadEventType
+  targetType          String?
+  targetId            String?
+  sourcePath          String?
+  userAgent           String?
+  referrer            String?
+  metadata            Json?
+  createdAt           DateTime               @default(now())
+  // CTA 실패가 사용자 흐름을 막지 않도록 이후 구현에서 best-effort로 기록할 예정
+
+  @@index([regionId, eventType, createdAt])
+  @@index([targetType, targetId])
+}
+
+model TrainingCourse {
+  id                  String                 @id @default(cuid())
+  regionId            String
+  region              Region                 @relation(fields: [regionId], references: [id])
+  title               String
+  summary             String?
+  status              PublishStatus          @default(draft)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  @@index([regionId, status])
+}
+
+model Certification {
+  id                  String                 @id @default(cuid())
+  regionId            String
+  region              Region                 @relation(fields: [regionId], references: [id])
+  title               String
+  summary             String?
+  status              PublishStatus          @default(draft)
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+
+  @@index([regionId, status])
+}
