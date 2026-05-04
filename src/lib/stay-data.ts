@@ -1,0 +1,36 @@
+export const FALLBACK_STAYS = [
+  {
+    id: "stay-1",
+    slug: "sowon-house-01",
+    title: "소원 낙조 펜션",
+    summary: "만리포 해변이 한눈에 보이는 바다 전망 펜션",
+    description: "서해의 아름다운 낙조를 거실에서 감상할 수 있는 고품격 펜션입니다. 가족 단위 여행객에게 최적화된 넓은 공간과 편의시설을 갖추고 있습니다.",
+    address: "충남 태안군 소원면 만리포해수욕장길 123",
+    priceText: "평일 120,000원 ~",
+    capacityText: "기준 2인 / 최대 4인",
+    images: ["/placeholder-acc-1.jpg"],
+    phone: "010-0000-0001",
+    kakaoUrl: "https://pf.kakao.com/_xxxx",
+    naverBookingUrl: "https://booking.naver.com/booking/3/bizes/123",
+    websiteUrl: "https://example.com",
+    status: "published",
+    regionId: "sowon",
+  },
+  {
+    id: "stay-2",
+    slug: "padori-minbak",
+    title: "파도리 어촌 민박",
+    summary: "어촌 마을의 정취를 느낄 수 있는 소박한 민박",
+    description: "파도리 해변 인근의 조용한 마을에 위치한 민박입니다. 할머니의 손맛이 담긴 아침 식사와 따뜻한 온돌방이 준비되어 있습니다.",
+    address: "충남 태안군 소원면 파도리길 45",
+    priceText: "50,000원",
+    capacityText: "기준 1인 / 최대 2인",
+    images: [], // Empty for fallback test
+    phone: "010-0000-0002",
+    kakaoUrl: null,
+    naverBookingUrl: null,
+    websiteUrl: null,
+    status: "published",
+    regionId: "sowon",
+  }
+];

@@ -100,7 +100,7 @@ export default async function Home() {
             </h1>
             <p className="text-muted-foreground text-lg md:text-xl max-w-2xl leading-relaxed">
               주민과 여행자가 상생하는 소원면의 진정한 매력을 발견하세요.
-              문의 한 번으로 시작되는 특별한 로컬 여행.
+              <br /> 문의 한 번으로 시작되는 특별한 로컬 여행.
             </p>
           </div>
           <div className="flex flex-wrap gap-3 mt-4">
