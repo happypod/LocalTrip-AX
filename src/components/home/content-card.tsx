@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +23,8 @@ export function ContentCard({
   badge,
   badgeVariant,
 }: ContentCardProps) {
+  const [imgError, setImgError] = useState(false);
+
   const badgeStyles = {
     stay: "bg-category-stay text-white",
     experience: "bg-category-experience text-white",
@@ -35,14 +38,12 @@ export function ContentCard({
       className="group block border rounded-lg bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full"
     >
       <div className="relative aspect-[4/3] bg-muted flex items-center justify-center overflow-hidden">
-        {imageUrl ? (
+        {imageUrl && !imgError ? (
           <img
             src={imageUrl}
             alt={title}
             className="w-full h-full object-cover transition-transform group-hover:scale-105"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = "https://placehold.co/600x450?text=No+Image";
-            }}
+            onError={() => setImgError(true)}
           />
         ) : (
           <div className="text-muted-foreground text-xs font-medium">이미지 준비 중</div>

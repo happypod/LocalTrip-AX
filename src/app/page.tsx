@@ -20,30 +20,50 @@ import {
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
+export const dynamic = "force-dynamic";
+
 async function getHomeData() {
   try {
     const prisma = getPrisma();
     // Attempt to connect to DB with a short check
     await prisma.$connect();
-    
+
+    // Fetch the 'sowon' region ID first
+    const sowonRegion = await prisma.region.findUnique({
+      where: { slug: "sowon" },
+      select: { id: true },
+    });
+
+    if (!sowonRegion) {
+      console.warn("'sowon' region not found in DB, using fallback data.");
+      return {
+        stays: FALLBACK_STAYS,
+        experiences: FALLBACK_EXPERIENCES,
+        programs: FALLBACK_PROGRAMS,
+        courses: FALLBACK_COURSES,
+      };
+    }
+
+    const regionId = sowonRegion.id;
+
     const [stays, experiences, programs, courses] = await Promise.all([
       prisma.accommodation.findMany({
-        where: { status: "published" },
+        where: { status: "published", regionId },
         take: 2,
         orderBy: { createdAt: "desc" },
       }),
       prisma.experience.findMany({
-        where: { status: "published" },
+        where: { status: "published", regionId },
         take: 2,
         orderBy: { createdAt: "desc" },
       }),
       prisma.localIncomeProgram.findMany({
-        where: { status: "published" },
+        where: { status: "published", regionId },
         take: 2,
         orderBy: { createdAt: "desc" },
       }),
       prisma.course.findMany({
-        where: { status: "published" },
+        where: { status: "published", regionId },
         take: 2,
         orderBy: { createdAt: "desc" },
       }),
