@@ -37,13 +37,14 @@ async function main() {
   console.log("Cleanup finished. Starting creation...");
 
   // 2. BusinessProfiles (5 samples)
+  // [P3] Use obvious placeholder names and numbers
   const bizProfiles = await Promise.all([
     prisma.businessProfile.create({
       data: {
         regionId,
-        name: "소원스테이 협동조합",
-        ownerName: "김소원",
-        phone: "010-1234-5678",
+        name: "소원 숙박 협동조합",
+        ownerName: "소원 운영자 01",
+        phone: "010-0000-0001",
         kakaoUrl: "https://pf.kakao.com/_example1",
         status: PublishStatus.published,
       },
@@ -51,9 +52,9 @@ async function main() {
     prisma.businessProfile.create({
       data: {
         regionId,
-        name: "파도리 어촌계",
-        ownerName: "이파도",
-        phone: "010-2222-3333",
+        name: "소원 체험 마을",
+        ownerName: "소원 운영자 02",
+        phone: "010-0000-0002",
         naverBookingUrl: "https://booking.naver.com/example2",
         status: PublishStatus.published,
       },
@@ -61,24 +62,27 @@ async function main() {
     prisma.businessProfile.create({
       data: {
         regionId,
-        name: "소원 공방",
-        ownerName: "박공예",
-        websiteUrl: "https://sowon-art.example.com",
+        name: "소원 로컬 상점",
+        ownerName: "소원 운영자 03",
+        phone: "010-0000-0003",
+        websiteUrl: "https://sowon-shop.example.com",
         status: PublishStatus.published,
       },
     }),
     prisma.businessProfile.create({
       data: {
         regionId,
-        name: "만리포 서핑 연합",
-        phone: "010-4444-5555",
+        name: "소원 레저 연합",
+        ownerName: "소원 운영자 04",
+        phone: "010-0000-0004",
         status: PublishStatus.published,
       },
     }),
     prisma.businessProfile.create({
       data: {
         regionId,
-        name: "미등록 파트너",
+        name: "미등록 파트너 05",
+        ownerName: "임시 운영자",
         status: PublishStatus.draft,
       },
     }),
@@ -96,7 +100,7 @@ async function main() {
       priceText: "평일 120,000원 ~",
       capacityText: "2~4인",
       images: ["/placeholder-acc-1.jpg"],
-      phone: "010-1234-5678",
+      phone: "010-0000-0001",
       kakaoUrl: "https://pf.kakao.com/_example1",
       status: PublishStatus.published,
     },
@@ -120,7 +124,7 @@ async function main() {
   await prisma.accommodation.create({
     data: {
       regionId,
-      title: "비밀의 숲 오두막",
+      title: "비밀의 숲 오두막 (DRAFT)",
       slug: "secret-cabin",
       summary: "준비 중인 숲속 캠핑 스팟",
       status: PublishStatus.draft,
@@ -162,7 +166,7 @@ async function main() {
   await prisma.experience.create({
     data: {
       regionId,
-      title: "겨울 한정 얼음 낚시",
+      title: "겨울 한정 얼음 낚시 (INACTIVE)",
       slug: "winter-fishing",
       summary: "겨울철에만 운영하는 특별 체험",
       status: PublishStatus.inactive,
@@ -183,7 +187,7 @@ async function main() {
       location: "파도리 마을 회관",
       priceText: "15,000원",
       images: ["/placeholder-prog-1.jpg"],
-      phone: "041-660-0000",
+      phone: "010-0000-0002",
       status: PublishStatus.published,
     },
   });
@@ -205,7 +209,7 @@ async function main() {
   await prisma.localIncomeProgram.create({
     data: {
       regionId,
-      title: "주민 목공방 기초 클래스",
+      title: "주민 목공방 기초 클래스 (DRAFT)",
       slug: "woodworking-class",
       summary: "마을 목공소에서 배우는 기초 가구 제작",
       linkedLifeService: "마을 노후 주택 수리 봉사단 연계",
@@ -285,8 +289,8 @@ async function main() {
     data: [
       {
         regionId,
-        name: "여행자A",
-        phone: "010-0000-1111",
+        name: "예시 질문자 01",
+        phone: "010-0000-0011",
         message: "숙소 예약 문의드립니다. 2명이서 1박 가능할까요?",
         privacyConsent: true,
         status: InquiryStatus.new,
@@ -295,8 +299,8 @@ async function main() {
       },
       {
         regionId,
-        name: "궁금이",
-        email: "test@example.com",
+        name: "예시 질문자 02",
+        email: "test-02@example.com",
         message: "주민 밥상 프로그램은 단체 예약도 되나요?",
         privacyConsent: true,
         status: InquiryStatus.in_progress,
@@ -305,25 +309,26 @@ async function main() {
   });
 
   // 8. PartnerApplications (2 samples)
+  // [P1] Remove "Transport" (Sowon Taxi) as it's out of scope
   await prisma.partnerApplication.createMany({
     data: [
       {
         regionId,
-        businessName: "햇살 카페",
-        applicantName: "김햇살",
-        phone: "010-9999-8888",
-        businessType: "F&B",
-        message: "체험 파트너로 등록하고 싶습니다.",
+        businessName: "햇살 브런치 카페",
+        applicantName: "카페 운영자 01",
+        phone: "010-0000-0012",
+        businessType: "F&B / 로컬상점",
+        message: "지역 식재료를 활용한 메뉴를 제안하고 싶습니다.",
         privacyConsent: true,
         status: InquiryStatus.new,
       },
       {
         regionId,
-        businessName: "소원 택시",
-        applicantName: "최운전",
-        phone: "010-7777-6666",
-        businessType: "Transport",
-        message: "지역 연계 이동 서비스 제안드립니다.",
+        businessName: "소원 낚시 체험단",
+        applicantName: "체험 운영자 03",
+        phone: "010-0000-0013",
+        businessType: "Experience",
+        message: "계절별 낚시 체험 프로그램을 제안합니다.",
         privacyConsent: true,
         status: InquiryStatus.resolved,
       },
@@ -350,13 +355,14 @@ async function main() {
   });
 
   // 10. LeadEvents (Sample for analysis tests)
+  // [P2] Use correct IA paths: /stays/[slug], /experiences/[slug]
   await prisma.leadEvent.createMany({
     data: [
       { regionId, eventType: LeadEventType.phone_click, targetType: "accommodation", targetId: acc1.id, sourcePath: "/" },
-      { regionId, eventType: LeadEventType.kakao_click, targetType: "experience", targetId: exp1.id, sourcePath: "/experience/surfing-class" },
-      { regionId, eventType: LeadEventType.naver_booking_click, targetType: "accommodation", targetId: acc2.id, sourcePath: "/accommodation/padori-minbak" },
-      { regionId, eventType: LeadEventType.website_click, targetType: "experience", targetId: exp1.id },
-      { regionId, eventType: LeadEventType.inquiry_submit, targetType: "accommodation", targetId: acc1.id },
+      { regionId, eventType: LeadEventType.kakao_click, targetType: "experience", targetId: exp1.id, sourcePath: "/experiences/surfing-class" },
+      { regionId, eventType: LeadEventType.naver_booking_click, targetType: "accommodation", targetId: acc2.id, sourcePath: "/stays/padori-minbak" },
+      { regionId, eventType: LeadEventType.website_click, targetType: "experience", targetId: exp1.id, sourcePath: "/experiences/surfing-class" },
+      { regionId, eventType: LeadEventType.inquiry_submit, targetType: "accommodation", targetId: acc1.id, sourcePath: "/stays/sowon-house-01" },
     ],
   });
 
