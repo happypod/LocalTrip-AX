@@ -1,25 +1,25 @@
 # Data Model (Draft)
 
-## 핵심 엔티티 구조
+- Region
+- BusinessProfile
+- Accommodation
+- Experience
+- LocalIncomeProgram
+- Course
+- CourseItem
+- Inquiry
+- PartnerApplication
+- LeadEvent
+- TrainingCourse
+- Certification
 
-### Region (지역)
-- id: String
-- name: String
-- code: String (URL Slug)
+- linkedLifeService
+- residentRole
+- revenueUse
 
-### Category (카테고리)
-- id: String
-- name: String (숙소, 체험, 주민소득상품, 추천코스)
-- type: Enum
-
-### Item (상품)
-- id: String
-- regionId: Relation
-- categoryId: Relation
-- title: String
-- description: Text
-- images: String[]
-- contactUrl: String (Kakao/Phone)
-
-## 확장 전략
-- `regionId` 기반의 샤딩 또는 필터링 구조를 통해 전국 단위 확장 지원.
+모든 주요 공개/운영 모델은 regionId를 가진다.
+공개 화면에는 status=published 데이터만 노출한다.
+draft, inactive 데이터는 공개 화면에 노출하지 않는다.
+Accommodation, Experience, LocalIncomeProgram, Course는 서로 흡수하지 않는다.
+LeadEvent는 전화, 카카오, 네이버예약, 홈페이지, 문의 제출 등의 행동을 기록한다.
+Inquiry는 이름, 연락처, 문의 내용, 개인정보 동의 여부 정도만 수집한다.

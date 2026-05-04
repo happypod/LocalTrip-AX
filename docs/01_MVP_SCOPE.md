@@ -1,14 +1,27 @@
 # MVP Scope: LocalTrip AX / 소원로컬트립
 
-## 포함 범위 (In-Scope)
-- 지역별(Region) 상품 탐색 (숙소, 체험, 주민소득상품, 추천코스)
-- 상품 상세 정보 조회
-- 카카오톡/전화 문의 연결 (Lead Generation)
-- 다지역 확장 가능한 구조 설계
+## 포함 범위
 
-## 제외 범위 (Out-of-Scope)
-- 실시간 예약 및 결제
-- 회원가입 및 로그인 (인증)
-- 관리자 CRUD 시스템
-- 리뷰 및 평점 시스템
-- 지도/AI API 고도화 (초기 단계)
+- 숙소, 체험, 주민소득상품, 추천코스 공개 노출
+- 전화, 카카오, 네이버예약, 홈페이지 CTA 연결
+- 문의폼 및 입점신청
+- LeadEvent 수집
+- 관리자 CRUD
+  - Region / BusinessProfile
+  - Accommodation
+  - Experience
+  - LocalIncomeProgram
+  - Course
+  - Inquiry / PartnerApplication 관리
+- 교육·인증·AX 확장을 위한 최소 placeholder 구조
+
+## 제외 범위
+
+- 사용자 회원가입/로그인
+- 결제, 정산
+- 실시간 예약 확정
+- 실시간 객실 재고
+- 차량운송
+- 후기, 쿠폰, 포인트
+- 실제 AI API 연동
+- 지도 API 고도화
