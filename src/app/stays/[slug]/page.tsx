@@ -136,7 +136,9 @@ export default async function StayDetailPage({ params }: { params: Promise<{ slu
                 예약 문의나 궁금한 점은 아래 채널로 직접 연락해 주세요.
               </p>
             </div>
-            <StayCTA
+            <StayCTA 
+              itemId={stay.id}
+              itemSlug={stay.slug}
               phone={stay.phone}
               kakaoUrl={stay.kakaoUrl}
               naverBookingUrl={stay.naverBookingUrl}

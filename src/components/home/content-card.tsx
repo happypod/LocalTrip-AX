@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHeart } from "@/lib/fontawesome";
 import { cn } from "@/lib/utils";
 
 interface ContentCardProps {
@@ -26,50 +29,59 @@ export function ContentCard({
   const [imgError, setImgError] = useState(false);
 
   const badgeStyles = {
-    stay: "bg-category-stay text-white",
-    experience: "bg-category-experience text-white",
-    program: "bg-category-program text-white",
-    course: "bg-category-course text-white",
+    stay: "bg-white text-[#161d1f]",
+    experience: "bg-white text-[#161d1f]",
+    program: "bg-white text-[#161d1f]",
+    course: "bg-white text-[#161d1f]",
   };
 
   return (
-    <Link
-      href={href}
-      className="group block border rounded-lg bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow h-full"
-    >
-      <div className="relative aspect-[4/3] bg-muted flex items-center justify-center overflow-hidden">
-        {imageUrl && !imgError ? (
-          <img
-            src={imageUrl}
-            alt={title}
-            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="text-muted-foreground text-xs font-medium">이미지 준비 중</div>
-        )}
-        {badge && (
-          <div
-            className={cn(
-              "absolute top-2 left-2 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider",
-              badgeVariant ? badgeStyles[badgeVariant] : "bg-primary text-primary-foreground"
-            )}
-          >
-            {badge}
-          </div>
-        )}
-      </div>
-      <div className="p-4 flex flex-col gap-1.5">
-        <h3 className="font-bold text-base leading-snug line-clamp-1">{title}</h3>
-        <p className="text-muted-foreground text-xs line-clamp-2 min-h-[2rem]">
-          {summary}
-        </p>
-        {priceText && (
-          <div className="mt-1 text-sm font-semibold text-foreground">
-            {priceText}
-          </div>
-        )}
-      </div>
+    <Link href={href} className="group block min-w-[220px] sm:min-w-0">
+      <article className="overflow-hidden rounded-2xl bg-white transition duration-300 hover:-translate-y-1">
+        <div className="relative aspect-[1.35] overflow-hidden rounded-2xl bg-[#dde4e6]">
+          {imageUrl && !imgError ? (
+            <Image
+              src={imageUrl}
+              alt={title}
+              fill
+              sizes="(min-width: 768px) 25vw, 220px"
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-[#584140]">
+              이미지 준비 중
+            </div>
+          )}
+
+          {badge && (
+            <span
+              className={cn(
+                "absolute left-2 top-2 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide shadow-sm",
+                badgeVariant ? badgeStyles[badgeVariant] : "bg-white text-[#161d1f]",
+              )}
+            >
+              {badge}
+            </span>
+          )}
+
+          <span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-[#ff6b6b] shadow-sm backdrop-blur-md">
+            <FontAwesomeIcon icon={faHeart} className="h-4 w-4" />
+          </span>
+        </div>
+
+        <div className="px-1.5 py-3">
+          <h3 className="line-clamp-1 text-base font-extrabold leading-snug text-[#161d1f]">{title}</h3>
+          <p className="mt-1 line-clamp-2 min-h-[2.25rem] text-xs leading-relaxed text-[#584140]">
+            {summary}
+          </p>
+          {priceText && (
+            <div className="mt-2 text-sm font-black text-[#161d1f]">
+              {priceText}
+            </div>
+          )}
+        </div>
+      </article>
     </Link>
   );
 }

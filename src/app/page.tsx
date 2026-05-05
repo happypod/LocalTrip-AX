@@ -6,310 +6,288 @@ import {
   FALLBACK_STAYS,
   FALLBACK_EXPERIENCES,
   FALLBACK_PROGRAMS,
-  FALLBACK_COURSES,
 } from "@/lib/home-data";
 import {
-  Bed,
-  Compass,
-  Users,
-  Map as MapIcon,
-  ChevronRight,
-  ArrowRight,
-  MapPin,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
+  faCalendarDays,
+  faChevronRight,
+  faCircleCheck,
+  faCompass,
+  faHouseChimney,
+  faMagnifyingGlass,
+  faMapLocationDot,
+  faPersonHiking,
+  faRoute,
+  faStore,
+  faUserGroup,
+  faUsers,
+} from "@/lib/fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export const dynamic = "force-dynamic";
+
+const HOME_PREVIEW_LIMIT = 4;
+
+function fillHomePreview(items: HomeItem[], fallbacks: HomeItem[]) {
+  const merged = new Map<string, HomeItem>();
+
+  for (const item of items) {
+    merged.set(item.slug, item);
+  }
+
+  for (const item of fallbacks) {
+    if (!merged.has(item.slug)) {
+      merged.set(item.slug, item);
+    }
+  }
+
+  return Array.from(merged.values()).slice(0, HOME_PREVIEW_LIMIT);
+}
 
 async function getHomeData() {
   try {
     const prisma = getPrisma();
-    // Attempt to connect to DB with a short check
     await prisma.$connect();
 
-    // Fetch the 'sowon' region ID first
     const sowonRegion = await prisma.region.findUnique({
       where: { slug: "sowon" },
       select: { id: true },
     });
 
     if (!sowonRegion) {
-      console.warn("'sowon' region not found in DB, using fallback data.");
       return {
         stays: FALLBACK_STAYS,
         experiences: FALLBACK_EXPERIENCES,
         programs: FALLBACK_PROGRAMS,
-        courses: FALLBACK_COURSES,
       };
     }
 
     const regionId = sowonRegion.id;
 
-    const [stays, experiences, programs, courses] = await Promise.all([
+    const [stays, experiences, programs] = await Promise.all([
       prisma.accommodation.findMany({
         where: { status: "published", regionId },
-        take: 2,
+        take: HOME_PREVIEW_LIMIT,
         orderBy: { createdAt: "desc" },
       }),
       prisma.experience.findMany({
         where: { status: "published", regionId },
-        take: 2,
+        take: HOME_PREVIEW_LIMIT,
         orderBy: { createdAt: "desc" },
       }),
       prisma.localIncomeProgram.findMany({
         where: { status: "published", regionId },
-        take: 2,
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.course.findMany({
-        where: { status: "published", regionId },
-        take: 2,
+        take: HOME_PREVIEW_LIMIT,
         orderBy: { createdAt: "desc" },
       }),
     ]);
 
     return {
-      stays: stays.length > 0 ? stays : FALLBACK_STAYS,
-      experiences: experiences.length > 0 ? experiences : FALLBACK_EXPERIENCES,
-      programs: programs.length > 0 ? programs : FALLBACK_PROGRAMS,
-      courses: courses.length > 0 ? courses : FALLBACK_COURSES,
+      stays: fillHomePreview(stays, FALLBACK_STAYS),
+      experiences: fillHomePreview(experiences, FALLBACK_EXPERIENCES),
+      programs: fillHomePreview(programs, FALLBACK_PROGRAMS),
     };
   } catch {
-    console.warn("DB connection failed or not available, using fallback data.");
     return {
       stays: FALLBACK_STAYS,
       experiences: FALLBACK_EXPERIENCES,
       programs: FALLBACK_PROGRAMS,
-      courses: FALLBACK_COURSES,
     };
   }
 }
 
+type HomeItem = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  priceText?: string | null;
+  images?: string[];
+};
+
+function SectionHeader({ title, href }: { title: string; href: string }) {
+  return (
+    <div className="mb-4 flex items-center justify-between">
+      <h2 className="text-2xl font-black tracking-tight text-[#161d1f]">{title}</h2>
+      <Link href={href} className="flex items-center gap-0.5 text-sm font-bold text-[#2b3234] hover:text-[#ae2f34]">
+        전체보기 <FontAwesomeIcon icon={faChevronRight} className="h-3.5 w-3.5" />
+      </Link>
+    </div>
+  );
+}
+
+function CardRail({
+  items,
+  hrefPrefix,
+  badge,
+  badgeVariant,
+  showPrice = true,
+}: {
+  items: HomeItem[];
+  hrefPrefix: string;
+  badge: string;
+  badgeVariant: "stay" | "experience" | "program";
+  showPrice?: boolean;
+}) {
+  return (
+    <div className="grid auto-cols-[220px] grid-flow-col gap-5 overflow-x-auto pb-2 md:grid-flow-row md:grid-cols-4 md:overflow-visible">
+      {items.map((item) => (
+        <ContentCard
+          key={item.id}
+          title={item.title}
+          summary={item.summary}
+          imageUrl={item.images?.[0]}
+          href={`${hrefPrefix}/${item.slug}`}
+          priceText={showPrice ? item.priceText ?? undefined : undefined}
+          badge={badge}
+          badgeVariant={badgeVariant}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default async function Home() {
-  const { stays, experiences, programs, courses } = await getHomeData();
+  const { stays, experiences, programs } = await getHomeData();
 
   return (
-    <div className="flex flex-col min-h-screen pb-20">
-      {/* 1. 상단 소개 영역 */}
-      <section className="px-6 py-12 md:py-20 bg-gradient-to-b from-muted/50 to-background border-b">
-        <div className="max-w-screen-xl mx-auto flex flex-col gap-6 items-start">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground leading-tight">
-              소원권역 로컬트립
+    <main className="min-h-screen bg-[#f4fafd] text-[#161d1f]">
+      <section
+        className="relative min-h-[580px] overflow-hidden bg-cover bg-center md:min-h-[640px]"
+        style={{ backgroundImage: "url('/images/hero-main.jpg')" }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/15 to-[#f4fafd]" />
+        <div className="relative mx-auto flex min-h-[580px] max-w-6xl flex-col px-5 py-5 md:min-h-[640px]">
+          <header className="flex items-center justify-between">
+            <Link href="/" className="text-lg font-black tracking-tight text-white drop-shadow md:text-[#161d1f]">
+              Sowon Trip
+            </Link>
+            <nav className="hidden items-center gap-7 rounded-full border border-white/30 bg-white/15 px-5 py-2 text-sm font-bold text-white shadow-sm backdrop-blur-xl md:flex">
+              <Link href="/stays" className="text-[#79f3ea] underline underline-offset-8">숙소</Link>
+              <Link href="/experiences">체험</Link>
+              <Link href="/programs">주민소득상품</Link>
+              <Link href="/courses">추천 코스</Link>
+              <Link href="/partner/apply" className="rounded-full border border-white/50 px-3 py-1">입점 신청</Link>
+            </nav>
+          </header>
+
+          <div className="flex flex-1 flex-col items-center justify-center pb-20 text-center text-white">
+            <h1 className="text-5xl font-black tracking-tight drop-shadow-lg md:text-7xl">
+              Sowon Trip
             </h1>
-            <p className="text-muted-foreground text-lg md:text-xl max-w-2xl leading-relaxed">
-              주민과 여행자가 상생하는 소원면의 진정한 매력을 발견하세요.
-              <br /> 문의 한 번으로 시작되는 특별한 로컬 여행.
+            <p className="mt-3 text-xl font-extrabold drop-shadow md:text-3xl">
+              여행의 시작, 소원의 여정
             </p>
-          </div>
-          <div className="flex flex-wrap gap-3 mt-4">
-            <Link
-              href="/stays"
-              className={cn(buttonVariants({ size: "xl", variant: "default" }), "rounded-full")}
-            >
-              숙소 보기
-            </Link>
-            <Link
-              href="/experiences"
-              className={cn(buttonVariants({ size: "xl", variant: "outline" }), "rounded-full")}
-            >
-              체험 보기
-            </Link>
-            <Link
-              href="/programs"
-              className={cn(buttonVariants({ size: "xl", variant: "ghost" }), "rounded-full")}
-            >
-              주민소득상품 보기
-            </Link>
+
+            <form action="/map" className="mt-8 flex w-full max-w-[620px] items-center gap-2 rounded-full border border-white/60 bg-white/70 p-2 pl-5 shadow-[0_20px_70px_-30px_rgba(0,0,0,0.7)] backdrop-blur-2xl">
+              <input
+                name="q"
+                aria-label="검색어"
+                placeholder="어디로 떠나시나요? 무엇을 하고 싶으신가요?"
+                className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#161d1f] outline-none placeholder:text-[#584140]/80 md:text-base"
+              />
+              <FontAwesomeIcon icon={faMagnifyingGlass} className="h-4 w-4 shrink-0 text-[#161d1f]" />
+              <button className="rounded-full bg-[#161d1f] px-5 py-2.5 text-sm font-black text-white shadow-sm hover:bg-[#ae2f34]">
+                검색
+              </button>
+            </form>
+
+            <div className="mt-4 flex flex-wrap justify-center gap-3">
+              <Link href="/courses" className="flex items-center gap-2 rounded-full border border-white/50 bg-white/65 px-5 py-3 text-sm font-bold text-[#161d1f] shadow-sm backdrop-blur-xl">
+                <FontAwesomeIcon icon={faCalendarDays} className="h-4 w-4" /> Dates
+              </Link>
+              <Link href="/partner/apply" className="flex items-center gap-2 rounded-full border border-white/50 bg-white/65 px-5 py-3 text-sm font-bold text-[#161d1f] shadow-sm backdrop-blur-xl">
+                <FontAwesomeIcon icon={faUserGroup} className="h-4 w-4" /> Guests
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 2. 카테고리 진입 섹션 */}
-      <section className="px-6 py-12 max-w-screen-xl mx-auto w-full">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <CategoryCard
-            title="숙소"
-            description="바다 전망부터 마을 민박까지"
-            href="/stays"
-            category="stay"
-            icon={<Bed className="w-6 h-6" />}
-          />
-          <CategoryCard
-            title="체험"
-            description="서핑부터 업사이클링까지"
-            href="/experiences"
-            category="experience"
-            icon={<Compass className="w-6 h-6" />}
-          />
-          <CategoryCard
-            title="주민소득상품"
-            description="마을의 활력이 되는 특별한 제안"
-            href="/programs"
-            category="program"
-            icon={<Users className="w-6 h-6" />}
-          />
-          <CategoryCard
-            title="추천코스"
-            description="로컬이 제안하는 완벽한 하루"
-            href="/courses"
-            category="course"
-            icon={<MapIcon className="w-6 h-6" />}
-          />
-        </div>
+      <section className="relative z-10 mx-auto -mt-28 grid max-w-4xl grid-cols-2 gap-4 px-5 md:grid-cols-4">
+        <CategoryCard
+          title="숙소"
+          subtitle="Stay"
+          href="/stays"
+          category="stay"
+          icon={<FontAwesomeIcon icon={faHouseChimney} className="h-9 w-9" />}
+        />
+        <CategoryCard
+          title="체험"
+          subtitle="Experience"
+          href="/experiences"
+          category="experience"
+          icon={<FontAwesomeIcon icon={faPersonHiking} className="h-9 w-9" />}
+        />
+        <CategoryCard
+          title="주민소득상품"
+          subtitle="Local Products"
+          href="/programs"
+          category="program"
+          icon={<FontAwesomeIcon icon={faStore} className="h-9 w-9" />}
+        />
+        <CategoryCard
+          title="추천 코스"
+          subtitle="Tours"
+          href="/courses"
+          category="course"
+          icon={<FontAwesomeIcon icon={faRoute} className="h-9 w-9" />}
+        />
       </section>
 
-      {/* 3. 추천 콘텐츠 미리보기 섹션 */}
-      <div className="flex flex-col gap-16 mt-4">
-        {/* 숙소 */}
-        <section className="px-6 max-w-screen-xl mx-auto w-full">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-category-stay rounded-full" />
-              추천 숙소
-            </h2>
-            <Link href="/stays" className="text-sm font-medium text-muted-foreground flex items-center hover:text-category-stay transition-colors">
-              전체보기 <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {stays.map((item) => (
-              <ContentCard
-                key={item.id}
-                title={item.title}
-                summary={item.summary}
-                imageUrl={item.images?.[0]}
-                href={`/stays/${item.slug}`}
-                priceText={item.priceText ?? undefined}
-                badge="Stay"
-                badgeVariant="stay"
-              />
-            ))}
-          </div>
+      <div className="mx-auto max-w-6xl px-5 pb-16 pt-10 md:pt-14">
+        <section className="py-5">
+          <SectionHeader title="추천 숙소" href="/stays" />
+          <CardRail items={stays} hrefPrefix="/stays" badge="STAY" badgeVariant="stay" />
         </section>
 
-        {/* 체험 */}
-        <section className="px-6 max-w-screen-xl mx-auto w-full">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-category-experience rounded-full" />
-              인기 체험
-            </h2>
-            <Link href="/experiences" className="text-sm font-medium text-muted-foreground flex items-center hover:text-category-experience transition-colors">
-              전체보기 <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {experiences.map((item) => (
-              <ContentCard
-                key={item.id}
-                title={item.title}
-                summary={item.summary}
-                imageUrl={item.images?.[0]}
-                href={`/experiences/${item.slug}`}
-                priceText={(item as { priceText: string | null }).priceText ?? undefined}
-                badge="Experience"
-                badgeVariant="experience"
-              />
-            ))}
-          </div>
+        <section className="py-8">
+          <SectionHeader title="인기 체험" href="/experiences" />
+          <CardRail items={experiences} hrefPrefix="/experiences" badge="EXPERIENCE" badgeVariant="experience" showPrice={false} />
         </section>
 
-        {/* 주민소득상품 */}
-        <section className="px-6 max-w-screen-xl mx-auto w-full">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-category-program rounded-full" />
-              주민소득상품
-            </h2>
-            <Link href="/programs" className="text-sm font-medium text-muted-foreground flex items-center hover:text-category-program transition-colors">
-              전체보기 <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {programs.map((item) => (
-              <ContentCard
-                key={item.id}
-                title={item.title}
-                summary={item.summary}
-                imageUrl={item.images?.[0]}
-                href={`/programs/${item.slug}`}
-                priceText={(item as { priceText: string | null }).priceText ?? undefined}
-                badge="Program"
-                badgeVariant="program"
-              />
-            ))}
-          </div>
+        <section className="py-8">
+          <SectionHeader title="주민소득상품" href="/programs" />
+          <CardRail items={programs} hrefPrefix="/programs" badge="PROGRAM" badgeVariant="program" showPrice={false} />
         </section>
 
-        {/* 추천코스 */}
-        <section className="px-6 max-w-screen-xl mx-auto w-full">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-category-course rounded-full" />
-              로컬 추천 코스
-            </h2>
-            <Link href="/courses" className="text-sm font-medium text-muted-foreground flex items-center hover:text-category-course transition-colors">
-              전체보기 <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {courses.map((item) => (
-              <ContentCard
-                key={item.id}
-                title={item.title}
-                summary={item.summary}
-                imageUrl={item.images?.[0]}
-                href={`/courses/${item.slug}`}
-                badge="Course"
-                badgeVariant="course"
-              />
-            ))}
-          </div>
+        <section className="grid gap-5 py-8 md:grid-cols-2">
+          <Link href="/partner/apply" className="group flex items-center justify-between rounded-2xl bg-white/80 p-7 shadow-[0_16px_50px_-32px_rgba(0,0,0,0.4)] ring-1 ring-[#dde4e6] backdrop-blur-xl transition hover:-translate-y-1">
+            <div>
+              <h3 className="text-xl font-black">파트너 입점 신청</h3>
+              <p className="mt-2 text-sm font-medium text-[#584140]">파트너 입점 설명하고 신청합니다.</p>
+              <span className="mt-5 inline-flex rounded-full bg-[#161d1f] px-5 py-2 text-sm font-black text-white group-hover:bg-[#ae2f34]">
+                파트너 신청
+              </span>
+            </div>
+            <FontAwesomeIcon icon={faCircleCheck} className="h-20 w-20 text-[#161d1f]" />
+          </Link>
+
+          <Link href="/map" className="group flex items-center justify-between rounded-2xl bg-white/80 p-7 shadow-[0_16px_50px_-32px_rgba(0,0,0,0.4)] ring-1 ring-[#dde4e6] backdrop-blur-xl transition hover:-translate-y-1">
+            <div>
+              <h3 className="text-xl font-black">로컬 지도 보기</h3>
+              <p className="mt-2 text-sm font-medium text-[#584140]">지역의 숙소와 체험 위치를 모아봅니다.</p>
+              <span className="mt-5 inline-flex rounded-full bg-[#161d1f] px-5 py-2 text-sm font-black text-white group-hover:bg-[#006a65]">
+                지도 보기
+              </span>
+            </div>
+            <FontAwesomeIcon icon={faMapLocationDot} className="h-20 w-20 text-[#161d1f]" />
+          </Link>
         </section>
+
+        <footer className="mt-7 flex flex-col gap-4 border-t border-[#dde4e6] py-7 text-sm text-[#584140] md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-wrap items-center gap-5">
+            <span className="text-base font-black text-[#161d1f]">Sowon Trip</span>
+            <span>관광문의</span>
+            <span>010-0233-4548</span>
+            <span>www.sowontrip.com</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <FontAwesomeIcon icon={faUsers} className="h-5 w-5" />
+            <FontAwesomeIcon icon={faCompass} className="h-5 w-5" />
+            <FontAwesomeIcon icon={faMapLocationDot} className="h-5 w-5" />
+          </div>
+        </footer>
       </div>
-
-      {/* 4. 입점신청 및 지도 진입 */}
-      <section className="px-6 py-20 mt-12 bg-muted/30">
-        <div className="max-w-screen-xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Link
-            href="/partner/apply"
-            className="group flex flex-col gap-4 p-8 bg-card border rounded-2xl hover:shadow-lg transition-all"
-          >
-            <div className="w-12 h-12 bg-primary/10 text-primary rounded-full flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-              <Users className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold mb-2">파트너 입점 신청</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                소원권역의 가치를 함께 만들어갈 숙박, 체험, 로컬 파트너를 모십니다.
-              </p>
-            </div>
-            <div className="flex items-center text-primary text-sm font-bold mt-2">
-              신청하러 가기 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-
-          <Link
-            href="/map"
-            className="group flex flex-col gap-4 p-8 bg-card border rounded-2xl hover:shadow-lg transition-all"
-          >
-            <div className="w-12 h-12 bg-secondary/20 text-secondary-foreground rounded-full flex items-center justify-center group-hover:bg-secondary group-hover:text-white transition-colors">
-              <MapPin className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold mb-2">로컬 지도 보기</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                소원면 곳곳에 숨겨진 보물 같은 장소들을 지도로 한눈에 확인하세요.
-              </p>
-            </div>
-            <div className="flex items-center text-secondary-foreground text-sm font-bold mt-2">
-              지도 열기 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-        </div>
-      </section>
-    </div>
+    </main>
   );
 }

@@ -8,10 +8,18 @@
 - `/experiences`
 - `/experiences/[slug]`
 - `/programs`
-- `/programs/[slug]`
+  - `/programs`: [x] 소원권역 주민소득상품 목록 (모바일 우선 1열/다열 카드, T-008 완료)
+    - `LocalIncomeProgram` 모델 기준 `regionId=sowon` & `status=published` 조회
+    - `linkedLifeService`, `residentRole` 정보 강조
+  - `/programs/[slug]`: [x] 주민소득상품 상세 (T-008 완료)
+    - 생활서비스 연계, 주민 역할, 수익 환류 구조를 별도 카드 블록으로 명확히 구분
+    - `program-cta` 적용 (운영/전화/카카오/웹사이트 등, 실제 예약 결제 배제)
 - `/courses`
-- `/courses/[slug]`
-- `/map`
+  - `/courses`: [x] 추천 코스 목록 (T-009 완료)
+  - `/courses/[slug]`: [x] 추천 코스 상세 (T-009 완료)
+- `/map`: [x] 권역 기반 탐색 플레이스홀더 (T-010 완료)
+  - 빌드 안전성을 위해 실제 지도 API 대신 `MapPlaceholder` 적용
+  - 숙소, 체험, 주민소득상품, 코스를 권역/아이템타입 기준으로 필터링
 - `/partner/apply`
 
 ### T-005 홈 화면 구성

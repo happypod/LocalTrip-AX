@@ -3,31 +3,45 @@ import { cn } from "@/lib/utils";
 
 interface CategoryCardProps {
   title: string;
+  subtitle: string;
   href: string;
   icon?: React.ReactNode;
   category: "stay" | "experience" | "program" | "course";
-  description?: string;
 }
 
-export function CategoryCard({ title, href, icon, category, description }: CategoryCardProps) {
+export function CategoryCard({ title, subtitle, href, icon, category }: CategoryCardProps) {
   const categoryStyles = {
-    stay: "bg-category-stay/10 text-category-stay border-category-stay/20 hover:bg-category-stay/20",
-    experience: "bg-category-experience/10 text-category-experience border-category-experience/20 hover:bg-category-experience/20",
-    program: "bg-category-program/10 text-category-program border-category-program/20 hover:bg-category-program/20",
-    course: "bg-category-course/10 text-category-course border-category-course/20 hover:bg-category-course/20",
+    stay: "from-sky-100/95 via-white/80 to-white/60 shadow-sky-200/80",
+    experience: "from-emerald-100/95 via-white/80 to-white/60 shadow-emerald-200/80",
+    program: "from-amber-100/95 via-white/80 to-white/60 shadow-amber-200/80",
+    course: "from-violet-100/95 via-white/80 to-white/60 shadow-violet-200/80",
+  };
+
+  const iconStyles = {
+    stay: "text-sky-950 ring-sky-200/70 shadow-sky-200/70",
+    experience: "text-emerald-950 ring-emerald-200/70 shadow-emerald-200/70",
+    program: "text-amber-950 ring-amber-200/70 shadow-amber-200/70",
+    course: "text-violet-950 ring-violet-200/70 shadow-violet-200/70",
   };
 
   return (
     <Link
       href={href}
       className={cn(
-        "flex flex-col items-center justify-center p-6 border rounded-xl transition-colors text-center gap-2 h-full",
-        categoryStyles[category]
+        "group flex min-h-[128px] flex-col items-center justify-center rounded-2xl border border-white/75 bg-gradient-to-br p-5 text-center text-[#161d1f] shadow-[0_18px_45px_-24px] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_-24px]",
+        categoryStyles[category],
       )}
     >
-      {icon && <div className="mb-1">{icon}</div>}
-      <span className="font-bold text-lg">{title}</span>
-      {description && <span className="text-[10px] opacity-80 leading-tight">{description}</span>}
+      <div
+        className={cn(
+          "mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/55 ring-1 shadow-[0_14px_32px_-22px] backdrop-blur-md transition duration-300 group-hover:scale-110 group-hover:bg-white/75",
+          iconStyles[category],
+        )}
+      >
+        {icon}
+      </div>
+      <span className="text-lg font-extrabold leading-none">{title}</span>
+      <span className="mt-1 text-xs font-medium text-[#2b3234]/75">{subtitle}</span>
     </Link>
   );
 }

@@ -198,6 +198,8 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
               </p>
             </div>
             <ExperienceCTA
+              itemId={exp.id}
+              itemSlug={exp.slug}
               phone={exp.phone}
               kakaoUrl={exp.kakaoUrl}
               naverBookingUrl={exp.naverBookingUrl}

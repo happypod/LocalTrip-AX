@@ -62,6 +62,7 @@ model BusinessProfile {
   regionId            String
   region              Region                 @relation(fields: [regionId], references: [id])
   name                String
+  businessType        String?
   ownerName           String?
   phone               String?
   kakaoUrl            String?

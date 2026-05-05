@@ -6,6 +6,22 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
+function mergeStaysWithFallback<T extends { slug: string }>(items: T[]) {
+  const merged = new Map<string, T | (typeof FALLBACK_STAYS)[number]>();
+
+  for (const item of items) {
+    merged.set(item.slug, item);
+  }
+
+  for (const item of FALLBACK_STAYS) {
+    if (!merged.has(item.slug)) {
+      merged.set(item.slug, item);
+    }
+  }
+
+  return Array.from(merged.values());
+}
+
 async function getStays() {
   try {
     const prisma = getPrisma();
@@ -28,7 +44,7 @@ async function getStays() {
       orderBy: { createdAt: "desc" },
     });
 
-    return stays.length > 0 ? stays : FALLBACK_STAYS;
+    return stays.length > 0 ? mergeStaysWithFallback(stays) : FALLBACK_STAYS;
   } catch (error) {
     console.warn("Failed to fetch stays from DB, using fallback:", error);
     return FALLBACK_STAYS;
