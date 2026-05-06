@@ -488,100 +488,92 @@ function CategoryOverlay({
           />
         </div>
 
-        {/* Section 1: NOL Ticket */}
-        <div className="mb-6">
-          <div className="mb-2 flex items-center gap-1.5 px-1">
-            <span className="text-sm font-black tracking-tight text-blue-600">NOL</span>
-            <span className="text-sm font-black text-gray-800">티켓</span>
-          </div>
-          <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
-            <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">뮤지컬</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">콘서트</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">전시/행사</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">클래식/무용</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">아동/가족</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">연극</Link>
-            </div>
-            <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-gray-50">
-              <Link href="/events" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">오픈 예정</Link>
-              <Link href="/events" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">티켓 할인</Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 2: Accommodation */}
+        {/* Section 1: Stays (소원머묾) */}
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <span className="text-sm">🏨</span>
-            <span className="text-sm font-black text-gray-800">국내숙소</span>
+            <span className="text-sm font-black text-gray-800">소원머묾 (숙박)</span>
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
-              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">호텔/리조트</Link>
+              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">한옥/전통가옥</Link>
+              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">독채/감성숙소</Link>
               <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">펜션/풀빌라</Link>
-              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">모텔</Link>
-              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">가족형숙소</Link>
-              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">글램핑/캠핑</Link>
+              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">카라반/글램핑</Link>
               <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">게스트하우스</Link>
+              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">전통민박/가족형</Link>
             </div>
             <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-gray-50">
-              <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500">QR체크인</span>
-              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">리조트</Link>
-              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">프리미엄 호텔</Link>
-              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">프리미엄 펜션</Link>
-              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">풀빌라</Link>
+              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">인기 머묾</Link>
+              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">초특가 숙소</Link>
+              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">전통 한옥</Link>
             </div>
           </div>
         </div>
 
-        {/* Section 3: Experiences */}
+        {/* Section 2: Experiences (인기노님) */}
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-1.5 px-1">
-            <span className="text-sm">🔮</span>
-            <span className="text-sm font-black text-gray-800">놀거리</span>
+            <span className="text-sm">🏄</span>
+            <span className="text-sm font-black text-gray-800">인기노님 (체험)</span>
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">국내레저</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">공연/전시</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">미디어아트</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">키즈전용관</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">바다 서핑</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">해안 생태체험</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">염전 소금만들기</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">해안 트레킹</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">바다 낚시 투어</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">원데이 공예클래스</Link>
             </div>
             <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-gray-50">
-              <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500">제주입장권</span>
-              <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500">반려동물</span>
-              <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500">화담숲</span>
+              <Link href="/experiences" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">액티비티</Link>
+              <Link href="/experiences" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">가족 체험</Link>
+              <Link href="/experiences" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">힐링 투어</Link>
             </div>
           </div>
         </div>
 
-        {/* Section 4: Transit */}
+        {/* Section 3: Programs (소원별미) */}
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-1.5 px-1">
-            <span className="text-sm">🚗</span>
-            <span className="text-sm font-black text-gray-800">교통/항공</span>
+            <span className="text-sm">🍤</span>
+            <span className="text-sm font-black text-gray-800">소원별미 (미식/프로그램)</span>
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
-              <Link href="/map" onClick={onClose} className="hover:text-[#ae2f34]">고속버스</Link>
-              <Link href="/map" onClick={onClose} className="hover:text-[#ae2f34]">기차</Link>
-              <Link href="/map" onClick={onClose} className="hover:text-[#ae2f34]">렌터카</Link>
-              <Link href="/map" onClick={onClose} className="hover:text-[#ae2f34]">항공</Link>
-              <Link href="/map" onClick={onClose} className="hover:text-[#ae2f34]">쏘카</Link>
+              <Link href="/programs" onClick={onClose} className="hover:text-[#ae2f34]">대하/꽃게 구이</Link>
+              <Link href="/programs" onClick={onClose} className="hover:text-[#ae2f34]">감태 떡만들기</Link>
+              <Link href="/programs" onClick={onClose} className="hover:text-[#ae2f34]">로컬 어촌 밥상</Link>
+              <Link href="/programs" onClick={onClose} className="hover:text-[#ae2f34]">제철 수산 미식</Link>
+              <Link href="/programs" onClick={onClose} className="hover:text-[#ae2f34]">전통주 페어링</Link>
+              <Link href="/programs" onClick={onClose} className="hover:text-[#ae2f34]">해산물 바비큐</Link>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-gray-50">
+              <Link href="/programs" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">로컬푸드</Link>
+              <Link href="/programs" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">제철 먹거리</Link>
+              <Link href="/programs" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">미식 기행</Link>
             </div>
           </div>
         </div>
 
-        {/* Section 5: Global Travel */}
+        {/* Section 4: Courses (추천여정) */}
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <span className="text-sm">🗺️</span>
-            <span className="text-sm font-black text-gray-800">해외여행</span>
+            <span className="text-sm font-black text-gray-800">추천여정 (코스)</span>
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
-              <span className="text-gray-400">서비스 준비 중</span>
+              <Link href="/courses" onClick={onClose} className="hover:text-[#ae2f34]">당일치기 쉼표코스</Link>
+              <Link href="/courses" onClick={onClose} className="hover:text-[#ae2f34]">1박2일 감성코스</Link>
+              <Link href="/courses" onClick={onClose} className="hover:text-[#ae2f34]">어촌 살아보기 코스</Link>
+              <Link href="/courses" onClick={onClose} className="hover:text-[#ae2f34]">가족 중심 맞춤여행</Link>
+              <Link href="/courses" onClick={onClose} className="hover:text-[#ae2f34]">연인 전용 데이트코스</Link>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-gray-50">
+              <Link href="/courses" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">추천 코스</Link>
+              <Link href="/map" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">지도 탐색</Link>
             </div>
           </div>
         </div>
