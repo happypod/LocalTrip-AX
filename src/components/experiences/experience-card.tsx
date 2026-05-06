@@ -12,6 +12,7 @@ interface ExperienceCardProps {
   category?: string | null;
   imageUrl?: string;
   slug: string;
+  href?: string;
 }
 
 export function ExperienceCard({
@@ -24,10 +25,11 @@ export function ExperienceCard({
   category,
   imageUrl,
   slug,
+  href,
 }: ExperienceCardProps) {
   return (
     <Link
-      href={`/experiences/${slug}`}
+      href={href || `/experiences/${slug}`}
       className="group block border rounded-xl bg-card overflow-hidden shadow-sm hover:shadow-md transition-all h-full"
     >
       <div className="relative">

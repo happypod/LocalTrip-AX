@@ -63,7 +63,7 @@ export const FALLBACK_COURSES: CourseUI[] = [
         time: "오후 2:00",
         title: "만리포 서핑 클래스",
         note: "초보자를 위한 입문 강습",
-        slug: "surfing-class"
+        slug: "mallipo-sunset-walk"
       },
       {
         id: "ci-1-3",
@@ -97,7 +97,7 @@ export const FALLBACK_COURSES: CourseUI[] = [
         time: "오후 1:00",
         title: "씨글라스 업사이클링 공예",
         note: "나만의 기념품 만들기",
-        slug: "sea-glass-art"
+        slug: "beachcombing-workshop"
       },
       {
         id: "ci-2-2",
@@ -269,7 +269,7 @@ export const FALLBACK_COURSES: CourseUI[] = [
         sortOrder: 2,
         title: "씨글라스 업사이클링",
         note: "주운 유리 조각으로 공예품 만들기",
-        slug: "sea-glass-art"
+        slug: "beachcombing-workshop"
       },
       {
         id: "ci-6-3",

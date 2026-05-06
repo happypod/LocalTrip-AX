@@ -40,7 +40,7 @@ export default function PartnerApplyPage() {
             <div className="flex flex-col gap-1">
               <span className="text-sm font-bold text-primary">안내 사항</span>
               <p className="text-xs text-primary/80 leading-relaxed">
-                이 페이지는 관광객 문의가 아니라, 숙소·체험·주민 프로그램 운영자의 <strong>입점신청 전용 페이지</strong>입니다. 
+                이 페이지는 관광객 문의가 아니라, 숙소·체험·주민소득상품 운영자의 <strong>입점신청 전용 페이지</strong>입니다.
                 관광객 문의는 각 상세 페이지의 &apos;문의 남기기&apos; 버튼을 이용해 주세요.
               </p>
             </div>

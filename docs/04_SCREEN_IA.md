@@ -39,6 +39,11 @@
 - `/admin/courses`
 - `/admin/inquiries`
 - `/admin/partner-applications`
+- `/admin/training`: [x] 교육·인증 최소 관리 화면 (교육과정 및 인증항목 목록, 신규 등록, 수정 및 상태 관리)
+- `/admin/ai-assistant`: [x] AX 콘텐츠 도우미 플레이스홀더 화면 (T-023 완료)
+- `/admin/reports`: [x] 월간 성과 요약 화면 (LeadEvent, 문의, 입점신청 월별 집계)
+
+
 
 ## Public Screen Rules
 

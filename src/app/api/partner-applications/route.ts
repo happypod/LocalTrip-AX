@@ -1,45 +1,71 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
+import {
+  isPublicApiValidationError,
+  PublicApiValidationError,
+  readBooleanField,
+  readEnumField,
+  readJsonRecord,
+  readStringField,
+} from "@/lib/public-api-validation";
 
 export const runtime = "nodejs";
 
+const PHONE_PATTERN = /^[0-9+\-\s().]{7,30}$/;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PARTNER_APPLICANT_TYPES = [
+  "accommodation_owner",
+  "experience_host",
+  "local_income_program",
+  "local_guide",
+  "food_operator",
+  "local_product",
+  "resident_group",
+  "cooperative",
+  "other",
+] as const;
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const {
-      applicantType,
-      businessName,
-      applicantName,
-      phone,
-      email,
-      regionName,
-      address,
-      currentWebsiteUrl,
-      naverBookingUrl,
-      kakaoUrl,
-      proposedTitle,
-      proposedDescription,
-      operationType,
-      availableSeason,
-      expectedParticipants,
-      privacyAgreed,
-    } = body;
+    const body = await readJsonRecord(req);
+    const applicantType = readEnumField(body, "applicantType", PARTNER_APPLICANT_TYPES, {
+      required: true,
+      code: "INVALID_INPUT",
+    });
+    const businessName = readStringField(body, "businessName", { max: 100 });
+    const applicantName = readStringField(body, "applicantName", {
+      required: true,
+      min: 2,
+      max: 50,
+      code: "INVALID_INPUT",
+    });
+    const phone = readStringField(body, "phone", {
+      required: true,
+      max: 30,
+      pattern: PHONE_PATTERN,
+      code: "INVALID_INPUT",
+    });
+    const email = readStringField(body, "email", {
+      max: 120,
+      pattern: EMAIL_PATTERN,
+      code: "INVALID_INPUT",
+    });
+    const regionName = readStringField(body, "regionName", { max: 100 });
+    const address = readStringField(body, "address", { max: 200 });
+    const currentWebsiteUrl = readStringField(body, "currentWebsiteUrl", { max: 300 });
+    const naverBookingUrl = readStringField(body, "naverBookingUrl", { max: 300 });
+    const kakaoUrl = readStringField(body, "kakaoUrl", { max: 300 });
+    const proposedTitle = readStringField(body, "proposedTitle", { max: 120 });
+    const proposedDescription = readStringField(body, "proposedDescription", { max: 1500 });
+    const operationType = readStringField(body, "operationType", { max: 100 });
+    const availableSeason = readStringField(body, "availableSeason", { max: 100 });
+    const expectedParticipants = readStringField(body, "expectedParticipants", { max: 100 });
+    const privacyAgreed = readBooleanField(body, "privacyAgreed");
 
-    // 1. Validations
     if (!privacyAgreed) {
-      return NextResponse.json({ ok: false, error: "PRIVACY_AGREEMENT_REQUIRED" }, { status: 400 });
+      throw new PublicApiValidationError("PRIVACY_AGREEMENT_REQUIRED", 400);
     }
 
-    if (!applicantType || !applicantName || !phone) {
-      return NextResponse.json({ ok: false, error: "INVALID_INPUT" }, { status: 400 });
-    }
-
-    const trimmedName = applicantName.trim();
-    if (trimmedName.length < 2) {
-      return NextResponse.json({ ok: false, error: "INVALID_INPUT" }, { status: 400 });
-    }
-
-    // 2. Prepare Message (Structure fields that don't fit in schema)
     const extraInfo = [];
     if (regionName) extraInfo.push(`운영지역: ${regionName}`);
     if (address) extraInfo.push(`주소: ${address}`);
@@ -56,11 +82,10 @@ export async function POST(req: Request) {
       finalMessage += extraInfo.join("\n") + "\n\n";
     }
     finalMessage += "--- 제안 상세 내용 ---\n";
-    finalMessage += proposedDescription?.trim() || "내용 없음";
+    finalMessage += proposedDescription || "내용 없음";
 
     const prisma = getPrisma();
 
-    // Verify Region (Default to sowon if not specified)
     const region = await prisma.region.findUnique({
       where: { slug: "sowon" },
       select: { id: true },
@@ -75,10 +100,10 @@ export async function POST(req: Request) {
     await prisma.partnerApplication.create({
       data: {
         regionId: region.id,
-        businessName: businessName?.trim() || applicantName.trim(),
-        applicantName: trimmedName,
-        phone: phone.trim(),
-        email: email?.trim() || null,
+        businessName: businessName || applicantName,
+        applicantName,
+        phone,
+        email,
         businessType: applicantType,
         message: finalMessage,
         privacyConsent: privacyAgreed,
@@ -111,6 +136,13 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
+    if (isPublicApiValidationError(error)) {
+      return NextResponse.json(
+        { ok: false, error: error.code },
+        { status: error.status },
+      );
+    }
+
     console.error("[PartnerApply] Failed to submit application:", error);
     return NextResponse.json({ ok: false, error: "INTERNAL_SERVER_ERROR" }, { status: 500 });
   }

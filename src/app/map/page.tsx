@@ -91,7 +91,17 @@ async function getMapItems(): Promise<MapItem[]> {
   }
 }
 
-export default async function MapPage() {
+interface MapPageProps {
+  searchParams: Promise<{
+    q?: string;
+    date?: string;
+    guests?: string;
+    type?: string;
+  }>;
+}
+
+export default async function MapPage({ searchParams }: MapPageProps) {
+  const { q, date, guests, type } = await searchParams;
   const items = await getMapItems();
 
   return (
@@ -122,7 +132,13 @@ export default async function MapPage() {
         </div>
 
         {/* Interactive Map Shell (Client Component) */}
-        <MapShell initialItems={items} />
+        <MapShell 
+          initialItems={items} 
+          initialQuery={q} 
+          initialDate={date} 
+          initialGuests={guests} 
+          initialType={type}
+        />
 
       </main>
     </div>

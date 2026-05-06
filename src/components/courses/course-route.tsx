@@ -1,32 +1,37 @@
-import { CourseItemUI } from "@/lib/course-data";
-import { CourseItemType } from "@prisma/client";
+import type { CourseItemUI } from "@/lib/course-data";
 import { Bed, Leaf, HeartHandshake, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const COURSE_ITEM_TYPE = {
+  accommodation: "accommodation",
+  experience: "experience",
+  localIncomeProgram: "local_income_program",
+} as const satisfies Record<string, CourseItemUI["itemType"]>;
 
 interface CourseRouteProps {
   items: CourseItemUI[];
 }
 
-function getItemIcon(type: CourseItemType) {
+function getItemIcon(type: CourseItemUI["itemType"]) {
   switch (type) {
-    case CourseItemType.accommodation:
+    case COURSE_ITEM_TYPE.accommodation:
       return <Bed className="w-4 h-4 text-category-stay" />;
-    case CourseItemType.experience:
+    case COURSE_ITEM_TYPE.experience:
       return <Leaf className="w-4 h-4 text-category-experience" />;
-    case CourseItemType.local_income_program:
+    case COURSE_ITEM_TYPE.localIncomeProgram:
       return <HeartHandshake className="w-4 h-4 text-category-program" />;
     default:
       return <MapPin className="w-4 h-4 text-muted-foreground" />;
   }
 }
 
-function getItemLabel(type: CourseItemType) {
+function getItemLabel(type: CourseItemUI["itemType"]) {
   switch (type) {
-    case CourseItemType.accommodation:
+    case COURSE_ITEM_TYPE.accommodation:
       return "숙소";
-    case CourseItemType.experience:
+    case COURSE_ITEM_TYPE.experience:
       return "체험";
-    case CourseItemType.local_income_program:
+    case COURSE_ITEM_TYPE.localIncomeProgram:
       return "주민소득상품";
     default:
       return "스팟";
@@ -64,9 +69,9 @@ export function CourseRoute({ items }: CourseRouteProps) {
                 <div 
                   className={cn(
                     "absolute left-0 top-0 bottom-0 w-1.5 opacity-80",
-                    item.itemType === CourseItemType.accommodation && "bg-category-stay",
-                    item.itemType === CourseItemType.experience && "bg-category-experience",
-                    item.itemType === CourseItemType.local_income_program && "bg-category-program",
+                    item.itemType === COURSE_ITEM_TYPE.accommodation && "bg-category-stay",
+                    item.itemType === COURSE_ITEM_TYPE.experience && "bg-category-experience",
+                    item.itemType === COURSE_ITEM_TYPE.localIncomeProgram && "bg-category-program",
                   )}
                 />
                 

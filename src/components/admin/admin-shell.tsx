@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAdminSession } from "@/lib/admin-auth";
-import { AdminSidebar } from "./admin-sidebar";
-import { AdminHeader } from "./admin-header";
+import { AdminLayoutWrapper } from "./admin-layout-wrapper";
 
 interface AdminShellProps {
   children: React.ReactNode;
@@ -16,16 +15,8 @@ export async function AdminShell({ children, title }: AdminShellProps) {
   }
 
   return (
-    <div className="flex min-h-screen bg-muted/20">
-      <AdminSidebar />
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        <AdminHeader title={title} username={session} />
-        <main className="flex-1 overflow-y-auto p-6 md:p-10">
-          <div className="max-w-screen-xl mx-auto">
-            {children}
-          </div>
-        </main>
-      </div>
-    </div>
+    <AdminLayoutWrapper title={title} username={session}>
+      {children}
+    </AdminLayoutWrapper>
   );
 }

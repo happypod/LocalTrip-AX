@@ -5,12 +5,16 @@ const SOWON_REGION_SLUG = "sowon";
 
 async function getSowonRegionId() {
   const prisma = getPrisma();
-  const region = await prisma.region.findUnique({
-    where: { slug: SOWON_REGION_SLUG },
-    select: { id: true },
-  });
-
-  return region?.id ?? null;
+  try {
+    const region = await prisma.region.findUnique({
+      where: { slug: SOWON_REGION_SLUG },
+      select: { id: true },
+    });
+    return region?.id ?? null;
+  } catch (error) {
+    console.error("Failed to fetch Sowon region ID from DB:", error);
+    return null;
+  }
 }
 
 export async function getDashboardStats() {

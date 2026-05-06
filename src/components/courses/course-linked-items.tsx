@@ -1,10 +1,15 @@
 "use client";
 
-import { CourseItemUI } from "@/lib/course-data";
-import { CourseItemType } from "@prisma/client";
+import type { CourseItemUI } from "@/lib/course-data";
 import { Bed, Leaf, HeartHandshake, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { trackLeadEvent } from "@/lib/lead-event";
+
+const COURSE_ITEM_TYPE = {
+  accommodation: "accommodation",
+  experience: "experience",
+  localIncomeProgram: "local_income_program",
+} as const satisfies Record<string, CourseItemUI["itemType"]>;
 
 interface CourseLinkedItemsProps {
   courseId: string;
@@ -34,9 +39,9 @@ export function CourseLinkedItems({ courseId, courseSlug, items }: CourseLinkedI
   }
 
   // Group items by type to show categorized lists
-  const stays = linkedItems.filter(i => i.itemType === CourseItemType.accommodation);
-  const experiences = linkedItems.filter(i => i.itemType === CourseItemType.experience);
-  const programs = linkedItems.filter(i => i.itemType === CourseItemType.local_income_program);
+  const stays = linkedItems.filter((i) => i.itemType === COURSE_ITEM_TYPE.accommodation);
+  const experiences = linkedItems.filter((i) => i.itemType === COURSE_ITEM_TYPE.experience);
+  const programs = linkedItems.filter((i) => i.itemType === COURSE_ITEM_TYPE.localIncomeProgram);
 
   return (
     <div className="flex flex-col gap-4">

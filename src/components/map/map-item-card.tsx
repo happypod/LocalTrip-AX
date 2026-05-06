@@ -45,7 +45,7 @@ export function MapItemCard({ item }: MapItemCardProps) {
     switch (type) {
       case "stay": return "숙소";
       case "experience": return "체험";
-      case "program": return "주민 프로그램";
+      case "program": return "주민소득상품";
       case "course": return "추천 코스";
       default: return "기타";
     }

@@ -71,11 +71,11 @@ export default async function CoursesPage() {
           <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
             <Link href="/" className="hover:text-foreground">홈</Link>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-foreground font-medium">추천 코스</span>
+            <span className="text-foreground font-medium">여정의 기록</span>
           </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight">소원권역 추천 코스</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">소원머묾 여정의 기록</h1>
           <p className="text-muted-foreground text-sm max-w-md leading-relaxed">
-            숙소, 로컬체험, 주민소득상품을 연결해 소원권역에서 보내는 하루를 제안합니다.
+            머묾, 노님, 소원 별미를 고요히 연결해 태안 바다에서 보내는 힐링 하루를 남깁니다.
           </p>
         </div>
       </header>
@@ -126,7 +126,7 @@ export default async function CoursesPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed rounded-xl">
-            <p className="text-muted-foreground">현재 등록된 코스가 없습니다.</p>
+            <p className="text-muted-foreground">현재 등록된 여정의 기록이 없습니다.</p>
           </div>
         )}
       </main>

@@ -2,11 +2,56 @@ import { PublishStatus } from "@prisma/client";
 import { getPrisma } from "@/lib/prisma";
 import { ExperienceCard } from "@/components/experiences/experience-card";
 import { FALLBACK_EXPERIENCES, ExperienceUI } from "@/lib/experience-data";
+import { FALLBACK_PROGRAMS } from "@/lib/program-data";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+type ProgramExperienceItem = {
+  id: string;
+  slug: string;
+  href: string;
+  title: string;
+  summary: string;
+  location?: string | null;
+  priceText?: string | null;
+  durationText?: string | null;
+  capacityText?: string | null;
+  category?: string | null;
+  images: string[];
+};
+
+type ProgramExperienceSource = Omit<ProgramExperienceItem, "href"> & {
+  category?: string | null;
+  status?: PublishStatus | string;
+};
+
+function isFoodProgram(program: ProgramExperienceSource) {
+  return (
+    program.category === "식생활" ||
+    program.slug === "salt-farm-tour" ||
+    program.slug === "village-dining" ||
+    program.slug === "local-table-experience"
+  );
+}
+
+function toProgramExperience(program: ProgramExperienceSource): ProgramExperienceItem {
+  return {
+    id: program.id,
+    slug: program.slug,
+    href: `/programs/${program.slug}`,
+    title: program.title,
+    summary: program.summary,
+    location: program.location,
+    priceText: program.priceText,
+    durationText: program.durationText || "1시간",
+    capacityText: program.capacityText || "제한없음",
+    category: "체험",
+    images: program.images || [],
+  };
+}
 
 async function getExperiences(): Promise<ExperienceUI[]> {
   try {
@@ -37,8 +82,50 @@ async function getExperiences(): Promise<ExperienceUI[]> {
   }
 }
 
+async function getProgramsAsExperiences(): Promise<ProgramExperienceItem[]> {
+  try {
+    const prisma = getPrisma();
+    await prisma.$connect();
+
+    const sowonRegion = await prisma.region.findUnique({
+      where: { slug: "sowon" },
+      select: { id: true },
+    });
+
+    let dbPrograms: ProgramExperienceSource[] = [];
+    if (sowonRegion) {
+      const programs = await prisma.localIncomeProgram.findMany({
+        where: {
+          status: PublishStatus.published,
+          regionId: sowonRegion.id,
+        },
+      });
+      dbPrograms = programs.map((program) => ({
+        id: program.id,
+        slug: program.slug,
+        title: program.title,
+        summary: program.summary,
+        location: program.location,
+        priceText: program.priceText,
+        images: program.images,
+      }));
+    }
+
+    const rawPrograms = dbPrograms.length > 0 ? dbPrograms : FALLBACK_PROGRAMS.filter(p => p.status === PublishStatus.published);
+    return rawPrograms.filter((program) => !isFoodProgram(program)).map(toProgramExperience);
+  } catch {
+    const nonFoodPrograms = FALLBACK_PROGRAMS.filter(
+      p => p.status === PublishStatus.published && !isFoodProgram(p)
+    );
+
+    return nonFoodPrograms.map(toProgramExperience);
+  }
+}
+
 export default async function ExperiencesPage() {
-  const experiences = await getExperiences();
+  const experiencesOnly = await getExperiences();
+  const programExperiences = await getProgramsAsExperiences();
+  const experiences = [...experiencesOnly, ...programExperiences];
   
   // Simple categories from data for the filter UI
   const categories = ["전체", ...new Set(experiences.map(e => e.category).filter(Boolean) as string[])];
@@ -50,11 +137,11 @@ export default async function ExperiencesPage() {
           <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
             <Link href="/" className="hover:text-foreground">홈</Link>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-foreground font-medium">체험</span>
+            <span className="text-foreground font-medium">노님</span>
           </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight">소원권역 로컬체험</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">소원머묾 로컬노님</h1>
           <p className="text-muted-foreground text-sm max-w-md leading-relaxed">
-            단순한 관광을 넘어 지역의 숨결을 느끼는 체류형 경험.
+            고요한 바닷바람을 맞으며 만나는 나만의 예술적이고 감성적인 체험.
             해변, 어촌, 공방에서 만나는 특별한 시간을 직접 문의해보세요.
           </p>
         </div>
@@ -92,12 +179,13 @@ export default async function ExperiencesPage() {
                 category={exp.category}
                 imageUrl={exp.images?.[0]}
                 slug={exp.slug}
+                href={"href" in exp ? exp.href : undefined}
               />
             ))}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-muted-foreground">현재 등록된 체험이 없습니다.</p>
+            <p className="text-muted-foreground">현재 등록된 노님이 없습니다.</p>
           </div>
         )}
       </main>

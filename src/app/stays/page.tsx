@@ -61,12 +61,12 @@ export default async function StaysPage() {
           <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
             <Link href="/" className="hover:text-foreground">홈</Link>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-foreground font-medium">숙소</span>
+            <span className="text-foreground font-medium">머묾</span>
           </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight">소원권역 숙소</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">소원머묾 머무는 곳</h1>
           <p className="text-muted-foreground text-sm max-w-md leading-relaxed">
             주민이 직접 운영하는 따뜻한 민박부터 파도가 보이는 오션뷰 펜션까지.
-            원하시는 숙소를 찾아 직접 문의해보세요.
+            당신만의 고요한 &apos;머묾&apos; 공간을 찾아 직접 문의해보세요.
           </p>
         </div>
       </header>
@@ -89,7 +89,7 @@ export default async function StaysPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-muted-foreground">현재 등록된 숙소가 없습니다.</p>
+            <p className="text-muted-foreground">현재 등록된 머묾 공간이 없습니다.</p>
           </div>
         )}
       </main>

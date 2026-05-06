@@ -288,3 +288,16 @@ model Certification {
 
   @@index([regionId, status])
 }
+
+model Event {
+  id                  String                 @id @default(cuid())
+  tag                 String
+  title               String
+  subTitle            String
+  description         String
+  gradient            String                 @default("from-blue-50 to-indigo-100/40")
+  status              PublishStatus          @default(draft)
+  href                String                 @default("/stays")
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+}

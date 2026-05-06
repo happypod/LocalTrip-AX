@@ -88,7 +88,7 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
       {/* Warning Banner */}
       <div className="p-4 text-sm text-blue-600 bg-blue-50 rounded-xl">
         <strong>안내:</strong> 현재 체험 카테고리, 안전안내, 위/경도, 준비물, 태그 등의 필드는 DB 스키마 제약으로 폼에서 제외되었습니다. <strong>상세 설명</strong>에 포함하여 작성해 주세요. <br />
-        <span className="text-blue-500 font-semibold text-xs mt-1 block">주민소득과 생활서비스 환류 구조를 명확히 관리해야 하는 상품은 &apos;주민 프로그램 관리&apos;에서 등록하는 것을 권장합니다.</span>
+        <span className="text-blue-500 font-semibold text-xs mt-1 block">주민소득과 생활서비스 환류 구조를 명확히 관리해야 하는 상품은 &apos;주민소득상품 관리&apos;에서 등록하는 것을 권장합니다.</span>
       </div>
 
       {businesses.length === 0 && (

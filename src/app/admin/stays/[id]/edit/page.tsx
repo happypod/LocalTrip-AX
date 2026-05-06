@@ -5,11 +5,12 @@ import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditStayPage({ params }: { params: { id: string } }) {
+export default async function EditStayPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const prisma = getPrisma();
   
   const [stay, regions, businesses] = await Promise.all([
-    prisma.accommodation.findUnique({ where: { id: params.id } }),
+    prisma.accommodation.findUnique({ where: { id } }),
     prisma.region.findMany({ orderBy: { name: "asc" } }),
     prisma.businessProfile.findMany({ orderBy: { name: "asc" } })
   ]);

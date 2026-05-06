@@ -35,40 +35,62 @@ async function getCourseBySlug(slug: string): Promise<CourseUI | undefined> {
         courseItems: {
           orderBy: { sortOrder: 'asc' },
           include: {
-            accommodation: { select: { slug: true, title: true } },
-            experience: { select: { slug: true, title: true } },
-            localIncomeProgram: { select: { slug: true, title: true } }
+            accommodation: { select: { slug: true, title: true, status: true } },
+            experience: { select: { slug: true, title: true, status: true } },
+            localIncomeProgram: { select: { slug: true, title: true, status: true } }
           }
         }
       }
     });
 
     if (course) {
-      // Map DB structure to UI structure safely
-      const routeItems: CourseItemUI[] = course.courseItems.map(item => {
-        let mappedSlug = "";
-        let mappedTitle = "이름 없음";
-        
-        if (item.itemType === CourseItemType.accommodation && item.accommodation) {
-          mappedSlug = item.accommodation.slug;
-          mappedTitle = item.accommodation.title;
-        } else if (item.itemType === CourseItemType.experience && item.experience) {
-          mappedSlug = item.experience.slug;
-          mappedTitle = item.experience.title;
-        } else if (item.itemType === CourseItemType.local_income_program && item.localIncomeProgram) {
-          mappedSlug = item.localIncomeProgram.slug;
-          mappedTitle = item.localIncomeProgram.title;
-        }
-        
-        return {
-          id: item.id,
-          itemType: item.itemType,
-          sortOrder: item.sortOrder,
-          note: item.note,
-          title: mappedTitle,
-          slug: mappedSlug,
-        };
-      });
+      const routeItems: CourseItemUI[] = course.courseItems
+        .map((item): CourseItemUI | null => {
+          if (item.itemType === CourseItemType.accommodation) {
+            if (!item.accommodation || item.accommodation.status !== PublishStatus.published) {
+              return null;
+            }
+            return {
+              id: item.id,
+              itemType: item.itemType,
+              sortOrder: item.sortOrder,
+              note: item.note,
+              title: item.accommodation.title,
+              slug: item.accommodation.slug,
+            };
+          }
+
+          if (item.itemType === CourseItemType.experience) {
+            if (!item.experience || item.experience.status !== PublishStatus.published) {
+              return null;
+            }
+            return {
+              id: item.id,
+              itemType: item.itemType,
+              sortOrder: item.sortOrder,
+              note: item.note,
+              title: item.experience.title,
+              slug: item.experience.slug,
+            };
+          }
+
+          if (item.itemType === CourseItemType.local_income_program) {
+            if (!item.localIncomeProgram || item.localIncomeProgram.status !== PublishStatus.published) {
+              return null;
+            }
+            return {
+              id: item.id,
+              itemType: item.itemType,
+              sortOrder: item.sortOrder,
+              note: item.note,
+              title: item.localIncomeProgram.title,
+              slug: item.localIncomeProgram.slug,
+            };
+          }
+
+          return null;
+        })
+        .filter((item): item is CourseItemUI => item !== null);
 
       return {
         ...course,

@@ -28,3 +28,39 @@ export function maskName(name: string | null): string {
   }
   return name.charAt(0) + "*".repeat(name.length - 2) + name.charAt(name.length - 1);
 }
+
+export function maskEmail(email: string | null): string {
+  if (!email) return "";
+  const parts = email.split("@");
+  if (parts.length !== 2) return email;
+  const [username, domain] = parts;
+  if (username.length <= 2) {
+    return username.charAt(0) + "*@" + domain;
+  }
+  return username.charAt(0) + "*".repeat(username.length - 2) + username.charAt(username.length - 1) + "@" + domain;
+}
+
+export function maskSensitiveText(value: string | null | undefined): string {
+  if (!value) return "";
+
+  return value
+    .replace(
+      /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g,
+      (email) => maskEmail(email)
+    )
+    .replace(
+      /(?:\+?82[-.\s]?)?0?1[016789][-\s.]?\d{3,4}[-.\s]?\d{4}/g,
+      (phone) => maskPhone(phone)
+    )
+    .replace(
+      /\b\d{2,3}[-.\s]?\d{3,4}[-.\s]?\d{4}\b/g,
+      (phone) => maskPhone(phone)
+    );
+}
+
+export function createMessagePreview(message: string | null | undefined, maxLength = 80): string {
+  const normalized = maskSensitiveText(message).replace(/\s+/g, " ").trim();
+  if (!normalized) return "-";
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, maxLength)}...`;
+}

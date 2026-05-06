@@ -5,11 +5,12 @@ import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditBusinessPage({ params }: { params: { id: string } }) {
+export default async function EditBusinessPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const prisma = getPrisma();
   
   const [business, regions] = await Promise.all([
-    prisma.businessProfile.findUnique({ where: { id: params.id } }),
+    prisma.businessProfile.findUnique({ where: { id } }),
     prisma.region.findMany({ orderBy: { name: "asc" } })
   ]);
 

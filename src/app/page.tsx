@@ -1,24 +1,19 @@
 import Link from "next/link";
 import { getPrisma } from "@/lib/prisma";
-import { CategoryCard } from "@/components/home/category-card";
-import { ContentCard } from "@/components/home/content-card";
+import { EventSlider } from "@/components/home/event-slider";
+import { HeroSearch } from "@/components/home/hero-search";
+import { InteractiveSlider } from "@/components/home/interactive-slider";
 import {
   FALLBACK_STAYS,
   FALLBACK_EXPERIENCES,
   FALLBACK_PROGRAMS,
+  FALLBACK_COURSES,
 } from "@/lib/home-data";
 import {
-  faCalendarDays,
   faChevronRight,
   faCircleCheck,
   faCompass,
-  faHouseChimney,
-  faMagnifyingGlass,
   faMapLocationDot,
-  faPersonHiking,
-  faRoute,
-  faStore,
-  faUserGroup,
   faUsers,
 } from "@/lib/fontawesome";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -26,6 +21,36 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 export const dynamic = "force-dynamic";
 
 const HOME_PREVIEW_LIMIT = 4;
+
+type HomeItem = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string;
+  priceText?: string | null;
+  images?: string[];
+};
+
+type HomeProgramItem = HomeItem & {
+  category?: string | null;
+};
+
+type HomeEventItem = {
+  id: string;
+  tag: string;
+  title: string;
+  subTitle: string;
+  description: string;
+  gradient: string;
+  href: string;
+};
+
+type HomeEventDelegate = {
+  findMany(args: {
+    where: { status: "published" };
+    orderBy: { createdAt: "desc" };
+  }): Promise<HomeEventItem[]>;
+};
 
 function fillHomePreview(items: HomeItem[], fallbacks: HomeItem[]) {
   const merged = new Map<string, HomeItem>();
@@ -43,6 +68,61 @@ function fillHomePreview(items: HomeItem[], fallbacks: HomeItem[]) {
   return Array.from(merged.values()).slice(0, HOME_PREVIEW_LIMIT);
 }
 
+function fillAllHomeItems(items: HomeItem[], fallbacks: HomeItem[]) {
+  const merged = new Map<string, HomeItem>();
+
+  for (const item of items) {
+    merged.set(item.slug, item);
+  }
+
+  for (const item of fallbacks) {
+    if (!merged.has(item.slug)) {
+      merged.set(item.slug, item);
+    }
+  }
+
+  return Array.from(merged.values());
+}
+
+function toHomeProgramItem(program: HomeProgramItem): HomeProgramItem {
+  let images = program.images;
+  if (program.slug === "shrimp-grill-experience") {
+    images = ["/images/programs/shrimp-grill.png"];
+  } else if (program.slug === "fishing-village-dining-class") {
+    images = ["/images/programs/dining-class.png"];
+  } else if (program.slug === "shrimp-seafood-bbq") {
+    images = ["/images/programs/seafood-bbq.png"];
+  }
+
+  return {
+    id: program.id,
+    slug: program.slug,
+    title: program.title,
+    summary: program.summary,
+    priceText: program.priceText,
+    images: images,
+    category: program.category,
+  };
+}
+
+function isFoodProgram(program: HomeProgramItem) {
+  return (
+    program.slug === "salt-farm-tour" ||
+    program.slug === "village-dining" ||
+    program.slug === "local-table-experience" ||
+    program.category === "식생활" ||
+    program.slug.includes("dining") ||
+    program.slug.includes("table")
+  );
+}
+
+function splitHomePrograms(programs: HomeProgramItem[]) {
+  const foodPrograms = programs.filter(isFoodProgram);
+  const experiencePrograms = programs.filter((program) => !isFoodProgram(program));
+
+  return { foodPrograms, experiencePrograms };
+}
+
 async function getHomeData() {
   try {
     const prisma = getPrisma();
@@ -54,55 +134,75 @@ async function getHomeData() {
     });
 
     if (!sowonRegion) {
+      const { foodPrograms, experiencePrograms } = splitHomePrograms(FALLBACK_PROGRAMS.map(toHomeProgramItem));
       return {
         stays: FALLBACK_STAYS,
-        experiences: FALLBACK_EXPERIENCES,
-        programs: FALLBACK_PROGRAMS,
+        experiences: [...FALLBACK_EXPERIENCES, ...experiencePrograms].slice(0, HOME_PREVIEW_LIMIT),
+        programs: foodPrograms,
+        courses: FALLBACK_COURSES,
+        events: [] as HomeEventItem[],
       };
     }
 
     const regionId = sowonRegion.id;
+    const prismaWithEvent = prisma as typeof prisma & { event: HomeEventDelegate };
 
-    const [stays, experiences, programs] = await Promise.all([
+    const [stays, experiences, programs, courses, events] = await Promise.all([
       prisma.accommodation.findMany({
         where: { status: "published", regionId },
-        take: HOME_PREVIEW_LIMIT,
         orderBy: { createdAt: "desc" },
       }),
       prisma.experience.findMany({
         where: { status: "published", regionId },
-        take: HOME_PREVIEW_LIMIT,
         orderBy: { createdAt: "desc" },
       }),
       prisma.localIncomeProgram.findMany({
         where: { status: "published", regionId },
-        take: HOME_PREVIEW_LIMIT,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.course.findMany({
+        where: { status: "published", regionId },
+        orderBy: { createdAt: "desc" },
+      }),
+      prismaWithEvent.event.findMany({
+        where: { status: "published" },
         orderBy: { createdAt: "desc" },
       }),
     ]);
 
+    const staysFilled = fillHomePreview(stays, FALLBACK_STAYS);
+    const experiencesFilled = fillHomePreview(experiences, FALLBACK_EXPERIENCES);
+    const programItems = programs.map((program: HomeProgramItem) => toHomeProgramItem({
+      id: program.id,
+      slug: program.slug,
+      title: program.title,
+      summary: program.summary,
+      priceText: program.priceText,
+      images: program.images,
+    }));
+    const programsFilled = fillAllHomeItems(programItems, FALLBACK_PROGRAMS.map(toHomeProgramItem));
+    const coursesFilled = fillHomePreview(courses, FALLBACK_COURSES);
+
+    const { foodPrograms, experiencePrograms } = splitHomePrograms(programsFilled);
+
     return {
-      stays: fillHomePreview(stays, FALLBACK_STAYS),
-      experiences: fillHomePreview(experiences, FALLBACK_EXPERIENCES),
-      programs: fillHomePreview(programs, FALLBACK_PROGRAMS),
+      stays: staysFilled,
+      experiences: [...experiencesFilled, ...experiencePrograms],
+      programs: foodPrograms,
+      courses: coursesFilled,
+      events,
     };
   } catch {
+    const { foodPrograms, experiencePrograms } = splitHomePrograms(FALLBACK_PROGRAMS.map(toHomeProgramItem));
     return {
       stays: FALLBACK_STAYS,
-      experiences: FALLBACK_EXPERIENCES,
-      programs: FALLBACK_PROGRAMS,
+      experiences: [...FALLBACK_EXPERIENCES, ...experiencePrograms],
+      programs: foodPrograms,
+      courses: FALLBACK_COURSES,
+      events: [] as HomeEventItem[],
     };
   }
 }
-
-type HomeItem = {
-  id: string;
-  slug: string;
-  title: string;
-  summary: string;
-  priceText?: string | null;
-  images?: string[];
-};
 
 function SectionHeader({ title, href }: { title: string; href: string }) {
   return (
@@ -115,39 +215,8 @@ function SectionHeader({ title, href }: { title: string; href: string }) {
   );
 }
 
-function CardRail({
-  items,
-  hrefPrefix,
-  badge,
-  badgeVariant,
-  showPrice = true,
-}: {
-  items: HomeItem[];
-  hrefPrefix: string;
-  badge: string;
-  badgeVariant: "stay" | "experience" | "program";
-  showPrice?: boolean;
-}) {
-  return (
-    <div className="grid auto-cols-[220px] grid-flow-col gap-5 overflow-x-auto pb-2 md:grid-flow-row md:grid-cols-4 md:overflow-visible">
-      {items.map((item) => (
-        <ContentCard
-          key={item.id}
-          title={item.title}
-          summary={item.summary}
-          imageUrl={item.images?.[0]}
-          href={`${hrefPrefix}/${item.slug}`}
-          priceText={showPrice ? item.priceText ?? undefined : undefined}
-          badge={badge}
-          badgeVariant={badgeVariant}
-        />
-      ))}
-    </div>
-  );
-}
-
 export default async function Home() {
-  const { stays, experiences, programs } = await getHomeData();
+  const { stays, experiences, programs, courses, events } = await getHomeData();
 
   return (
     <main className="min-h-screen bg-[#f4fafd] text-[#161d1f]">
@@ -155,99 +224,41 @@ export default async function Home() {
         className="relative min-h-[580px] overflow-hidden bg-cover bg-center md:min-h-[640px]"
         style={{ backgroundImage: "url('/images/hero-main.jpg')" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/15 to-[#f4fafd]" />
-        <div className="relative mx-auto flex min-h-[580px] max-w-6xl flex-col px-5 py-5 md:min-h-[640px]">
-          <header className="flex items-center justify-between">
-            <Link href="/" className="text-lg font-black tracking-tight text-white drop-shadow md:text-[#161d1f]">
-              Sowon Trip
-            </Link>
-            <nav className="hidden items-center gap-7 rounded-full border border-white/30 bg-white/15 px-5 py-2 text-sm font-bold text-white shadow-sm backdrop-blur-xl md:flex">
-              <Link href="/stays" className="text-[#79f3ea] underline underline-offset-8">숙소</Link>
-              <Link href="/experiences">체험</Link>
-              <Link href="/programs">주민소득상품</Link>
-              <Link href="/courses">추천 코스</Link>
-              <Link href="/partner/apply" className="rounded-full border border-white/50 px-3 py-1">입점 신청</Link>
-            </nav>
-          </header>
-
+        <div className="absolute inset-0 bg-black/30" />
+        <div className="relative mx-auto flex min-h-[580px] max-w-7xl flex-col px-5 py-5 md:min-h-[640px]">
           <div className="flex flex-1 flex-col items-center justify-center pb-20 text-center text-white">
             <h1 className="text-5xl font-black tracking-tight drop-shadow-lg md:text-7xl">
-              Sowon Trip
+              소원머묾
             </h1>
-            <p className="mt-3 text-xl font-extrabold drop-shadow md:text-3xl">
-              여행의 시작, 소원의 여정
+            <p className="mt-4 text-base md:text-xl font-extrabold drop-shadow leading-relaxed text-white/95">
+              당신의 바람(所願)이 머무는 고요한 시간,<br className="md:hidden" /> 태안 바다에서의 특별한 하루.
             </p>
 
-            <form action="/map" className="mt-8 flex w-full max-w-[620px] items-center gap-2 rounded-full border border-white/60 bg-white/70 p-2 pl-5 shadow-[0_20px_70px_-30px_rgba(0,0,0,0.7)] backdrop-blur-2xl">
-              <input
-                name="q"
-                aria-label="검색어"
-                placeholder="어디로 떠나시나요? 무엇을 하고 싶으신가요?"
-                className="min-w-0 flex-1 bg-transparent text-sm font-semibold text-[#161d1f] outline-none placeholder:text-[#584140]/80 md:text-base"
-              />
-              <FontAwesomeIcon icon={faMagnifyingGlass} className="h-4 w-4 shrink-0 text-[#161d1f]" />
-              <button className="rounded-full bg-[#161d1f] px-5 py-2.5 text-sm font-black text-white shadow-sm hover:bg-[#ae2f34]">
-                검색
-              </button>
-            </form>
-
-            <div className="mt-4 flex flex-wrap justify-center gap-3">
-              <Link href="/courses" className="flex items-center gap-2 rounded-full border border-white/50 bg-white/65 px-5 py-3 text-sm font-bold text-[#161d1f] shadow-sm backdrop-blur-xl">
-                <FontAwesomeIcon icon={faCalendarDays} className="h-4 w-4" /> Dates
-              </Link>
-              <Link href="/partner/apply" className="flex items-center gap-2 rounded-full border border-white/50 bg-white/65 px-5 py-3 text-sm font-bold text-[#161d1f] shadow-sm backdrop-blur-xl">
-                <FontAwesomeIcon icon={faUserGroup} className="h-4 w-4" /> Guests
-              </Link>
-            </div>
+            <HeroSearch />
           </div>
         </div>
       </section>
 
-      <section className="relative z-10 mx-auto -mt-28 grid max-w-4xl grid-cols-2 gap-4 px-5 md:grid-cols-4">
-        <CategoryCard
-          title="숙소"
-          subtitle="Stay"
-          href="/stays"
-          category="stay"
-          icon={<FontAwesomeIcon icon={faHouseChimney} className="h-9 w-9" />}
-        />
-        <CategoryCard
-          title="체험"
-          subtitle="Experience"
-          href="/experiences"
-          category="experience"
-          icon={<FontAwesomeIcon icon={faPersonHiking} className="h-9 w-9" />}
-        />
-        <CategoryCard
-          title="주민소득상품"
-          subtitle="Local Products"
-          href="/programs"
-          category="program"
-          icon={<FontAwesomeIcon icon={faStore} className="h-9 w-9" />}
-        />
-        <CategoryCard
-          title="추천 코스"
-          subtitle="Tours"
-          href="/courses"
-          category="course"
-          icon={<FontAwesomeIcon icon={faRoute} className="h-9 w-9" />}
-        />
-      </section>
-
-      <div className="mx-auto max-w-6xl px-5 pb-16 pt-10 md:pt-14">
+      <div className="mx-auto max-w-7xl px-5 pb-16 pt-6">
+        <EventSlider events={events} />
         <section className="py-5">
-          <SectionHeader title="추천 숙소" href="/stays" />
-          <CardRail items={stays} hrefPrefix="/stays" badge="STAY" badgeVariant="stay" />
+          <SectionHeader title="추천 머묾" href="/stays" />
+          <InteractiveSlider items={stays} hrefPrefix="/stays" badge="쉼" badgeVariant="stay" />
         </section>
 
         <section className="py-8">
-          <SectionHeader title="인기 체험" href="/experiences" />
-          <CardRail items={experiences} hrefPrefix="/experiences" badge="EXPERIENCE" badgeVariant="experience" showPrice={false} />
+          <SectionHeader title="인기 노님" href="/experiences" />
+          <InteractiveSlider items={experiences} hrefPrefix="/experiences" badge="놀이" badgeVariant="experience" />
         </section>
 
         <section className="py-8">
-          <SectionHeader title="주민소득상품" href="/programs" />
-          <CardRail items={programs} hrefPrefix="/programs" badge="PROGRAM" badgeVariant="program" showPrice={false} />
+          <SectionHeader title="소원 별미" href="/programs" />
+          <InteractiveSlider items={programs} hrefPrefix="/programs" badge="맛" badgeVariant="program" />
+        </section>
+
+        <section className="py-8">
+          <SectionHeader title="여정의 기록" href="/courses" />
+          <InteractiveSlider items={courses} hrefPrefix="/courses" badge="기록" badgeVariant="course" showPrice={false} />
         </section>
 
         <section className="grid gap-5 py-8 md:grid-cols-2">
@@ -276,7 +287,7 @@ export default async function Home() {
 
         <footer className="mt-7 flex flex-col gap-4 border-t border-[#dde4e6] py-7 text-sm text-[#584140] md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-5">
-            <span className="text-base font-black text-[#161d1f]">Sowon Trip</span>
+            <span className="text-base font-black text-[#161d1f]">소원머묾</span>
             <span>관광문의</span>
             <span>010-0233-4548</span>
             <span>www.sowontrip.com</span>

@@ -32,8 +32,7 @@ export interface MapRegionUI {
 
 export const MAP_REGIONS: MapRegionUI[] = [
   { id: "mallipo", name: "만리포 권역", summary: "서핑과 노을의 중심", lat: 36.7865, lng: 126.1362 },
-  { id: "cheonlipo", name: "천리포 권역", summary: "조용한 수목원과 해변", lat: 36.7977, lng: 126.1481 },
-  { id: "cheonripo", name: "천리포 권역", summary: "해식동굴과 어촌 밥상", lat: 36.7384, lng: 126.1384 },
+  { id: "cheonlipo", name: "천리포 권역", summary: "수목원, 해식동굴, 어촌 밥상", lat: 36.7977, lng: 126.1481 },
   { id: "mohang", name: "모항·의항 권역", summary: "항구의 활기와 수산물", lat: 36.7725, lng: 126.1511 },
 ];
 

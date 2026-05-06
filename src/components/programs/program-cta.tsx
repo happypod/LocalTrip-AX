@@ -43,7 +43,7 @@ export function ProgramCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl,
               <a
                 href={`tel:${phone.replace(/[^0-9]/g, "")}`}
                 onClick={() => handleTrack("phone_click", `tel:${phone.replace(/[^0-9]/g, "")}`)}
-                className={cn(buttonVariants({ variant: "default", size: "lg" }), "w-full sm:flex-1 bg-gray-900 hover:bg-gray-800 text-white")}
+                className={cn(buttonVariants({ variant: "default", size: "xl" }), "w-full sm:flex-1 bg-gray-900 hover:bg-gray-800 text-white")}
               >
                 <Phone className="w-4 h-4 mr-2" />
                 전화 문의
@@ -56,7 +56,7 @@ export function ProgramCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl,
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => handleTrack("kakao_click", kakaoUrl)}
-                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:flex-1 bg-[#FEE500] hover:bg-[#FEE500]/90 text-black border-transparent hover:border-transparent")}
+                className={cn(buttonVariants({ variant: "outline", size: "xl" }), "w-full sm:flex-1 bg-[#FEE500] hover:bg-[#FEE500]/90 text-black border-transparent hover:border-transparent")}
               >
                 <MessageCircle className="w-4 h-4 mr-2 fill-black" />
                 카카오 문의
@@ -71,7 +71,7 @@ export function ProgramCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl,
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => handleTrack("naver_booking_click", naverBookingUrl)}
-                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:flex-1 text-[#03C75A] border-[#03C75A]/30 hover:bg-[#03C75A]/5")}
+                className={cn(buttonVariants({ variant: "outline", size: "xl" }), "w-full sm:flex-1 text-[#03C75A] border-[#03C75A]/30 hover:bg-[#03C75A]/5")}
               >
                 <CalendarDays className="w-4 h-4 mr-2" />
                 네이버예약에서 확인
@@ -84,7 +84,7 @@ export function ProgramCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl,
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => handleTrack("homepage_click", websiteUrl)}
-                className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full sm:flex-1")}
+                className={cn(buttonVariants({ variant: "outline", size: "xl" }), "w-full sm:flex-1")}
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 운영자 페이지 보기

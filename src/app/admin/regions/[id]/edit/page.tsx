@@ -5,11 +5,12 @@ import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditRegionPage({ params }: { params: { id: string } }) {
+export default async function EditRegionPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const prisma = getPrisma();
   
   const region = await prisma.region.findUnique({
-    where: { id: params.id }
+    where: { id }
   });
 
   if (!region) {

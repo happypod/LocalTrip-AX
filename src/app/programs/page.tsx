@@ -38,7 +38,10 @@ async function getPrograms(): Promise<LocalIncomeProgramUI[]> {
 }
 
 export default async function ProgramsPage() {
-  const programs = await getPrograms();
+  const allPrograms = await getPrograms();
+  const programs = allPrograms.filter(
+    p => p.category === "식생활" || p.slug === "salt-farm-tour"
+  );
   
   // Simple categories from data for the filter UI
   const categories = ["전체", ...new Set(programs.map(p => p.category).filter(Boolean) as string[])];
@@ -50,11 +53,11 @@ export default async function ProgramsPage() {
           <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
             <Link href="/" className="hover:text-foreground">홈</Link>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-foreground font-medium">주민소득상품</span>
+            <span className="text-foreground font-medium">소원 별미</span>
           </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight">주민이 운영하는 로컬 프로그램</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">소원머묾 로컬 별미</h1>
           <p className="text-muted-foreground text-sm max-w-md leading-relaxed">
-            소원권역의 생활서비스와 주민소득을 함께 키우는 체류형 프로그램입니다.
+            주민들이 정성스레 길러내고 만든 태안 소원면의 향토 특산품이자 특별한 별미를 소개합니다.
           </p>
         </div>
       </header>
@@ -105,7 +108,7 @@ export default async function ProgramsPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed rounded-xl">
-            <p className="text-muted-foreground">현재 등록된 주민소득상품이 없습니다.</p>
+            <p className="text-muted-foreground">현재 등록된 소원 별미가 없습니다.</p>
           </div>
         )}
       </main>

@@ -11,7 +11,7 @@ export function MapFilterTabs({ selectedType, onTypeSelect }: MapFilterTabsProps
     { id: "all", label: "전체보기" },
     { id: "stay", label: "숙소", colorClass: "text-category-stay bg-category-stay/10 border-category-stay/20" },
     { id: "experience", label: "체험", colorClass: "text-category-experience bg-category-experience/10 border-category-experience/20" },
-    { id: "program", label: "주민 프로그램", colorClass: "text-category-program bg-category-program/10 border-category-program/20" },
+    { id: "program", label: "주민소득상품", colorClass: "text-category-program bg-category-program/10 border-category-program/20" },
     { id: "course", label: "추천 코스", colorClass: "text-category-course bg-category-course/10 border-category-course/20" },
   ];
 

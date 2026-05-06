@@ -109,7 +109,7 @@ export default function AdminLoginPage() {
           </form>
 
           <p className="mt-8 text-[11px] text-muted-foreground text-center leading-relaxed">
-            관리자 계정으로 로그인하면 숙소, 체험, 주민 프로그램, <br />
+            관리자 계정으로 로그인하면 숙소, 체험, 주민소득상품, <br />
             문의, 입점신청을 관리할 수 있습니다.
           </p>
         </div>
