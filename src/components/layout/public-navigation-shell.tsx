@@ -11,6 +11,7 @@ import {
   faHouseChimney,
   faList,
   faLocationArrow,
+  faMagnifyingGlass,
   faShoppingCart,
   faUser,
   faXmark,
@@ -358,21 +359,51 @@ function LocaleCurrencyModal({
   );
 }
 
-function MobileBottomNav({ pathname }: { pathname: string }) {
-  const bottomItems: Array<
-    | (NavItem & { kind?: "link" })
-    | { kind: "button"; label: string; shortLabel: string; icon: IconDefinition }
-  > = [
-    navItems[1],
-    navItems[2],
-    navItems[0],
-    { kind: "button", label: "찜", shortLabel: "찜", icon: faHeart },
+function MobileBottomNav({
+  pathname,
+  isCategoryOpen,
+  setIsCategoryOpen,
+}: {
+  pathname: string;
+  isCategoryOpen: boolean;
+  setIsCategoryOpen: (open: boolean) => void;
+}) {
+  const bottomItems = [
     {
+      kind: "category" as const,
+      label: "카테고리",
+      shortLabel: "카테고리",
+      icon: faList,
+    },
+    {
+      kind: "link" as const,
+      href: "/map",
+      label: "내주변",
+      shortLabel: "내주변",
+      icon: faLocationArrow,
+      match: (path: string) => path.startsWith("/map") && !isCategoryOpen,
+    },
+    {
+      kind: "link" as const,
+      href: "/",
+      label: "홈",
+      shortLabel: "홈",
+      icon: faHouseChimney,
+      match: (path: string) => path === "/" && !isCategoryOpen,
+    },
+    {
+      kind: "button" as const,
+      label: "찜",
+      shortLabel: "찜",
+      icon: faHeart,
+    },
+    {
+      kind: "link" as const,
       href: "/admin",
       label: "마이",
       shortLabel: "마이",
       icon: faUser,
-      match: (currentPathname) => currentPathname.startsWith("/admin"),
+      match: (path: string) => path.startsWith("/admin") && !isCategoryOpen,
     },
   ];
 
@@ -382,6 +413,23 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
       className="fixed inset-x-0 bottom-0 z-50 grid h-[72px] grid-cols-5 border-t border-gray-100 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0px)] shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl md:hidden"
     >
       {bottomItems.map((item) => {
+        if (item.kind === "category") {
+          const isActive = isCategoryOpen;
+          return (
+            <button
+              key={item.label}
+              type="button"
+              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+              className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg text-[10px] font-black tracking-tight transition ${
+                isActive ? "text-[#ae2f34]" : "text-[#2f3744] active:text-[#111827]"
+              }`}
+            >
+              <FontAwesomeIcon icon={item.icon} className={`h-[18px] w-[18px] ${isActive ? "scale-110" : ""}`} />
+              <span>{item.shortLabel}</span>
+            </button>
+          );
+        }
+
         if (item.kind === "button") {
           return (
             <button
@@ -401,9 +449,10 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
           <Link
             key={item.href}
             href={item.href}
+            onClick={() => setIsCategoryOpen(false)}
             aria-current={isActive ? "page" : undefined}
             className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg text-[10px] font-black tracking-tight transition ${
-              isActive ? "text-[#111827]" : "text-[#2f3744] active:text-[#111827]"
+              isActive ? "text-[#ae2f34]" : "text-[#2f3744] active:text-[#111827]"
             }`}
           >
             <FontAwesomeIcon icon={item.icon} className={`h-[18px] w-[18px] ${isActive ? "scale-110" : ""}`} />
@@ -415,8 +464,136 @@ function MobileBottomNav({ pathname }: { pathname: string }) {
   );
 }
 
+function CategoryOverlay({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-40 overflow-y-auto bg-[#f8fafc] pb-[88px] pt-4 md:hidden">
+      <div className="px-4">
+        {/* Search Bar */}
+        <div className="relative mb-6 mt-2">
+          <span className="absolute inset-y-0 left-4 flex items-center text-gray-400">
+            <FontAwesomeIcon icon={faMagnifyingGlass} className="h-4 w-4" />
+          </span>
+          <input
+            type="text"
+            placeholder="검색어를 입력하세요"
+            className="w-full rounded-full border border-gray-200 bg-white py-3 pl-11 pr-4 text-sm font-medium text-gray-700 shadow-sm focus:border-[#ae2f34] focus:outline-none"
+          />
+        </div>
+
+        {/* Section 1: NOL Ticket */}
+        <div className="mb-6">
+          <div className="mb-2 flex items-center gap-1.5 px-1">
+            <span className="text-sm font-black tracking-tight text-blue-600">NOL</span>
+            <span className="text-sm font-black text-gray-800">티켓</span>
+          </div>
+          <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
+            <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">뮤지컬</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">콘서트</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">전시/행사</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">클래식/무용</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">아동/가족</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">연극</Link>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-gray-50">
+              <Link href="/events" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">오픈 예정</Link>
+              <Link href="/events" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">티켓 할인</Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 2: Accommodation */}
+        <div className="mb-6">
+          <div className="mb-2 flex items-center gap-1.5 px-1">
+            <span className="text-sm">🏨</span>
+            <span className="text-sm font-black text-gray-800">국내숙소</span>
+          </div>
+          <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
+            <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
+              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">호텔/리조트</Link>
+              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">펜션/풀빌라</Link>
+              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">모텔</Link>
+              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">가족형숙소</Link>
+              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">글램핑/캠핑</Link>
+              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">게스트하우스</Link>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-gray-50">
+              <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500">QR체크인</span>
+              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">리조트</Link>
+              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">프리미엄 호텔</Link>
+              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">프리미엄 펜션</Link>
+              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">풀빌라</Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 3: Experiences */}
+        <div className="mb-6">
+          <div className="mb-2 flex items-center gap-1.5 px-1">
+            <span className="text-sm">🔮</span>
+            <span className="text-sm font-black text-gray-800">놀거리</span>
+          </div>
+          <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
+            <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">국내레저</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">공연/전시</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">미디어아트</Link>
+              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">키즈전용관</Link>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-gray-50">
+              <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500">제주입장권</span>
+              <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500">반려동물</span>
+              <span className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500">화담숲</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 4: Transit */}
+        <div className="mb-6">
+          <div className="mb-2 flex items-center gap-1.5 px-1">
+            <span className="text-sm">🚗</span>
+            <span className="text-sm font-black text-gray-800">교통/항공</span>
+          </div>
+          <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
+            <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
+              <Link href="/map" onClick={onClose} className="hover:text-[#ae2f34]">고속버스</Link>
+              <Link href="/map" onClick={onClose} className="hover:text-[#ae2f34]">기차</Link>
+              <Link href="/map" onClick={onClose} className="hover:text-[#ae2f34]">렌터카</Link>
+              <Link href="/map" onClick={onClose} className="hover:text-[#ae2f34]">항공</Link>
+              <Link href="/map" onClick={onClose} className="hover:text-[#ae2f34]">쏘카</Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 5: Global Travel */}
+        <div className="mb-6">
+          <div className="mb-2 flex items-center gap-1.5 px-1">
+            <span className="text-sm">🗺️</span>
+            <span className="text-sm font-black text-gray-800">해외여행</span>
+          </div>
+          <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
+            <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
+              <span className="text-gray-400">서비스 준비 중</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 export function PublicNavigationShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
   const [modalTab, setModalTab] = useState<"lang" | "currency">("lang");
   const [selectedLang, setSelectedLang] = useState<LanguageItem>(languages[0]);
@@ -439,10 +616,24 @@ export function PublicNavigationShell({ children }: { children: ReactNode }) {
         selectedCurrency={selectedCurrency}
         onOpenSwitcher={openSwitcher}
       />
-      <MobileTopNav selectedLang={selectedLang} selectedCurrency={selectedCurrency} onOpenSwitcher={openSwitcher} />
-      {children}
-      <div aria-hidden="true" className="h-20 md:hidden" />
-      <MobileBottomNav pathname={pathname} />
+      {!isCategoryOpen && (
+        <MobileTopNav selectedLang={selectedLang} selectedCurrency={selectedCurrency} onOpenSwitcher={openSwitcher} />
+      )}
+
+      {isCategoryOpen ? (
+        <CategoryOverlay isOpen={isCategoryOpen} onClose={() => setIsCategoryOpen(false)} />
+      ) : (
+        <>
+          {children}
+          <div aria-hidden="true" className="h-20 md:hidden" />
+        </>
+      )}
+
+      <MobileBottomNav
+        pathname={pathname}
+        isCategoryOpen={isCategoryOpen}
+        setIsCategoryOpen={setIsCategoryOpen}
+      />
       {isSwitcherOpen && (
         <LocaleCurrencyModal
           modalTab={modalTab}
