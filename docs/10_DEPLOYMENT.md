@@ -64,8 +64,8 @@ Production smoke test:
 - `200 /admin/login`
 - `400 POST /api/inquiries` with empty body
 - `400 POST /api/partner-applications` with empty body
-- `T-031 Secret Rotation & Admin Security check passed (200 OK for /admin/* pages after login, 500 without cookie).`
-- `T-032 Production Smoke Test passed (200 OK for all public pages, 400 validation correctly catching empty POST). Note: P1 security patch from T-031 requires immediate Vercel deployment to enforce complete route protection.`
+- `T-031 Secret Rotation & Admin Security check passed (200 OK for /admin/* pages after login, 307 Redirect to /admin/login without cookie).`
+- `T-032 Production Smoke Test passed (200 OK for all public pages, 400 validation correctly catching empty POST). Note: Admin route protection and unauthorized 307 redirects are patched locally and await Vercel deployment.`
 
 ## DB Operations
 

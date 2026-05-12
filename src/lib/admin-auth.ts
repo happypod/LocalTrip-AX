@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 const SESSION_COOKIE_NAME = "ltax_admin_session";
@@ -103,7 +104,7 @@ export async function requireAdminSession() {
   const session = await getAdminSession();
 
   if (!session) {
-    throw new Error("관리자 로그인이 필요합니다.");
+    redirect("/admin/login");
   }
 
   return session;
