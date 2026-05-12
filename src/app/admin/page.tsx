@@ -13,9 +13,13 @@ import { LeadEventSummary } from "@/components/admin/dashboard/lead-event-summar
 import { AdminQuickActions } from "@/components/admin/dashboard/admin-quick-actions";
 import { Bed, Compass, Store, Map, Users, UserPlus } from "lucide-react";
 
+import { requireAdminSession } from "@/lib/admin-auth";
+
 export const revalidate = 0;
 
 export default async function AdminDashboardPage() {
+  await requireAdminSession();
+  
   const [
     stats,
     leadSummary,

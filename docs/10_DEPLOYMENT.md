@@ -64,12 +64,15 @@ Production smoke test:
 - `200 /admin/login`
 - `400 POST /api/inquiries` with empty body
 - `400 POST /api/partner-applications` with empty body
+- `T-031 Secret Rotation & Admin Security check passed (200 OK for /admin/* pages after login, 500 without cookie).`
+- `T-032 Production Smoke Test passed (200 OK for all public pages, 400 validation correctly catching empty POST). Note: P1 security patch from T-031 requires immediate Vercel deployment to enforce complete route protection.`
 
 ## DB Operations
 
-Production DB schema push and seed were not executed during T-027.
+- **Production DB Schema Push**: Executed during T-029.
+- **Production Seed Data**: Executed during T-030 (2026-05-12). Seed command `npx prisma db seed` was run successfully after confirming the DB was empty, populating initial demo/testing data.
 
-Run these only after explicit operator approval:
+Run these only after explicit operator approval for any future operations:
 
 ```bash
 npx prisma db push

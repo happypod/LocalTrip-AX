@@ -6,6 +6,7 @@ import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeart } from "@/lib/fontawesome";
 import { cn } from "@/lib/utils";
+import { useWishlist } from "@/context/wishlist-context";
 
 interface ContentCardProps {
   title: string;
@@ -27,12 +28,21 @@ export function ContentCard({
   badgeVariant,
 }: ContentCardProps) {
   const [imgError, setImgError] = useState(false);
+  const { toggleItem, isInWishlist } = useWishlist();
+  
+  const isFavorited = isInWishlist(href);
 
   const badgeStyles = {
     stay: "bg-white text-[#161d1f]",
     experience: "bg-white text-[#161d1f]",
     program: "bg-white text-[#161d1f]",
     course: "bg-white text-[#161d1f]",
+  };
+
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleItem({ href, title, summary, priceText, imageUrl, badge });
   };
 
   return (
@@ -65,9 +75,16 @@ export function ContentCard({
             </span>
           )}
 
-          <span className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-[#ff6b6b] shadow-sm backdrop-blur-md">
-            <FontAwesomeIcon icon={faHeart} className="h-4 w-4" />
-          </span>
+          <button 
+            type="button"
+            onClick={handleWishlistClick}
+            className={cn(
+              "absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full shadow-sm backdrop-blur-md transition duration-300 active:scale-90",
+              isFavorited ? "bg-[#ff4b4b] text-white" : "bg-white/80 text-gray-400 hover:bg-white hover:text-[#ff4b4b]"
+            )}
+          >
+            <FontAwesomeIcon icon={faHeart} className={cn("h-3.5 w-3.5 transition", isFavorited && "scale-110")} />
+          </button>
         </div>
 
         <div className="px-1.5 py-3">

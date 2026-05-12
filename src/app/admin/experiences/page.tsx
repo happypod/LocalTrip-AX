@@ -2,11 +2,13 @@ import { getPrisma } from "@/lib/prisma";
 import { ExperienceList } from "@/components/admin/experiences/experience-list";
 import { AdminShell } from "@/components/admin/admin-shell";
 import Link from "next/link";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminExperiencesPage() {
+  await requireAdminSession();
   const prisma = getPrisma();
   const experiences = await prisma.experience.findMany({
     include: {

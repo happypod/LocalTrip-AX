@@ -3,10 +3,12 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { StayList } from "@/components/admin/stays/stay-list";
 import { getPrisma } from "@/lib/prisma";
 import { Accommodation, Region, BusinessProfile } from "@prisma/client";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminStaysPage() {
+  await requireAdminSession();
   const prisma = getPrisma();
   let stays: (Accommodation & { region: Region; businessProfile: BusinessProfile | null })[] = [];
   let error = null;

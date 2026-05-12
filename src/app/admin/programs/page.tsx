@@ -2,11 +2,13 @@ import { getPrisma } from "@/lib/prisma";
 import { ProgramList } from "@/components/admin/programs/program-list";
 import { AdminShell } from "@/components/admin/admin-shell";
 import Link from "next/link";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminProgramsPage() {
+  await requireAdminSession();
   const prisma = getPrisma();
   const programs = await prisma.localIncomeProgram.findMany({
     include: {

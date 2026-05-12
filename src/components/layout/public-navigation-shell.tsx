@@ -4,7 +4,10 @@ import { useState, type ReactNode } from "react";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useWishlist } from "@/context/wishlist-context";
+import { cn } from "@/lib/utils";
 import {
   faClock,
   faHeart,
@@ -150,12 +153,16 @@ function DesktopTopNav({
   selectedLang,
   selectedCurrency,
   onOpenSwitcher,
+  onOpenWishlist,
 }: {
   pathname: string;
   selectedLang: LanguageItem;
   selectedCurrency: CurrencyItem;
   onOpenSwitcher: () => void;
+  onOpenWishlist: () => void;
 }) {
+  const { wishlist } = useWishlist();
+
   return (
     <header className="hidden md:block sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-6 px-6">
@@ -170,10 +177,23 @@ function DesktopTopNav({
           >
             고객센터
           </Link>
-          <button type="button" className="flex items-center gap-2 transition hover:text-[#111827]">
-            <FontAwesomeIcon icon={faHeart} className="h-4 w-4 text-[#566170]" />
+          
+          <button 
+            type="button" 
+            onClick={onOpenWishlist}
+            className="flex items-center gap-2 transition hover:text-[#111827] group relative cursor-pointer"
+          >
+            <div className="relative">
+              <FontAwesomeIcon icon={faHeart} className={cn("h-4 w-4 text-[#566170] group-hover:text-[#ff4b4b] transition-colors", wishlist.length > 0 && "text-[#ff4b4b]")} />
+              {wishlist.length > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-[#ae2f34] px-0.5 text-[8px] font-black text-white shadow-sm">
+                  {wishlist.length > 99 ? "99+" : wishlist.length}
+                </span>
+              )}
+            </div>
             <span>찜</span>
           </button>
+
           <button type="button" className="flex items-center gap-2 transition hover:text-[#111827]">
             <FontAwesomeIcon icon={faShoppingCart} className="h-4 w-4 text-[#566170]" />
             <span>장바구니</span>
@@ -363,11 +383,15 @@ function MobileBottomNav({
   pathname,
   isCategoryOpen,
   setIsCategoryOpen,
+  onOpenWishlist,
 }: {
   pathname: string;
   isCategoryOpen: boolean;
   setIsCategoryOpen: (open: boolean) => void;
+  onOpenWishlist: () => void;
 }) {
+  const { wishlist } = useWishlist();
+  
   const bottomItems = [
     {
       kind: "category" as const,
@@ -396,6 +420,7 @@ function MobileBottomNav({
       label: "찜",
       shortLabel: "찜",
       icon: faHeart,
+      action: onOpenWishlist,
     },
     {
       kind: "link" as const,
@@ -431,13 +456,22 @@ function MobileBottomNav({
         }
 
         if (item.kind === "button") {
+          const isWishlist = item.label === "찜";
           return (
             <button
               key={item.label}
               type="button"
+              onClick={item.action}
               className="flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg text-[10px] font-black tracking-tight text-[#2f3744] transition active:text-[#111827]"
             >
-              <FontAwesomeIcon icon={item.icon} className="h-[18px] w-[18px]" />
+              <div className="relative">
+                <FontAwesomeIcon icon={item.icon} className={cn("h-[18px] w-[18px] transition", isWishlist && wishlist.length > 0 && "text-[#ff4b4b]")} />
+                {isWishlist && wishlist.length > 0 && (
+                  <span className="absolute -right-2 -top-1.5 flex h-3 min-w-[12px] items-center justify-center rounded-full bg-[#ae2f34] px-0.5 text-[7px] font-black text-white">
+                    {wishlist.length}
+                  </span>
+                )}
+              </div>
               <span>{item.shortLabel}</span>
             </button>
           );
@@ -583,9 +617,134 @@ function CategoryOverlay({
   );
 }
 
+function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const { wishlist, removeItem } = useWishlist();
+
+  if (!isOpen) return null;
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-sm animate-in fade-in duration-200"
+        onClick={onClose}
+      />
+      
+      {/* Slide Panel */}
+      <div className="fixed inset-y-0 right-0 z-[70] w-full max-w-[360px] bg-white shadow-2xl animate-in slide-in-from-right duration-300 sm:w-[400px]">
+        <div className="flex h-full flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 bg-white">
+            <div className="flex items-center gap-2 font-black text-lg text-gray-900">
+              <FontAwesomeIcon icon={faHeart} className="text-[#ff4b4b] h-4 w-4" />
+              <span>찜한 여행 ({wishlist.length})</span>
+            </div>
+            <button 
+              type="button"
+              onClick={onClose} 
+              className="flex h-8 w-8 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 transition"
+            >
+              <FontAwesomeIcon icon={faXmark} className="h-5 w-5" />
+            </button>
+          </div>
+          
+          {/* Content Scrollable List */}
+          <div className="flex-1 overflow-y-auto bg-[#f8fafc] p-4">
+            {wishlist.length === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center text-center px-4">
+                <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-white text-[#dde4e6] shadow-inner text-3xl">
+                   <FontAwesomeIcon icon={faHeart} />
+                </div>
+                <p className="text-lg font-extrabold text-[#2f3744]">찜한 목록이 없습니다</p>
+                <p className="mt-2 text-sm leading-relaxed text-gray-500 font-medium">
+                  마음에 드는 로컬 숙소나 체험을 발견하면<br />
+                  하트를 꾹 눌러 담아보세요!
+                </p>
+                <button 
+                  type="button"
+                  onClick={onClose} 
+                  className="mt-8 rounded-full bg-[#2f3744] px-6 py-3 text-sm font-bold text-white shadow-lg active:scale-95 transition"
+                >
+                  여행지 구경가기
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-3">
+                {wishlist.map((item) => (
+                  <div 
+                    key={item.href} 
+                    className="group relative flex gap-3 rounded-2xl border border-gray-100 bg-white p-3 shadow-sm transition hover:shadow-md"
+                  >
+                    {/* Thumbnail */}
+                    <Link href={item.href} onClick={onClose} className="relative aspect-[1.3] h-[72px] w-[96px] flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                      {item.imageUrl ? (
+                         <Image 
+                           src={item.imageUrl} 
+                           alt={item.title} 
+                           fill 
+                           className="object-cover group-hover:scale-105 transition-transform duration-500" 
+                         />
+                      ) : (
+                         <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-400 font-medium">이미지 없음</div>
+                      )}
+                    </Link>
+                    
+                    {/* Text details */}
+                    <div className="flex flex-1 flex-col justify-center pr-4">
+                       {item.badge && (
+                         <span className="mb-1 text-[10px] font-bold text-gray-400">{item.badge}</span>
+                       )}
+                       <Link 
+                         href={item.href} 
+                         onClick={onClose} 
+                         className="line-clamp-1 text-sm font-bold text-[#2f3744] hover:text-[#ae2f34] transition-colors"
+                       >
+                         {item.title}
+                       </Link>
+                       {item.priceText ? (
+                         <p className="mt-1 text-[13px] font-black text-[#ae2f34]">{item.priceText}</p>
+                       ) : (
+                         <p className="mt-1 text-[13px] font-medium text-gray-400">정보 확인 중</p>
+                       )}
+                    </div>
+
+                    {/* Delete action */}
+                    <button 
+                      type="button"
+                      onClick={() => removeItem(item.href)} 
+                      className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 shadow-sm opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-200"
+                      title="찜 삭제"
+                    >
+                       <FontAwesomeIcon icon={faXmark} className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          {/* Footer (Bottom actions) */}
+          {wishlist.length > 0 && (
+            <div className="border-t border-gray-100 bg-white p-4">
+              <button 
+                type="button"
+                onClick={onClose} 
+                className="w-full rounded-xl bg-[#ae2f34] py-4 text-sm font-extrabold text-white shadow-md active:scale-[0.98] transition-transform"
+              >
+                계속 둘러보기
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function PublicNavigationShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
   const [modalTab, setModalTab] = useState<"lang" | "currency">("lang");
   const [selectedLang, setSelectedLang] = useState<LanguageItem>(languages[0]);
@@ -607,6 +766,7 @@ export function PublicNavigationShell({ children }: { children: ReactNode }) {
         selectedLang={selectedLang}
         selectedCurrency={selectedCurrency}
         onOpenSwitcher={openSwitcher}
+        onOpenWishlist={() => setIsWishlistOpen(true)}
       />
       {!isCategoryOpen && (
         <MobileTopNav selectedLang={selectedLang} selectedCurrency={selectedCurrency} onOpenSwitcher={openSwitcher} />
@@ -625,7 +785,14 @@ export function PublicNavigationShell({ children }: { children: ReactNode }) {
         pathname={pathname}
         isCategoryOpen={isCategoryOpen}
         setIsCategoryOpen={setIsCategoryOpen}
+        onOpenWishlist={() => setIsWishlistOpen(true)}
       />
+      
+      <WishlistDrawer 
+        isOpen={isWishlistOpen} 
+        onClose={() => setIsWishlistOpen(false)} 
+      />
+
       {isSwitcherOpen && (
         <LocaleCurrencyModal
           modalTab={modalTab}

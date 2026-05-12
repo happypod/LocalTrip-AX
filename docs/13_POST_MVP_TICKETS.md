@@ -37,6 +37,11 @@
   - 승인 없이 운영 DB seed 실행 금지
 - 완료 기준:
   - 운영 초기 데이터 정책과 실행 결과가 문서화됨
+- **실행 결과 (2026-05-12 완료)**:
+  - DB 초기 상태(빈 DB) 확인 후 `npx prisma db seed` 안전하게 실행 완료.
+  - 생성된 데이터 수: Region 1건, BusinessProfile 5건, Accommodation 4건, Experience 4건, LocalIncomeProgram 7건, Course 2건.
+  - 공개 화면(`/`, `/stays`, `/experiences` 등) 및 관리자 화면(`/admin/*`) 200 OK 접근 검증 완료.
+
 
 ### T-031 관리자 계정 및 Secret Rotation
 
@@ -49,6 +54,11 @@
   - 관리자 로그인/로그아웃 확인
 - 완료 기준:
   - 운영용 관리자 계정으로 로그인 검증 완료
+- **실행 결과 (2026-05-12 완료)**:
+  - `src/lib/admin-auth.ts`의 세션 서명 검증 및 만료 시간 체계 정상 확인.
+  - 관리자 메뉴 라우트 누락 세션 체크 로직(`requireAdminSession`) 전체 보완 완료.
+  - Vercel CLI로 기존 등록된 관리자 환경변수 존재 여부 확인 완료.
+  - 유효한 쿠키 없이 `/admin` 및 하위 라우트 접근 시 올바르게 거부됨을 확인.
 
 ### T-032 Production Smoke Test
 
@@ -73,6 +83,11 @@
   - LeadEvent 실패 시 사용자 CTA 흐름 유지
 - 완료 기준:
   - Production smoke test 결과가 문서화됨
+- **실행 결과 (2026-05-12 완료)**:
+  - Vercel Production URL(`https://localtrip-ax.vercel.app`) 대상 접근 테스트 완료.
+  - 모든 공개 라우트(`/`, `/stays`, `/experiences` 등) 200 OK 정상 렌더링 확인.
+  - 관리자 로그인 정상 동작 확인. 단, T-031에서 로컬 수정된 라우트 보호 로직이 배포 전이라, 현재 프로덕션 환경의 `/admin` 일부 경로가 비인가 상태로 접근되거나 에러(500)를 던지는 취약점(P1) 존재 확인.
+  - API 검증: 빈 body POST 시 400 Bad Request 로직 정상 동작 방어 확인.
 
 ### T-033 모바일/PC 실기기 QA
 
@@ -386,3 +401,164 @@
 - 목적: AX 도우미 placeholder를 실제 AI API 기능으로 전환하기 위한 비용/승인/로그 기준을 정의한다.
 - 완료 기준:
   - API provider, 비용 상한, 운영자 승인 workflow, 개인정보 처리 기준 문서화
+
+## 11순위: B2B Premium PR / 콘텐츠 제작대행 BM
+
+이 영역은 MVP 범위가 아니다. 결제, 정산, 예약 확정 없이 숙소 상세 안에서 프리미엄 PR 콘텐츠를 노출하고, 운영자가 B2B 제작대행 신청과 노출 상태를 관리하는 Post-MVP BM 확장으로 다룬다.
+
+기준 문서:
+
+- [14_B2B_PREMIUM_PR.md](./14_B2B_PREMIUM_PR.md)
+
+### T-053 Accommodation Premium PR JSON 필드 설계
+
+- 목적: 기존 숙소 데이터 구조를 크게 흔들지 않고 프리미엄 PR 옵션을 저장할 수 있는 확장 필드를 추가한다.
+- 작업 범위:
+  - `Accommodation` 모델에 `premiumPr Json` 필드 추가 검토
+  - 기본값은 `{"isPremium": false}`
+  - PostgreSQL/Supabase에서는 Prisma `Json`이 JSONB로 저장되는 것을 전제로 한다.
+  - JSON 구조 초안:
+    - `isPremium`
+    - `features.matterportUrl`
+    - `features.hostVideoUrl`
+    - `features.droneViewUrl`
+    - `display.badgeLabel`
+    - `contract.packageName`
+    - `contract.expiresAt`
+  - Prisma migration 또는 `db push` 적용 방식 결정
+- 제외:
+  - 결제, 정산, 구독 과금 자동화
+  - 예약 확정 기능
+- 완료 기준:
+  - Prisma schema와 데이터 모델 문서에 `premiumPr` 구조가 정의되어 있다.
+  - 기존 숙소 생성/수정/공개 조회가 깨지지 않는다.
+
+### T-054 숙소 상세 Premium PR 노출 UI
+
+- 목적: 프리미엄 옵션을 구매한 숙소만 상세 페이지 안에서 VR/영상 콘텐츠를 노출한다.
+- 작업 범위:
+  - 숙소 대표 이미지 영역에 `VR로 미리보기` 또는 `3D 숙소 투어` 배지 조건부 노출
+  - Matterport URL이 있으면 전체 화면 모달 iframe으로 표시
+  - host video URL이 있으면 `호스트 이야기` 섹션 조건부 노출
+  - drone video URL이 있으면 별도 영상/배지 조건부 노출
+  - 옵션이 없는 숙소는 기존 상세 레이아웃 유지
+- 보안 기준:
+  - iframe URL은 allowlist 기반으로만 허용
+    - `my.matterport.com`
+    - `www.youtube.com/embed`
+    - `www.youtube-nocookie.com/embed`
+    - `player.vimeo.com`
+  - 외부 URL 원문을 무검증 iframe에 넣지 않는다.
+- 완료 기준:
+  - 프리미엄 숙소와 일반 숙소의 상세 화면 분기가 안정적으로 동작한다.
+  - 모바일에서 모달 닫기와 터치 영역이 정상 동작한다.
+
+### T-055 관리자 Accommodation Premium PR 입력 UI
+
+- 목적: 운영자가 숙소별 프리미엄 PR 옵션을 직접 등록/수정할 수 있게 한다.
+- 작업 범위:
+  - `/admin/stays` 생성/수정 폼에 `프리미엄 PR 적용` 체크박스 추가
+  - 체크 시 URL 입력 영역 노출
+    - Matterport URL
+    - Host video embed URL
+    - Drone video embed URL
+    - 배지 문구
+    - 패키지명
+    - 노출 종료일
+  - 서버 액션에서 JSON 구조 검증
+  - URL allowlist 검증
+  - `premiumPr.isPremium=false`이면 feature URL은 공개 화면에서 무시
+- 완료 기준:
+  - 관리자에서 프리미엄 PR 정보를 저장/수정할 수 있다.
+  - 잘못된 URL은 서버에서 거부된다.
+
+### T-056 Premium PR LeadEvent 수집
+
+- 목적: 프리미엄 PR 콘텐츠의 성과를 측정할 수 있도록 클릭 이벤트를 수집한다.
+- 작업 범위:
+  - `VR로 미리보기` 클릭 이벤트 기록
+  - `호스트 영상 보기` 또는 영상 섹션 진입 이벤트 기록
+  - `드론 영상 보기` 클릭 이벤트 기록
+  - 기존 `LeadEvent` 모델의 `metadata Json` 활용 여부 결정
+  - 필요한 경우 `LeadEventType` enum 확장 검토
+- 권장 이벤트 예시:
+  - `premium_vr_click`
+  - `premium_video_click`
+  - `premium_drone_click`
+- 완료 기준:
+  - 프리미엄 콘텐츠 클릭이 관리자 성과 분석에 사용할 수 있는 형태로 저장된다.
+  - LeadEvent 저장 실패가 사용자 경험을 막지 않는다.
+
+### T-057 B2B 콘텐츠 제작대행 신청 폼
+
+- 목적: 숙박업주가 플랫폼 안에서 프리미엄 PR 제작대행을 문의할 수 있게 한다.
+- 작업 범위:
+  - 공개 또는 파트너 영역에 `프리미엄 PR 제작 문의` 폼 추가
+  - 수집 항목 최소화:
+    - 숙소명
+    - 담당자명
+    - 연락처
+    - 희망 상품
+    - 요청 메모
+    - 개인정보 동의
+  - 상품 선택지:
+    - 3D/VR 촬영
+    - 호스트 인터뷰 영상
+    - 드론 영상
+    - 연간 프리미엄 노출
+    - 상담 후 결정
+  - 결제/계약 자동화는 제외하고 문의 접수까지만 구현
+- 완료 기준:
+  - 업주가 제작대행 상담 요청을 제출할 수 있다.
+  - 저장 실패 시 성공으로 응답하지 않는다.
+
+### T-058 B2B 제작대행 관리자 관리 화면
+
+- 목적: 운영자/현장센터가 제작대행 문의를 접수하고 상태를 관리한다.
+- 작업 범위:
+  - `/admin/premium-requests` 또는 `/admin/b2b-requests` 관리 화면 추가
+  - 상태값:
+    - `new`
+    - `quoted`
+    - `scheduled`
+    - `in_progress`
+    - `published`
+    - `completed`
+    - `archived`
+  - 개인정보 마스킹 적용
+  - 상세 화면에서만 원문 메모 조회
+  - 관리자 세션 검증을 서버 액션마다 적용
+- 완료 기준:
+  - 제작대행 문의 목록, 상세, 상태 변경이 가능하다.
+
+### T-059 현장센터 제작 Workflow 문서화
+
+- 목적: 플랫폼 운영 조직과 지역 활동가가 프리미엄 콘텐츠를 제작/납품하는 운영 절차를 정한다.
+- 작업 범위:
+  - 접수
+  - 견적
+  - 촬영 일정 조율
+  - 촬영
+  - 편집
+  - 업주 확인
+  - 플랫폼 등록
+  - 노출 시작
+  - 만료/갱신 안내
+  - 청년 활동가 역할 정의
+- 완료 기준:
+  - 운영자가 실제 현장 업무에 쓸 수 있는 체크리스트가 문서화되어 있다.
+
+### T-060 Premium PR QA / 보안 기준
+
+- 목적: 프리미엄 PR 기능이 플랫폼 품질과 개인정보/보안 기준을 해치지 않도록 QA한다.
+- QA 항목:
+  - 일반 숙소에 프리미엄 섹션이 노출되지 않는다.
+  - `isPremium=false`이면 URL이 있어도 공개 노출하지 않는다.
+  - 허용되지 않은 iframe 도메인은 렌더링하지 않는다.
+  - 모바일에서 VR 모달이 화면을 벗어나지 않는다.
+  - 모달 닫기 버튼 터치 영역이 충분하다.
+  - LeadEvent 실패 시 사용자는 계속 콘텐츠를 볼 수 있다.
+  - 관리자 목록에서 신청자 개인정보는 마스킹된다.
+  - 결제/예약 확정 문구가 노출되지 않는다.
+- 완료 기준:
+  - QA 결과가 문서화되고 P1/P2 이슈가 없다.

@@ -43,7 +43,13 @@ NEXT_PUBLIC_SITE_URL="http://localhost:3000"
 - 관리자 세션 쿠키는 HTTP-only 쿠키로 저장한다.
 - 세션 값은 `ADMIN_SESSION_SECRET`으로 서명하고 만료 시간을 검증한다.
 - 운영 환경에서 `ADMIN_SESSION_SECRET`이 없으면 세션 발급 및 검증이 실패해야 한다.
-- 관리자 화면 보호만으로 충분하지 않다. 관리자 mutation Server Action은 함수 시작부에서 `requireAdminSession()`을 호출한다.
+- 관리자 화면 보호만으로 충분하지 않다. 관리자 mutation Server Action 및 관리자용 페이지(`src/app/admin/*`)는 렌더링 또는 함수 시작부에서 `requireAdminSession()`을 필수 호출한다.
+
+### Secret Rotation 기준 (T-031 적용)
+
+- `ADMIN_PASSWORD` 및 `ADMIN_SESSION_SECRET`은 예시값이 아닌 실서비스용 난수 및 강한 값으로 주기적으로 교체(Rotation)해야 한다.
+- Secret 생성 권장 방식 (32바이트 이상 난수): `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+- 값은 Vercel Environment Variables를 통해 주입되며, 변경 시마다 Production 환경을 재배포(`vercel --prod`)해야 즉각 반영된다.
 
 ## 공개 API 보안 기준
 

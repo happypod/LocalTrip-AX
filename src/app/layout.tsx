@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import "@/lib/fontawesome";
 import { PublicNavigationShell } from "@/components/layout/public-navigation-shell";
+import { WishlistProvider } from "@/context/wishlist-context";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,7 +25,9 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full">
       <body className={`${inter.variable} font-sans min-h-full flex flex-col antialiased`}>
-        <PublicNavigationShell>{children}</PublicNavigationShell>
+        <WishlistProvider>
+          <PublicNavigationShell>{children}</PublicNavigationShell>
+        </WishlistProvider>
       </body>
     </html>
   );
