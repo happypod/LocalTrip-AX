@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "stay": "Dwelling",
+    "experience": "Wander",
+    "localProduct": "Savor",
+    "course": "Path"
+  },
+  "hero": {
+    "title": "Breathe with Ocean Breeze & Deep Forest",
+    "subtitle": "Slow moments in tranquil Sowon coastal village"
+  },
+  "section": {
+    "recommendedStay": "Serene Dwellings",
+    "popularExperience": "Mindful Wandering",
+    "localProduct": "Authentic Savors",
+    "recommendedCourse": "Whispering Paths"
+  },
+  "badge": {
+    "stay": "Rest",
+    "experience": "Flow",
+    "program": "Taste",
+    "course": "Walk"
+  },
+  "button": {
+    "viewAll": "Show All",
+    "openMap": "Open Map",
+    "apply": "Contact Us"
+  }
+}

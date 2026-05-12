@@ -10,7 +10,7 @@ MVP는 T-001~T-028 기준으로 완료된 상태다. 이후 작업은 MVP 범위
 - 운영 초기 seed 데이터 적용 여부 결정
 - 관리자 계정 및 secret rotation
 - Production smoke test
-- 모바일/PC 실기기 QA
+- 모바일/PC viewport QA 및 실제 기기 후속 QA
 - 공개 데이터 노출 QA
 - 개인정보/문의/입점신청 QA
 - 이미지 및 fallback QA
@@ -35,6 +35,7 @@ MVP는 T-001~T-028 기준으로 완료된 상태다. 이후 작업은 MVP 범위
 ## Phase 3: 운영 기능 고도화
 
 - 실제 지도 API 연동 및 위치 데이터 정규화
+- 이벤트를 실제 운영 콘텐츠로 사용할 경우 `Event.regionId`, 공개 `/events` 조회, 관리자 이벤트 CRUD 검증 정비
 - 이미지 최적화 및 `next/image` 전환
 - 접근성 QA 자동화
 - 운영 로그 및 오류 모니터링

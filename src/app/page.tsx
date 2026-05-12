@@ -181,7 +181,7 @@ async function getHomeData() {
       images: program.images,
     }));
     const programsFilled = fillAllHomeItems(programItems, FALLBACK_PROGRAMS.map(toHomeProgramItem));
-    const coursesFilled = fillHomePreview(courses, FALLBACK_COURSES);
+    const coursesFilled = fillAllHomeItems(courses, FALLBACK_COURSES);
 
     const { foodPrograms, experiencePrograms } = splitHomePrograms(programsFilled);
 

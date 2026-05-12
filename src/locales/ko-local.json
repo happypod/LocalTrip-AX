@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "stay": "숙소",
+    "experience": "체험",
+    "localProduct": "로컬푸드",
+    "course": "추천코스"
+  },
+  "hero": {
+    "title": "로컬과 상생하는 태안 여행",
+    "subtitle": "지역주민의 정성을 연결합니다"
+  },
+  "section": {
+    "recommendedStay": "로컬 숙박",
+    "popularExperience": "인기 체험",
+    "localProduct": "주민특산품",
+    "recommendedCourse": "기획 투어코스"
+  },
+  "badge": {
+    "stay": "숙박",
+    "experience": "체험",
+    "program": "상생",
+    "course": "코스"
+  },
+  "button": {
+    "viewAll": "전체보기",
+    "openMap": "지도보기",
+    "apply": "입점안내"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "stay": "마실방",
+    "experience": "마실놀이",
+    "localProduct": "주전부리",
+    "course": "산책기"
+  },
+  "hero": {
+    "title": "정겨운 바닷마을로 마실 오세요",
+    "subtitle": "이웃사촌처럼 편안한 태안 소원면 이야기"
+  },
+  "section": {
+    "recommendedStay": "편안한 마실방",
+    "popularExperience": "재미난 마실놀이",
+    "localProduct": "정성어린 주전부리",
+    "recommendedCourse": "함께 걷는 산책기"
+  },
+  "badge": {
+    "stay": "마실",
+    "experience": "놀이",
+    "program": "맛",
+    "course": "산책"
+  },
+  "button": {
+    "viewAll": "다 보기",
+    "openMap": "동네 한바퀴",
+    "apply": "함께 하기"
+  }
+}

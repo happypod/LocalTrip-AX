@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronRight, faCompass, faStar, faTicket } from "@/lib/fontawesome";
+import { faChevronRight } from "@/lib/fontawesome";
 
 interface EventItem {
   id: string;
@@ -22,6 +23,7 @@ interface EventSliderProps {
 
 export function EventSlider({ events: dbEvents }: EventSliderProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [failedImageIds, setFailedImageIds] = useState<Record<string, boolean>>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [hasMoved, setHasMoved] = useState(false);
@@ -263,15 +265,28 @@ export function EventSlider({ events: dbEvents }: EventSliderProps) {
                   </p>
                 </div>
 
-                {/* Graphic element with beautiful local scenic image */}
+                {/* Graphic element with local scenic image and safe fallback */}
                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl shadow-sm ring-4 ring-white transition-transform duration-500 group-hover:scale-110 group-hover:rotate-2">
-                  <img
-                    src={event.bgImage}
-                    alt={event.title}
-                    className="h-full w-full object-cover select-none"
-                    draggable={false}
-                  />
-                  <div className="absolute inset-0 bg-black/5" />
+                  {event.bgImage && !failedImageIds[event.id] ? (
+                    <>
+                      <Image
+                        src={event.bgImage}
+                        alt={event.title}
+                        fill
+                        sizes="80px"
+                        className="object-cover select-none"
+                        draggable={false}
+                        onError={() =>
+                          setFailedImageIds((prev) => ({ ...prev, [event.id]: true }))
+                        }
+                      />
+                      <div className="absolute inset-0 bg-black/5" />
+                    </>
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-white/70 text-[10px] font-black text-[#584140]">
+                      이벤트
+                    </div>
+                  )}
                   <div className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-[#161d1f] text-[10px] font-bold text-white shadow-sm">
                     Go
                   </div>

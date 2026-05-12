@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "stay": "宿泊",
+    "experience": "体験",
+    "localProduct": "美食",
+    "course": "コース"
+  },
+  "hero": {
+    "title": "海と森が出会う場所、泰安所遠面",
+    "subtitle": "あなただけのローカルトリップを提案します"
+  },
+  "section": {
+    "recommendedStay": "おすすめの宿",
+    "popularExperience": "人気の体験",
+    "localProduct": "ローカル美食",
+    "recommendedCourse": "おすすめコース"
+  },
+  "badge": {
+    "stay": "泊",
+    "experience": "遊",
+    "program": "食",
+    "course": "旅"
+  },
+  "button": {
+    "viewAll": "すべて見る",
+    "openMap": "地図を見る",
+    "apply": "パートナー募集"
+  }
+}

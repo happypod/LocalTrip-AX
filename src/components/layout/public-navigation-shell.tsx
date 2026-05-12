@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -32,42 +31,6 @@ interface CurrencyItem {
   symbol: string;
   isPopular?: boolean;
 }
-
-type NavItem = {
-  href: string;
-  label: string;
-  shortLabel: string;
-  icon: IconDefinition;
-  match: (pathname: string) => boolean;
-};
-
-const navItems: NavItem[] = [
-  {
-    href: "/",
-    label: "홈",
-    shortLabel: "홈",
-    icon: faHouseChimney,
-    match: (pathname) => pathname === "/",
-  },
-  {
-    href: "/stays",
-    label: "카테고리",
-    shortLabel: "카테고리",
-    icon: faList,
-    match: (pathname) =>
-      pathname.startsWith("/stays") ||
-      pathname.startsWith("/experiences") ||
-      pathname.startsWith("/programs") ||
-      pathname.startsWith("/courses"),
-  },
-  {
-    href: "/map",
-    label: "내주변",
-    shortLabel: "내주변",
-    icon: faLocationArrow,
-    match: (pathname) => pathname.startsWith("/map"),
-  },
-];
 
 const languages: LanguageItem[] = [
   { code: "ko", label: "한국어", flag: "KR" },
@@ -396,14 +359,12 @@ function MobileBottomNav({
     {
       kind: "category" as const,
       label: "카테고리",
-      shortLabel: "카테고리",
       icon: faList,
     },
     {
       kind: "link" as const,
       href: "/map",
       label: "내주변",
-      shortLabel: "내주변",
       icon: faLocationArrow,
       match: (path: string) => path.startsWith("/map") && !isCategoryOpen,
     },
@@ -411,14 +372,12 @@ function MobileBottomNav({
       kind: "link" as const,
       href: "/",
       label: "홈",
-      shortLabel: "홈",
       icon: faHouseChimney,
       match: (path: string) => path === "/" && !isCategoryOpen,
     },
     {
       kind: "button" as const,
       label: "찜",
-      shortLabel: "찜",
       icon: faHeart,
       action: onOpenWishlist,
     },
@@ -426,7 +385,6 @@ function MobileBottomNav({
       kind: "link" as const,
       href: "/admin",
       label: "마이",
-      shortLabel: "마이",
       icon: faUser,
       match: (path: string) => path.startsWith("/admin") && !isCategoryOpen,
     },
@@ -435,7 +393,7 @@ function MobileBottomNav({
   return (
     <nav
       aria-label="모바일 주요 메뉴"
-      className="fixed inset-x-0 bottom-0 z-50 grid h-[72px] grid-cols-5 border-t border-gray-100 bg-white/95 px-2 pb-[max(env(safe-area-inset-bottom),0px)] shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 grid h-[calc(64px+env(safe-area-inset-bottom))] grid-cols-5 border-t border-gray-100 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl md:hidden"
     >
       {bottomItems.map((item) => {
         if (item.kind === "category") {
@@ -445,12 +403,13 @@ function MobileBottomNav({
               key={item.label}
               type="button"
               onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-              className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg text-[10px] font-black tracking-tight transition ${
+              aria-label={item.label}
+              title={item.label}
+              className={`flex h-16 items-center justify-center rounded-lg transition ${
                 isActive ? "text-[#ae2f34]" : "text-[#2f3744] active:text-[#111827]"
               }`}
             >
-              <FontAwesomeIcon icon={item.icon} className={`h-[18px] w-[18px] ${isActive ? "scale-110" : ""}`} />
-              <span>{item.shortLabel}</span>
+              <FontAwesomeIcon icon={item.icon} className={`h-7 w-7 transition-transform ${isActive ? "scale-110" : ""}`} />
             </button>
           );
         }
@@ -462,17 +421,18 @@ function MobileBottomNav({
               key={item.label}
               type="button"
               onClick={item.action}
-              className="flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg text-[10px] font-black tracking-tight text-[#2f3744] transition active:text-[#111827]"
+              aria-label={item.label}
+              title={item.label}
+              className="flex h-16 items-center justify-center rounded-lg text-[#2f3744] transition active:text-[#111827]"
             >
               <div className="relative">
-                <FontAwesomeIcon icon={item.icon} className={cn("h-[18px] w-[18px] transition", isWishlist && wishlist.length > 0 && "text-[#ff4b4b]")} />
+                <FontAwesomeIcon icon={item.icon} className={cn("h-7 w-7 transition-transform", isWishlist && wishlist.length > 0 && "text-[#ff4b4b]")} />
                 {isWishlist && wishlist.length > 0 && (
-                  <span className="absolute -right-2 -top-1.5 flex h-3 min-w-[12px] items-center justify-center rounded-full bg-[#ae2f34] px-0.5 text-[7px] font-black text-white">
+                  <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#ae2f34] px-1 text-[8px] font-black leading-none text-white">
                     {wishlist.length}
                   </span>
                 )}
               </div>
-              <span>{item.shortLabel}</span>
             </button>
           );
         }
@@ -485,12 +445,13 @@ function MobileBottomNav({
             href={item.href}
             onClick={() => setIsCategoryOpen(false)}
             aria-current={isActive ? "page" : undefined}
-            className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-lg text-[10px] font-black tracking-tight transition ${
+            aria-label={item.label}
+            title={item.label}
+            className={`flex h-16 items-center justify-center rounded-lg transition ${
               isActive ? "text-[#ae2f34]" : "text-[#2f3744] active:text-[#111827]"
             }`}
           >
-            <FontAwesomeIcon icon={item.icon} className={`h-[18px] w-[18px] ${isActive ? "scale-110" : ""}`} />
-            <span>{item.shortLabel}</span>
+            <FontAwesomeIcon icon={item.icon} className={`h-7 w-7 transition-transform ${isActive ? "scale-110" : ""}`} />
           </Link>
         );
       })}
@@ -517,8 +478,9 @@ function CategoryOverlay({
           </span>
           <input
             type="text"
+            aria-label="검색어 입력"
             placeholder="검색어를 입력하세요"
-            className="w-full rounded-full border border-gray-200 bg-white py-3 pl-11 pr-4 text-sm font-medium text-gray-700 shadow-sm focus:border-[#ae2f34] focus:outline-none"
+            className="w-full rounded-full border border-gray-200 bg-white py-3 pl-11 pr-4 text-sm font-medium text-gray-700 shadow-sm focus:border-[#ae2f34] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ae2f34]"
           />
         </div>
 

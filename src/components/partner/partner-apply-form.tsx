@@ -133,11 +133,13 @@ export function PartnerApplyForm() {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {PARTNER_TYPES.map((type) => (
-            <div
+            <button
               key={type.id}
+              type="button"
               onClick={() => setFormData({ ...formData, applicantType: type.id })}
+              aria-pressed={formData.applicantType === type.id}
               className={cn(
-                "flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all hover:bg-muted/50",
+                "flex items-start text-left gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                 formData.applicantType === type.id 
                   ? "border-primary bg-primary/5 ring-1 ring-primary/20" 
                   : "border-border bg-card"
@@ -150,10 +152,10 @@ export function PartnerApplyForm() {
                 {type.icon}
               </div>
               <div className="flex flex-col gap-0.5">
-                <span className="font-bold text-sm">{type.label}</span>
+                <span className="font-bold text-sm text-foreground">{type.label}</span>
                 <span className="text-xs text-muted-foreground leading-tight">{type.description}</span>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </section>

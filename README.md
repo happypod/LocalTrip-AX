@@ -4,7 +4,7 @@
 
 ## 프로젝트 정보
 - **기술 스택**: Next.js App Router, TypeScript, Tailwind CSS, shadcn/ui, Prisma
-- **현재 단계**: T-028 MVP 릴리즈 노트 완료
+- **현재 단계**: T-040 출시 승인 체크리스트 완료
 
 ## 실행 방법
 
@@ -60,8 +60,24 @@ npm run start
 
 - Vercel project: `sowons-projects-e525dae5/localtrip-ax`
 - Production URL: `https://localtrip-ax.vercel.app`
-- Production env vars registered in Vercel: `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `NEXT_PUBLIC_SITE_URL`
+- Production env vars verified in Vercel: `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`
+- Production env var pending before final public launch: `NEXT_PUBLIC_SITE_URL`
 - Build command: `npm run build` (`prisma generate && next build`)
 - Production deployment verified on T-027 with public route smoke tests.
 
 DB schema changes and seed execution are operator-controlled steps. Do not run `prisma db push` or `prisma db seed` against Production without explicit approval.
+
+### Domain Policy
+
+- MVP validation uses the Vercel default domain: `https://localtrip-ax.vercel.app`.
+- A custom domain should be connected before external promotion, QR distribution, or public operating materials.
+- `NEXT_PUBLIC_SITE_URL` is a public origin value, not a secret. In Production it should match the canonical public URL.
+- T-039 verification found that `NEXT_PUBLIC_SITE_URL` still needs Production env alignment before final public launch.
+- Domain decision and setup steps are tracked in `docs/12_PRE_LAUNCH_CHECKLIST.md`.
+
+## Pre-Launch Status
+
+- Current launch decision: 조건부 출시 승인
+- Checklist: `docs/12_PRE_LAUNCH_CHECKLIST.md`
+- MVP validation/pilot use can proceed on the Vercel default URL.
+- Before broad public launch, add `NEXT_PUBLIC_SITE_URL` to Vercel Production, run real device QA, and decide custom domain timing.

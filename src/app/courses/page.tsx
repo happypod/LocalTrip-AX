@@ -1,10 +1,9 @@
 import { PublishStatus } from "@prisma/client";
 import { getPrisma } from "@/lib/prisma";
-import { CourseCard } from "@/components/courses/course-card";
+import { CourseFilterGrid, CourseFilterItem } from "@/components/courses/course-filter-grid";
 import { FALLBACK_COURSES, CourseUI } from "@/lib/course-data";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -33,23 +32,33 @@ async function getCourses(): Promise<CourseUI[]> {
       orderBy: { createdAt: "desc" },
     });
 
-    if (courses.length > 0) {
-      // Map Prisma data to CourseUI structure
-      // For MVP, if there are DB items we use them, but the full UI object is complex.
-      // We'll map the basic counts. Note: targetType/durationType aren't in DB currently,
-      // so if using DB, we might miss them unless extended.
-      return courses.map(c => ({
+    const formattedCourses = courses.map(c => {
+      const fallback = FALLBACK_COURSES.find(f => f.slug === c.slug);
+      return {
         ...c,
-        targetType: "전체",
-        durationType: "기본",
+        targetType: fallback?.targetType || "전체",
+        durationType: fallback?.durationType || "기본",
         linkedStayCount: c.courseItems.filter(i => i.itemType === "accommodation").length,
         linkedExpCount: c.courseItems.filter(i => i.itemType === "experience").length,
         linkedProgCount: c.courseItems.filter(i => i.itemType === "local_income_program").length,
-        routeItems: [], // Won't show correctly in list without parsing, but list doesn't show routeItems anyway
-      })) as CourseUI[];
+        routeItems: [],
+      };
+    }) as CourseUI[];
+
+    const merged = new Map<string, CourseUI>();
+    // 1. Add DB items
+    for (const item of formattedCourses) {
+      merged.set(item.slug, item);
+    }
+    // 2. Add Fallbacks
+    const publishedFallbacks = FALLBACK_COURSES.filter(c => c.status === PublishStatus.published);
+    for (const item of publishedFallbacks) {
+      if (!merged.has(item.slug)) {
+        merged.set(item.slug, item);
+      }
     }
 
-    return FALLBACK_COURSES.filter(c => c.status === PublishStatus.published);
+    return Array.from(merged.values());
   } catch (error) {
     console.warn("Failed to fetch courses from DB, using fallback:", error);
     return FALLBACK_COURSES.filter(c => c.status === PublishStatus.published);
@@ -58,11 +67,18 @@ async function getCourses(): Promise<CourseUI[]> {
 
 export default async function CoursesPage() {
   const courses = await getCourses();
-  
-  // Simple filter tags from fallback targetTypes and durationTypes
-  const targetTypes = ["전체", ...new Set(courses.map(c => c.targetType).filter(Boolean) as string[])];
-  const durationTypes = [...new Set(courses.map(c => c.durationType).filter(Boolean) as string[])];
-  const allFilters = [...targetTypes, ...durationTypes];
+  const courseItems: CourseFilterItem[] = courses.map((course) => ({
+    id: course.id,
+    title: course.title,
+    summary: course.summary,
+    targetType: course.targetType,
+    durationType: course.durationType,
+    imageUrl: course.images?.[0],
+    slug: course.slug,
+    linkedStayCount: course.linkedStayCount,
+    linkedExpCount: course.linkedExpCount,
+    linkedProgCount: course.linkedProgCount,
+  }));
 
   return (
     <div className="flex flex-col min-h-screen pb-20">
@@ -90,40 +106,8 @@ export default async function CoursesPage() {
           </p>
         </div>
 
-        {/* Simple Filter UI */}
-        <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {allFilters.map((cat, idx) => (
-            <button
-              key={`${cat}-${idx}`}
-              className={cn(
-                "px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap",
-                cat === "전체" 
-                  ? "bg-category-course text-white" 
-                  : "bg-muted text-muted-foreground hover:bg-muted/80 border"
-              )}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {courses.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {courses.map((course) => (
-              <CourseCard
-                key={course.id}
-                title={course.title}
-                summary={course.summary}
-                targetType={course.targetType}
-                durationType={course.durationType}
-                imageUrl={course.images?.[0]}
-                slug={course.slug}
-                linkedStayCount={course.linkedStayCount}
-                linkedExpCount={course.linkedExpCount}
-                linkedProgCount={course.linkedProgCount}
-              />
-            ))}
-          </div>
+        {courseItems.length > 0 ? (
+          <CourseFilterGrid courses={courseItems} />
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed rounded-xl">
             <p className="text-muted-foreground">현재 등록된 여정의 기록이 없습니다.</p>

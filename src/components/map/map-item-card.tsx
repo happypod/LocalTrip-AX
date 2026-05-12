@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { MapItem } from "@/lib/map-data";
 import { Bed, Leaf, HeartHandshake, Compass, MapPin, ImageOff } from "lucide-react";
@@ -11,6 +12,8 @@ interface MapItemCardProps {
 }
 
 export function MapItemCard({ item }: MapItemCardProps) {
+  const [imgError, setImgError] = useState(false);
+
   const handleTrack = () => {
     // map the mapItem type to LeadItemType
     const itemTypeMap: Record<string, LeadItemType> = {
@@ -69,13 +72,14 @@ export function MapItemCard({ item }: MapItemCardProps) {
     >
       {/* Image Area */}
       <div className="w-full sm:w-32 h-32 sm:h-full relative shrink-0 bg-muted border-b sm:border-b-0 sm:border-r flex items-center justify-center">
-        {item.image ? (
+        {item.image && !imgError ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img 
             src={item.image} 
             alt={item.title} 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
             loading="lazy"
+            onError={() => setImgError(true)}
           />
         ) : (
           <div className="flex flex-col items-center opacity-40">

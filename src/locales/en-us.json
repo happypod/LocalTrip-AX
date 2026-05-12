@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "stay": "Stay",
+    "experience": "Activity",
+    "localProduct": "Dine",
+    "course": "Course"
+  },
+  "hero": {
+    "title": "Where Ocean Meets Forest, Sowon-myeon",
+    "subtitle": "Discover local journeys tailored just for you"
+  },
+  "section": {
+    "recommendedStay": "Local Stays",
+    "popularExperience": "Popular Activities",
+    "localProduct": "Local Eats",
+    "recommendedCourse": "Curated Courses"
+  },
+  "badge": {
+    "stay": "Stay",
+    "experience": "Act",
+    "program": "Eat",
+    "course": "Trip"
+  },
+  "button": {
+    "viewAll": "View All",
+    "openMap": "Explore Map",
+    "apply": "Partner Up"
+  }
+}

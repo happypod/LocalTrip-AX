@@ -75,7 +75,22 @@ async function getExperiences(): Promise<ExperienceUI[]> {
       orderBy: { createdAt: "desc" },
     });
 
-    return (experiences.length > 0 ? experiences : FALLBACK_EXPERIENCES) as ExperienceUI[];
+    const merged = new Map<string, ExperienceUI>();
+    for (const item of experiences) {
+      const fb = FALLBACK_EXPERIENCES.find(f => f.slug === item.slug);
+      merged.set(item.slug, {
+        ...(fb || {}),
+        ...item,
+        category: fb?.category,
+      } as ExperienceUI);
+    }
+    for (const item of FALLBACK_EXPERIENCES) {
+      if (!merged.has(item.slug)) {
+        merged.set(item.slug, item);
+      }
+    }
+
+    return Array.from(merged.values());
   } catch (error) {
     console.warn("Failed to fetch experiences from DB, using fallback:", error);
     return FALLBACK_EXPERIENCES;
@@ -111,7 +126,25 @@ async function getProgramsAsExperiences(): Promise<ProgramExperienceItem[]> {
       }));
     }
 
-    const rawPrograms = dbPrograms.length > 0 ? dbPrograms : FALLBACK_PROGRAMS.filter(p => p.status === PublishStatus.published);
+    const merged = new Map<string, ProgramExperienceSource>();
+    // 1. DB Items (with fallback enrichment)
+    for (const item of dbPrograms) {
+      const fb = FALLBACK_PROGRAMS.find(f => f.slug === item.slug);
+      merged.set(item.slug, {
+        ...(fb || {}),
+        ...item,
+        category: item.category || fb?.category,
+      } as ProgramExperienceSource);
+    }
+    // 2. Fallbacks
+    const publishedFallbacks = FALLBACK_PROGRAMS.filter(p => p.status === PublishStatus.published);
+    for (const item of publishedFallbacks) {
+      if (!merged.has(item.slug)) {
+        merged.set(item.slug, item as ProgramExperienceSource);
+      }
+    }
+
+    const rawPrograms = Array.from(merged.values());
     return rawPrograms.filter((program) => !isFoodProgram(program)).map(toProgramExperience);
   } catch {
     const nonFoodPrograms = FALLBACK_PROGRAMS.filter(
@@ -122,13 +155,25 @@ async function getProgramsAsExperiences(): Promise<ProgramExperienceItem[]> {
   }
 }
 
-export default async function ExperiencesPage() {
+export default async function ExperiencesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category: queryCategory } = await searchParams;
+  const activeCategory = queryCategory || "전체";
+
   const experiencesOnly = await getExperiences();
   const programExperiences = await getProgramsAsExperiences();
-  const experiences = [...experiencesOnly, ...programExperiences];
+  let allExperiences = [...experiencesOnly, ...programExperiences];
   
   // Simple categories from data for the filter UI
-  const categories = ["전체", ...new Set(experiences.map(e => e.category).filter(Boolean) as string[])];
+  const categories = ["전체", ...new Set(allExperiences.map(e => e.category).filter(Boolean) as string[])];
+
+  // Filter logic
+  const filteredExperiences = activeCategory === "전체"
+    ? allExperiences
+    : allExperiences.filter(e => e.category === activeCategory);
 
   return (
     <div className="flex flex-col min-h-screen pb-20">
@@ -148,26 +193,27 @@ export default async function ExperiencesPage() {
       </header>
 
       <main className="px-6 py-8 max-w-screen-xl mx-auto w-full flex flex-col gap-8">
-        {/* Simple Filter UI (Visual only for now as requested) */}
+        {/* URL Driven Filter UI */}
         <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((cat) => (
-            <button
+            <Link
               key={cat}
+              href={cat === "전체" ? "/experiences" : `/experiences?category=${encodeURIComponent(cat)}`}
               className={cn(
                 "px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap",
-                cat === "전체" 
+                activeCategory === cat 
                   ? "bg-category-experience text-white" 
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
             >
               {cat}
-            </button>
+            </Link>
           ))}
         </div>
 
-        {experiences.length > 0 ? (
+        {filteredExperiences.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {experiences.map((exp) => (
+            {filteredExperiences.map((exp) => (
               <ExperienceCard
                 key={exp.id}
                 title={exp.title}
@@ -184,8 +230,10 @@ export default async function ExperiencesPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-muted-foreground">현재 등록된 노님이 없습니다.</p>
+          <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed rounded-xl">
+            <p className="text-muted-foreground">
+              {activeCategory} 카테고리에 해당하는 노님이 없습니다.
+            </p>
           </div>
         )}
       </main>

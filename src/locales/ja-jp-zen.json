@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "stay": "逗留",
+    "experience": "散策",
+    "localProduct": "美味",
+    "course": "旅路"
+  },
+  "hero": {
+    "title": "潮風と静寂が織りなすひととき",
+    "subtitle": "所遠面の豊かな自然に包まれる旅"
+  },
+  "section": {
+    "recommendedStay": "上質な逗留",
+    "popularExperience": "心遊ぶ散策",
+    "localProduct": "里の美味",
+    "recommendedCourse": "趣ある旅路"
+  },
+  "badge": {
+    "stay": "宿",
+    "experience": "遊",
+    "program": "味",
+    "course": "道"
+  },
+  "button": {
+    "viewAll": "一覧",
+    "openMap": "絵図",
+    "apply": "お問い合わせ"
+  }
+}

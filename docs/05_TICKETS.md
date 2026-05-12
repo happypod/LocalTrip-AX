@@ -93,7 +93,8 @@
     - `docs/09_SECURITY_ENV.md` 보안·환경변수 운영 기준 문서 추가
 - [x] T-027 배포
     - Vercel project `sowons-projects-e525dae5/localtrip-ax` 연결 완료
-    - Production 환경변수 등록 완료: `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `NEXT_PUBLIC_SITE_URL`
+    - Production 환경변수 등록 완료: `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`
+    - T-039/T-040 재점검 기준 `NEXT_PUBLIC_SITE_URL`은 최종 공개 전 추가 필요
     - `npm run build`에 `prisma generate`를 포함하여 Vercel fresh install 빌드 실패 방지
     - Production 배포 완료: `https://localtrip-ax.vercel.app`
     - 공개 목록/상세 주요 경로 및 문의/입점신청 API 기본 방어 smoke test 통과

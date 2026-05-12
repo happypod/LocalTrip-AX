@@ -92,10 +92,12 @@ async function getCourseBySlug(slug: string): Promise<CourseUI | undefined> {
         })
         .filter((item): item is CourseItemUI => item !== null);
 
+      const fallback = FALLBACK_COURSES.find(f => f.slug === course.slug);
       return {
         ...course,
-        targetType: "전체", // Fallback logic for extended fields
-        durationType: "기본",
+        targetType: fallback?.targetType || "전체",
+        durationType: fallback?.durationType || "기본",
+        season: fallback?.season,
         routeItems,
         linkedStayCount: routeItems.filter(i => i.itemType === "accommodation").length,
         linkedExpCount: routeItems.filter(i => i.itemType === "experience").length,

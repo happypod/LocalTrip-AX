@@ -26,7 +26,7 @@ export function AdminLayoutWrapper({ children, title, username }: AdminLayoutWra
         onClick={() => setIsCollapsed(!isCollapsed)}
         className={cn(
           "fixed top-20 z-50 flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white shadow-md border border-primary/20 hover:scale-110 hover:bg-primary/90 active:scale-95 transition-all duration-300 cursor-pointer hidden md:flex",
-          isCollapsed ? "left-4" : "left-[240px]"
+          isCollapsed ? "left-[64px]" : "left-[240px]"
         )}
         title={isCollapsed ? "사이드바 열기" : "사이드바 접기"}
       >

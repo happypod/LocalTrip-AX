@@ -53,7 +53,8 @@
 ## T-027 Deployment QA
 
 - [x] Vercel project linked: `sowons-projects-e525dae5/localtrip-ax`
-- [x] Production env vars registered: `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `NEXT_PUBLIC_SITE_URL`
+- [x] Production env vars registered: `DATABASE_URL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`
+- [ ] T-039 recheck: add `NEXT_PUBLIC_SITE_URL` to Vercel Production before final public launch
 - [x] `npx prisma validate` passed before deployment
 - [x] `npm run lint` passed with existing `<img>` LCP warnings only
 - [x] `npm run build` passed locally with `prisma generate && next build`
@@ -75,3 +76,87 @@
 - [x] `npm run build` 통과
 - [x] `docs/11_MVP_RELEASE_NOTES.md` 작성
 - [x] Production 재배포, Vercel 환경변수 변경, DB push, DB seed 미실행
+
+## T-033 Mobile/PC Viewport QA
+
+- [x] Desktop (1440x900) 랜딩 페이지 레이아웃 확인
+- [x] Mobile (390x844) 랜딩 페이지 bottom nav, top bar 확인
+- [x] 주요 9개 공개 라우트 Content Landmarks (Header/Nav/Size) 확인 완료
+- [x] 비로그인 접근 `/admin` 시 `/admin/login` 리다이렉트 (307) 로직 보완 및 검증 완료
+- [x] `npm run lint` 에러 없음 확인 (기존 <img> warning 제외)
+- [x] `npm run build` 통과 확인
+- [x] Production UI 치명적 깨짐(P1/P2) 미발견
+- [ ] 실제 iOS/Android/PC 기기 수동 확인은 후속 QA에서 별도 수행
+
+## T-034 Public Data Exposure QA
+
+- [x] 공개 라우트 Prisma Query `{ status: "published" }` 조건 전수 검증
+- [x] Course 상세 연결 항목에 대한 Non-published JS 필터링 렌더 방지 로직 검증 완료 (`src/app/courses/[slug]/page.tsx`)
+- [x] 개인정보(문의/입점신청) READ API 공개 노출 없음 확인 (Admin 한정 로직)
+- [x] CTA 정책 준수 확인 (외부 연결 및 단순 조회형 Flow 유지)
+- [x] Production URL Live HEAD Verification Success (200 OK)
+- [x] 빈 상태(/events 등) 시 Fallback 레이아웃 안정성 확인
+
+## Event Operating Content Follow-up
+
+- [ ] Event 모델에 `regionId` 추가 필요 여부 확정
+- [ ] `/events` 페이지가 fallback이 아니라 실제 Event 데이터를 조회하도록 전환
+- [ ] Home 이벤트 조회에 `regionId + status=published` 필터 적용
+- [ ] draft/inactive 및 다른 region 이벤트 비노출 QA
+
+## T-035 개인정보/문의/입점신청 QA
+
+- [x] 문의/입점신청 공개 폼 개인정보 수집 최소화 및 동의 Checkbox UI 정상
+- [x] 필수값 또는 개인정보 동의 누락 시 API단에서 방어(HTTP 400 응답)
+- [x] 정상 요청 시 `200 OK`, DB 저장 에러 시 명확한 실패 응답(`500 INTERNAL_SERVER_ERROR`) - 실패를 성공으로 무마(ok: true)하는 P1 취약점 없음
+- [x] 부가적 로깅 이벤트(LeadEvent) 적재 실패는 본 작업 성공 응답에 영향을 미치지 않음 (Best-effort 준수)
+- [x] 관리자 문의/입점신청 목록 컴포넌트(`inquiry-list.tsx` 등)에서 이름, 이메일, 전화번호 마스킹 처리 확인 (`maskName`, `maskEmail`, `maskPhone`)
+- [x] 관리자 목록 데이터 전달 시 `message` 원문을 누락시키고 Server Side에서 잘라낸 `messagePreview` 속성만 전송함으로써 근본적인 데이터 노출 사전 차단 확인
+- [x] 상세 원문 페이지는 인가된 관리자만 접근 가능하며(`requireAdminSession` 적용), 소원권역(`sowon`)으로 데이터 조회 스코핑 한정 완료
+
+## T-036 이미지 및 Fallback QA
+
+- [x] 외부 Placeholder 서비스(`placehold.co`, `unsplash` 등) 의존성 검색 결과 전무함 확인
+- [x] 이미지 누락 시 로컬 Placeholder UI("이미지 준비 중") 표시 로직 전수 점검 완료 (`content-card.tsx`, `stay-image.tsx`, `experience-image.tsx`, `program-image.tsx`, `course-image.tsx`, `map-item-card.tsx`, `event-slider.tsx`)
+- [x] `onError` 발생 시 Javascript State를 통한 Fallback 트리거링 구조 정상 동작 확인
+- [x] Data Mapping 단계에서 이미지 배열의 첫 요소(`images?.[0]`)에 대한 안전한 Optional Chaining 접근 검증
+- [x] Production UI 전체 빌드 테스트(`npm run build`) 통과 확인 및 렌더링 안전성 확보
+- [x] <img> 사용에 따른 LCP Warning(Next/Image 미사용)은 이미 인지된 성능적 개선사항(Post-MVP)으로 인계 처리
+
+## T-037 지도 Placeholder QA
+
+- [x] `/map` 경로 Live Production 200 OK 정상 응답 확인
+- [x] 지도 API Key 미연동 상태에서도 안내 텍스트(Info)와 Static Placeholder를 통해 안정적인 레이아웃 제공
+- [x] Database 쿼리(`prisma.accommodation.findMany` 등)에서 `regionId: sowonRegion.id` 및 `status: "published"` 필터링 전수 적용 검증
+- [x] Map Item Card에서 카테고리별 고유 Label("주민소득상품" 등) 및 고유 Tailwind Color/Icon 분리 표시 확인
+- [x] 이미지 부재 시 `ImageOff` Lucide 아이콘과 "이미지 준비 중" 로컬 UI 처리 완료
+- [x] 이벤트 로깅(`trackLeadEvent`)의 `catch` 무결 및 `keepalive: true`를 통한 사용자 인터랙션(클릭) 비지연(Non-blocking) 설계 보장
+
+## T-039 운영 도메인 QA
+
+- [x] Vercel 기본 Production URL 유지 결정: `https://localtrip-ax.vercel.app`
+- [x] Production 공개 경로 HTTP 확인: `/`, `/stays`, `/experiences`, `/programs`, `/courses`, `/map`, `/partner/apply`, `/customer-center` 모두 `200 OK`
+- [x] `/admin` 비로그인 접근 시 `/admin/login`으로 `307 Temporary Redirect` 확인
+- [x] 커스텀 도메인은 외부 공개/홍보 전 연결 권장으로 문서화
+- [x] Vercel DNS 연결 절차 문서화
+- [ ] Vercel Production에 `NEXT_PUBLIC_SITE_URL` 추가 필요
+
+## T-040 출시 승인 체크리스트 QA
+
+- [x] `docs/12_PRE_LAUNCH_CHECKLIST.md` 작성 및 출시 판단 포함
+- [x] MVP 범위 준수 항목 확인
+- [x] 공개 화면/관리자 화면/DB/환경변수/보안/LeadEvent/Known Issues 항목 포함
+- [x] 현재 출시 판단: 조건부 출시 승인
+- [x] `npx prisma validate` 통과
+- [x] `npm run lint` 통과: 에러 0건, 기존 `<img>` LCP warning 2건
+- [x] `npm run build` 통과
+- [ ] 조건부 승인 잔여 항목: `NEXT_PUBLIC_SITE_URL` Production 등록, 실제 기기 QA, 커스텀 도메인 연결 시점 결정
+
+## T-038 접근성 기본 QA
+
+- [x] 모바일 하단 네비게이션 아이콘 버튼에 `aria-label`, `title`, `aria-current` 적용 상태 확인
+- [x] 모바일 카테고리 오버레이의 검색 input에 명시적인 `aria-label` 보완 완료
+- [x] 관리자 사이드바 접힘 상태(icon-only) 링크에 `aria-label` 및 `title`을 통한 툴팁/스크린리더 설명 제공 확인
+- [x] 문의 다이얼로그(`inquiry-dialog.tsx`)의 모든 Form Controls(Input, Textarea, Checkbox)가 `htmlFor`/`id` 및 Radix `Label`로 올바르게 연결됨을 보장
+- [x] 입점 신청 폼(`partner-apply-form.tsx`)의 신청자 유형 선택용 div 요소를 시맨틱 `<button>`으로 리팩토링하여 키보드 Focus 접근성 및 선택 상태(`aria-pressed`) 식별력 개선 완료
+- [x] 관리자 로그인 페이지 Input ID/Label 매칭 무결성 확인

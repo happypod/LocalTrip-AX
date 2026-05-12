@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { ImageOff } from "lucide-react";
 
 interface ProgramImageProps {
@@ -6,7 +9,9 @@ interface ProgramImageProps {
 }
 
 export function ProgramImage({ src, alt }: ProgramImageProps) {
-  if (!src) {
+  const [imgError, setImgError] = useState(false);
+
+  if (!src || imgError) {
     return (
       <div className="w-full aspect-[4/3] bg-muted/60 flex flex-col items-center justify-center text-muted-foreground border-b">
         <ImageOff className="w-8 h-8 mb-2 opacity-50" />
@@ -23,6 +28,7 @@ export function ProgramImage({ src, alt }: ProgramImageProps) {
         alt={alt}
         className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out"
         loading="lazy"
+        onError={() => setImgError(true)}
       />
     </div>
   );

@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "stay": "安居",
+    "experience": "闲游",
+    "localProduct": "风味",
+    "course": "寻踪"
+  },
+  "hero": {
+    "title": "听风观海，悠然所远",
+    "subtitle": "感受慢节奏的宁静时光"
+  },
+  "section": {
+    "recommendedStay": "禅意安居",
+    "popularExperience": "自然闲游",
+    "localProduct": "乡土风味",
+    "recommendedCourse": "治愈之旅"
+  },
+  "badge": {
+    "stay": "居",
+    "experience": "闲",
+    "program": "味",
+    "course": "道"
+  },
+  "button": {
+    "viewAll": "一览",
+    "openMap": "观图",
+    "apply": "合作洽谈"
+  }
+}

@@ -30,21 +30,60 @@ async function getPrograms(): Promise<LocalIncomeProgramUI[]> {
       orderBy: { createdAt: "desc" },
     });
 
-    return (programs.length > 0 ? programs : FALLBACK_PROGRAMS.filter(p => p.status === PublishStatus.published)) as LocalIncomeProgramUI[];
+    const merged = new Map<string, LocalIncomeProgramUI>();
+    // 1. Add DB items (with fallback enrichment)
+    for (const item of programs) {
+      const fb = FALLBACK_PROGRAMS.find(f => f.slug === item.slug);
+      merged.set(item.slug, {
+        ...(fb || {}),
+        ...item,
+        category: fb?.category, // DB model lacks category, explicitly copy from fallback
+      } as LocalIncomeProgramUI);
+    }
+    // 2. Add Fallbacks (Published only)
+    const publishedFallbacks = FALLBACK_PROGRAMS.filter(p => p.status === PublishStatus.published);
+    for (const item of publishedFallbacks) {
+      if (!merged.has(item.slug)) {
+        merged.set(item.slug, item);
+      }
+    }
+
+    return Array.from(merged.values());
   } catch (error) {
     console.warn("Failed to fetch programs from DB, using fallback:", error);
     return FALLBACK_PROGRAMS.filter(p => p.status === PublishStatus.published);
   }
 }
 
-export default async function ProgramsPage() {
-  const allPrograms = await getPrograms();
-  const programs = allPrograms.filter(
-    p => p.category === "식생활" || p.slug === "salt-farm-tour"
+function isFoodProgram(program: LocalIncomeProgramUI) {
+  const slug = program.slug || "";
+  return (
+    program.category === "식생활" ||
+    slug === "salt-farm-tour" ||
+    slug === "village-dining" ||
+    slug === "local-table-experience" ||
+    slug.includes("dining") ||
+    slug.includes("table")
   );
+}
+
+export default async function ProgramsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category: queryCategory } = await searchParams;
+  const activeCategory = queryCategory || "전체";
+
+  const allPrograms = await getPrograms();
+  const programs = allPrograms.filter(isFoodProgram);
   
   // Simple categories from data for the filter UI
   const categories = ["전체", ...new Set(programs.map(p => p.category).filter(Boolean) as string[])];
+
+  const filteredPrograms = activeCategory === "전체"
+    ? programs
+    : programs.filter(p => p.category === activeCategory);
 
   return (
     <div className="flex flex-col min-h-screen pb-20">
@@ -75,23 +114,24 @@ export default async function ProgramsPage() {
         {/* Simple Filter UI */}
         <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {categories.map((cat) => (
-            <button
+            <Link
               key={cat}
+              href={cat === "전체" ? "/programs" : `/programs?category=${encodeURIComponent(cat)}`}
               className={cn(
-                "px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap",
-                cat === "전체" 
-                  ? "bg-category-program text-white" 
-                  : "bg-muted text-muted-foreground hover:bg-muted/80 border"
+                "px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap border",
+                activeCategory === cat 
+                  ? "bg-category-program text-white border-category-program" 
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
             >
               {cat}
-            </button>
+            </Link>
           ))}
         </div>
 
-        {programs.length > 0 ? (
+        {filteredPrograms.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {programs.map((prog) => (
+            {filteredPrograms.map((prog) => (
               <ProgramCard
                 key={prog.id}
                 title={prog.title}
@@ -108,7 +148,9 @@ export default async function ProgramsPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed rounded-xl">
-            <p className="text-muted-foreground">현재 등록된 소원 별미가 없습니다.</p>
+            <p className="text-muted-foreground">
+              {activeCategory} 카테고리에 해당하는 소원 별미가 없습니다.
+            </p>
           </div>
         )}
       </main>

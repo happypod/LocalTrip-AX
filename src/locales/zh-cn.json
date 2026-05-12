@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "stay": "住宿",
+    "experience": "体验",
+    "localProduct": "美食",
+    "course": "路线"
+  },
+  "hero": {
+    "title": "海与林相遇的地方，泰安所远面",
+    "subtitle": "为您量身定制的当地之旅"
+  },
+  "section": {
+    "recommendedStay": "精选住宿",
+    "popularExperience": "热门体验",
+    "localProduct": "当地美食",
+    "recommendedCourse": "推荐路线"
+  },
+  "badge": {
+    "stay": "住",
+    "experience": "玩",
+    "program": "食",
+    "course": "游"
+  },
+  "button": {
+    "viewAll": "查看全部",
+    "openMap": "探索地图",
+    "apply": "商家入驻"
+  }
+}

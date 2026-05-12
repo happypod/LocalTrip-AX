@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { ImageOff } from "lucide-react";
 
 interface CourseImageProps {
@@ -6,7 +9,9 @@ interface CourseImageProps {
 }
 
 export function CourseImage({ src, alt }: CourseImageProps) {
-  if (!src) {
+  const [imgError, setImgError] = useState(false);
+
+  if (!src || imgError) {
     return (
       <div className="w-full aspect-[16/9] bg-muted/60 flex flex-col items-center justify-center text-muted-foreground border-b">
         <ImageOff className="w-8 h-8 mb-2 opacity-50" />
@@ -23,6 +28,7 @@ export function CourseImage({ src, alt }: CourseImageProps) {
         alt={alt}
         className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500 ease-out"
         loading="lazy"
+        onError={() => setImgError(true)}
       />
     </div>
   );

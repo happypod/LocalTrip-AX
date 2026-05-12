@@ -1,0 +1,29 @@
+{
+  "nav": {
+    "stay": "행랑",
+    "experience": "소요",
+    "localProduct": "풍미",
+    "course": "유람"
+  },
+  "hero": {
+    "title": "산천과 해풍을 노니는 고요한 시간",
+    "subtitle": "태안 소원면의 깊은 풍경에 스며듭니다"
+  },
+  "section": {
+    "recommendedStay": "기품 있는 행랑",
+    "popularExperience": "풍류를 담은 소요",
+    "localProduct": "자연의 풍미",
+    "recommendedCourse": "운치 있는 유람기"
+  },
+  "badge": {
+    "stay": "거처",
+    "experience": "소요",
+    "program": "풍미",
+    "course": "유람"
+  },
+  "button": {
+    "viewAll": "모두 보기",
+    "openMap": "지도 유람",
+    "apply": "제휴 문의"
+  }
+}

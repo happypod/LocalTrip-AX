@@ -96,6 +96,7 @@
 - Production DB schema push와 seed는 T-027/T-028에서 실행하지 않았다.
 - `npx prisma db push`, `npx prisma db seed`는 운영자 승인 후 별도 실행해야 한다.
 - 운영 전 `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, DB credential rotation 여부를 확인한다.
+- T-039/T-040 재점검 기준, 최종 공개 전 Vercel Production에 `NEXT_PUBLIC_SITE_URL`을 canonical public URL로 추가해야 한다.
 
 ## 8. QA 결과
 

@@ -9,13 +9,18 @@
 
 ## Environment Variables
 
-Registered in Vercel Production and Development:
+Verified in Vercel Production during T-039:
 
 - `DATABASE_URL`
 - `ADMIN_USERNAME`
 - `ADMIN_PASSWORD`
 - `ADMIN_SESSION_SECRET`
+
+Pending before final public launch:
+
 - `NEXT_PUBLIC_SITE_URL`
+
+`NEXT_PUBLIC_SITE_URL` is public, not a secret. Set it to `https://localtrip-ax.vercel.app` while using the Vercel default domain, or to the approved custom domain after domain connection.
 
 Preview env vars were not registered because Vercel rejects the Production Branch `main` as a Preview branch target. Add Preview variables later only for a non-production Git branch if needed.
 

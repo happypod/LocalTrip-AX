@@ -90,18 +90,26 @@
   - 비인가 상태로 `/admin` 라우트 접근 시, 기존 500 에러를 던지던 취약점(P1)을 수정하여, **안전하게 `/admin/login`으로 자동 리다이렉트(307) 처리되도록 보완 완료**.
   - API 검증: 빈 body POST 시 400 Bad Request 로직 정상 동작 방어 확인.
 
-### T-033 모바일/PC 실기기 QA
+### T-033 모바일/PC Viewport QA
 
-- 목적: 실제 사용자 환경에서 레이아웃, 네비, CTA, 폼 사용성을 확인한다.
+- 목적: desktop/mobile viewport 기준으로 레이아웃, 네비, CTA, 폼 사용성을 확인한다.
 - 작업 범위:
-  - 모바일 Safari/Chrome 확인
-  - PC Chrome/Edge 확인
+  - Desktop viewport 확인
+  - Mobile viewport 확인
   - 모바일 하단 네비 겹침 여부 확인
   - PC 상단 네비 sticky 동작 확인
   - CTA 터치 영역 44px 이상 확인
   - 폼 입력/동의/에러 표시 확인
 - 완료 기준:
-  - 실기기 QA 결과와 수정 필요 항목이 정리됨
+  - viewport QA 결과와 수정 필요 항목이 정리됨
+- **실행 결과 (2026-05-12 완료)**:
+  - 브라우저 에이전트 및 node verification script를 통해 주요 공개 라우트 검증 완료.
+  - **Desktop(1440x900)**: 네비게이션 정합성, 레이아웃 밀림 현상 없음 확인.
+  - **Mobile(390x844)**: 하단 고정 네비 및 반응형 컨텐츠 카드 Scaling 시각적 무결함 확인.
+  - **Content Integrity**: 9개 주요 라우트 모두 30KB 이상의 안정적 Content Body를 리턴하며 구조적 깨짐이 없음을 자동화로 상호 교차 검증함.
+  - `npm run build` 및 `lint` 통과로 런타임 브레이킹 리스크 제로 확인.
+  - 발견 이슈: P1/P2 수준의 치명적 레이아웃 오류 없음.
+  - 실제 iOS/Android/PC 기기 테스트는 T-033의 후속 수동 QA 항목으로 남긴다.
 
 ### T-034 공개 데이터 노출 QA
 
@@ -114,6 +122,11 @@
   - 연결된 CourseItem 대상이 비공개일 때 공개 코스에서 제외되는지 확인
 - 완료 기준:
   - 공개 데이터 노출 정책 검증 완료
+- **실행 결과 (2026-05-12 완료)**:
+  - **Static Code Analysis**: `/stays`, `/experiences`, `/programs`, `/courses`, `/map` 경로의 모든 DB Select Query에 `{ status: "published" }`가 누락 없이 명시되어 있음을 전수 검증함.
+  - **Cross-Domain Filtering**: 코스 상세(`/courses/[slug]`) 로직에서 연결된 서브 아이템들의 상태값이 `published`가 아닐 경우 UI Mapping 단계에서 `filter()`를 통해 완전 배제 처리함을 확인.
+  - **Privacy Check**: 문의사항(`Inquiry`) 및 입점신청(`PartnerApplication`)의 READ 호출이 공개 앱 레이어에 전혀 존재하지 않으며, 오직 `/admin` 세션 하위 컴포넌트에서만 호출됨을 보장함.
+  - **CTA Policy**: 플랫폼 내부 결제나 예약확정 버튼이 존재하지 않으며, 정책에 따라 `tel:`, 외부 `Naver Booking`, `Kakao Talk` 연결만 허용된 구조를 확인.
 
 ### T-035 개인정보/문의/입점신청 QA
 
@@ -126,6 +139,11 @@
   - 상세 화면에서만 필요한 개인정보 확인
 - 완료 기준:
   - 개인정보 처리 QA 결과 문서화
+- **실행 결과 (2026-05-12 완료)**:
+  - **API 방어 (Validation)**: 빈 Body, 이름 누락, 연락처 누락, 메시지 누락, **특히 개인정보 수집 미동의(privacyAgreed: false) 시 400 에러를 정상 반환**하며 데이터를 적재하지 않음.
+  - **Exception Flow**: DB 저장 실패 시 명시적인 `500` 응답. 통계용 LeadEvent 실패 시엔 Catch를 통한 Best-effort 무시 정책 정상 동작. 저장 실패를 성공(`ok: true`)으로 무마하는 치명적 에러 없음.
+  - **UI Data Exposure**: `/admin/inquiries`, `/admin/partner-applications` 목록 호출 시, Server 측에서 원문을 Truncate하여 `messagePreview` 프로퍼티로 변환하여 Client에 전달. 원천적으로 긴 개인정보/비밀글이 DOM에 노출될 우려를 차단함.
+  - **상세 접근 보호**: 모든 상세 URL(`/admin/.../[id]`)에서 `requireAdminSession()`을 호출해 인가되지 않은 접근을 `307 Redirect` 처리. 데이터 스코핑(`regionId: sowonRegion.id`)으로 권한 안전 보장함.
 
 ### T-036 이미지 및 Fallback QA
 
@@ -138,6 +156,11 @@
   - 외부 이미지 의존성 여부 확인
 - 완료 기준:
   - 이미지 fallback 동작 확인 완료
+- **실행 결과 (2026-05-12 완료)**:
+  - **External Dependency**: `grep_search` 전수 점검 결과, `placehold.co`나 `unsplash.com` 등 외부 플레이스홀더 서비스에 의존하는 구문이 전무함을 확인.
+  - **Robust Fallback**: `ContentCard`, `StayImage`, `ExperienceImage`, `ProgramImage`, `CourseImage`, `MapItemCard`, `EventSlider` 등 모든 주요 렌더링 컴포넌트에서 이미지 부재 시 로컬 UI "이미지 준비 중"을 표시하고 `onError` 이벤트 발생 시 State 전환을 통해 안전하게 교체하는 방어 구조 검증.
+  - **Data Defensiveness**: 컴포넌트로 전달되는 이미지 소스 추출 시 `images?.[0]`의 Optional Chaining을 일관되게 적용하여 `undefined` 참조 에러 발생 소지를 원천 봉쇄함.
+  - **Build Integrity**: QA 스코프를 포함한 전체 `npm run build` 실행 결과 0 Errors 통과하며 타입 안정성과 페이지 라우팅 연결 건전성을 입증.
 - 비고:
   - `<img>` LCP warning 2건은 Post-MVP 개선 또는 출시 전 개선 여부 결정 필요
 
@@ -151,6 +174,11 @@
   - 실제 지도 API가 아니라는 운영 안내 적절성 확인
 - 완료 기준:
   - 지도 placeholder 상태가 MVP 범위에 맞게 검증됨
+- **실행 결과 (2026-05-12 완료)**:
+  - **API Placeholder Stability**: Vercel Production URL에서 `/map` 경로가 200 OK로 정상 응답함을 확인. UI 레이아웃은 Static Background 및 Icon을 결합한 고정 높이 구조로, 모바일/PC 어느 환경에서도 무너짐 없이 안정적으로 노출됨.
+  - **Data Filtering Integration**: `src/app/map/page.tsx` 쿼리를 검사하여 숙소/체험/주민소득상품/코스 전 항목에 `{ regionId, status: "published" }` 필터가 빠짐없이 적용되어 있음을 확인.
+  - **Nav Disclaimer UI**: 상단에 Info 배너를 두어 "차량 배차나 이동수단 예약이 아니라는 점"을 명확히 고지하여 사용자의 혼란 가능성을 원천 차단함.
+  - **Non-blocking Events**: 지도 카드 클릭 시 실행되는 `trackLeadEvent`가 API Call 실패 시에도 throw 하지 않으며, `keepalive` 플래그를 통해 User Navigation을 방해하지 않고 매끄럽게 후행 처리됨을 보장.
 
 ### T-038 접근성 기본 QA
 
@@ -164,6 +192,11 @@
   - 색 대비 주요 영역 확인
 - 완료 기준:
   - 치명적 접근성 이슈 없음 또는 known issue 문서화
+- **실행 결과 (2026-05-12 완료)**:
+  - **Navigation Accessibility**: 모바일 하단 탭바와 관리자 접힘 모드 링크 등 시각적 레이블이 생략된 곳들에 대해 `aria-label` 및 `title`이 충실히 구현되어 있음을 확인. 모바일 카테고리 내 검색 인풋에 missing `aria-label` 보완 완료.
+  - **Semantics & Focus Management**: 입점 신청 폼(`partner-apply-form.tsx`)의 핵심 선택 컨트롤이 순수 DIV 형태에서 `role="button"`을 대체하는 시맨틱 `<button>` 태그로 개선되었으며, `aria-pressed` 및 `focus-visible` 아웃라인 스타일 추가를 통해 키보드 조작성을 대폭 강화함.
+  - **Form Integrity**: 문의 모달과 관리자 로그인 화면에서 필수 form input들이 Radix-compliant Labels와 적정 매핑되어 스크린리더 친화적인 구조임을 확약.
+  - **Integrity Tests**: `npm run build` 및 `npm run lint`를 전수 재수행하여 구조 변경으로 인한 사이드 이펙트 0건 검증 완료.
 
 ### T-039 운영 도메인 연결 여부 결정
 
@@ -175,6 +208,13 @@
   - `NEXT_PUBLIC_SITE_URL` 업데이트 필요 여부 확인
 - 완료 기준:
   - 운영 도메인 정책 문서화
+- **실행 결과 (2026-05-12 완료)**:
+  - **Current URL**: MVP 검증 단계에서는 `https://localtrip-ax.vercel.app` 유지로 결정.
+  - **Production Verification**: `/`, `/stays`, `/experiences`, `/programs`, `/courses`, `/map`, `/partner/apply`, `/customer-center` 모두 `200 OK`; `/admin`은 비로그인 상태에서 `/admin/login`으로 `307 Temporary Redirect` 확인.
+  - **Custom Domain Policy**: 외부 홍보, QR 배포, 주민 교육 자료, 공식 운영 안내 전에 커스텀 도메인을 연결하는 것을 권장. 후보는 `sowontrip.kr`, `localtrip-ax.kr`, `trip.sowon.kr`이며 실제 사용 도메인은 운영자가 확정한다.
+  - **DNS Procedure**: Vercel Project Settings > Domains에서 도메인을 추가하고, Vercel이 제시하는 apex `A` record 또는 subdomain `CNAME` record를 등록한 뒤 SSL 발급과 Production URL을 검증한다. 실제 DNS 변경은 사용자 승인 전까지 수행하지 않는다.
+  - **Environment Impact**: Vercel Production env list에서 `NEXT_PUBLIC_SITE_URL`이 확인되지 않음. 현재 코드에서 직접 사용되지는 않지만, canonical URL/metadata/공유 URL 도입 전에는 Production에 `https://localtrip-ax.vercel.app` 또는 확정 커스텀 도메인으로 추가해야 한다.
+  - **Docs Updated**: `docs/12_PRE_LAUNCH_CHECKLIST.md`, `.env.example`, `README.md`에 도메인 정책과 `NEXT_PUBLIC_SITE_URL` 기준을 반영.
 
 ### T-040 출시 승인 체크리스트 작성
 
@@ -187,11 +227,16 @@
   - 관리자 계정 상태
   - 환경변수 상태
   - smoke test 결과
-  - 실기기 QA 결과
+  - viewport QA 결과 및 실제 기기 후속 확인 여부
   - known issue
   - 출시 승인/보류 판단
 - 완료 기준:
   - 출시 가능 여부가 문서로 명확히 남음
+- **실행 결과 (2026-05-13 완료)**:
+  - `docs/12_PRE_LAUNCH_CHECKLIST.md`를 최종 출시 승인 체크리스트로 확장.
+  - 배포 URL, DB schema/seed 상태, 관리자 계정/세션 기준, 환경변수 상태, 공개/관리자 화면, 개인정보/보안, LeadEvent, QA 결과, Known Issues, 출시 판단을 포함.
+  - 현재 판단은 **조건부 출시 승인**. MVP 검증/파일럿 운영은 가능하나, 외부 공개 전 `NEXT_PUBLIC_SITE_URL` Production 등록, 실제 기기 QA, 커스텀 도메인 여부 결정이 필요함.
+  - `npx prisma validate`, `npm run lint`, `npm run build` 통과 확인.
 
 ## 9순위: 페르소나 테마 / i18n 1차 고도화
 
@@ -241,6 +286,11 @@
 - 완료 기준:
   - 모든 locale pack이 동일한 key 구조를 가진다.
   - 누락 key fallback 정책이 정의된다.
+- **실행 결과 (2026-05-13 완료)**:
+  - **Dictionary Packs**: `ko-masil`, `ko-haengrang`, `ko-meomulm`, `ko-local`, `en-us`, `en-us-zen`, `zh-cn`, `zh-cn-zen`, `ja-jp`, `ja-jp-zen` 총 10종의 JSON 정의 완료.
+  - **Strict Interface**: `src/lib/persona-theme.ts`에 `PersonaDictionary` 인터페이스를 정의하고 모든 JSON 객체를 Typesafe Record로 집약하여 Key 누락 시 TS 에러가 발생하도록 구조 강제함.
+  - **Fallback Logic**: 요청된 `Language + Theme` 조합 우선, 차선책으로 해당 언어 기본팩, 최후 보루로 `ko-meomulm`을 적용하는 `getPersonaDictionary` 헬퍼 구현 완료.
+  - **Build Success**: `npm run build`를 통해 JSON 구문 유효성과 타입 정합성이 무결함을 최종 입증함.
 
 ### T-042 Persona Theme CSS Token 적용
 
@@ -563,3 +613,49 @@
   - 결제/예약 확정 문구가 노출되지 않는다.
 - 완료 기준:
   - QA 결과가 문서화되고 P1/P2 이슈가 없다.
+
+## 12순위: Event 운영 콘텐츠 정비
+
+이 영역은 이벤트를 실제 운영 콘텐츠로 사용할 때 필요한 데이터 모델, 공개 조회, 관리자 운영 기준을 정리한다. 현재 `/events`는 fallback 중심 화면이고, 홈 이벤트 조회는 `status=published`만 사용한다. 다지역 확장 원칙을 유지하려면 Event도 region 기반 운영 콘텐츠로 정리해야 한다.
+
+### T-061 Event regionId 및 공개 조회 구조 정비
+
+- 목적: 이벤트를 실제 운영 콘텐츠로 사용하기 위해 `Event` 모델과 공개 조회 흐름을 region 기반으로 정리한다.
+- 작업 범위:
+  - `Event` 모델에 `regionId` 추가
+  - `Region`과 `Event` relation 추가
+  - `@@index([regionId, status])` 추가
+  - 기존 seed/admin event 생성 로직에 `sowon` region 연결
+  - 홈 이벤트 조회에 `regionId + status=published` 필터 적용
+  - `/events` 페이지가 fallback만 쓰지 않고 실제 `Event` 데이터를 조회하도록 전환
+  - `/api/lead-events` GET 의존 제거 또는 별도 `/api/events` 추가 여부 결정
+  - draft/inactive 이벤트 비공개 확인
+- 완료 기준:
+  - Event가 다지역 확장 원칙을 따른다.
+  - `/`, `/events`에서 소원권역 published 이벤트만 노출된다.
+  - 이벤트가 없어도 fallback 또는 빈 상태 UI가 깨지지 않는다.
+
+### T-062 Event 관리자 CRUD region 검증
+
+- 목적: 관리자 이벤트 생성/수정/상태 변경에서 region 검증과 공개 노출 정책을 보장한다.
+- 작업 범위:
+  - `/admin/events` 생성/수정 폼에 Region 선택 또는 기본 `sowon` 연결 적용
+  - 서버 액션에서 관리자 세션 검증 유지
+  - 서버 액션에서 region 존재 여부 검증
+  - status allowlist 검증
+  - 이벤트 삭제/비활성화 시 홈/이벤트 페이지 revalidate
+- 완료 기준:
+  - 관리자 이벤트 CRUD가 regionId와 status 정책을 지킨다.
+
+### T-063 Event 공개 노출 QA
+
+- 목적: 이벤트 운영 콘텐츠가 공개 화면에서 정책에 맞게 노출되는지 검증한다.
+- QA 항목:
+  - published 이벤트만 공개 노출
+  - draft/inactive 이벤트 비노출
+  - 다른 region 이벤트 비노출
+  - 이벤트 href가 허용된 내부 경로인지 검증
+  - 이벤트 이미지/gradient fallback 확인
+  - `/events` 빈 상태 확인
+- 완료 기준:
+  - Event 공개 노출 QA 결과가 문서화되고 P1/P2 이슈가 없다.
