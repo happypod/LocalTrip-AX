@@ -49,6 +49,13 @@
   --color-category-experience: var(--category-experience);
   --color-category-program: var(--category-program);
   --color-category-course: var(--category-course);
+  --color-persona-primary: var(--persona-primary);
+  --color-persona-bg: var(--persona-bg);
+  --color-persona-surface: var(--persona-surface);
+  --color-persona-text: var(--persona-text);
+  --color-persona-muted: var(--persona-muted);
+  --radius-persona: var(--persona-radius);
+  --font-persona-display: var(--persona-font-display);
 }
 
 :root {
@@ -88,6 +95,15 @@
   --category-experience: oklch(0.6 0.15 150);
   --category-program: oklch(0.6 0.15 50);
   --category-course: oklch(0.6 0.15 300);
+
+  /* Persona Theme Tokens - Defaulting to meomulm */
+  --persona-primary: oklch(0.3 0.02 250);
+  --persona-bg: oklch(0.98 0.005 250);
+  --persona-surface: oklch(1 0 0);
+  --persona-text: oklch(0.15 0.01 250);
+  --persona-muted: oklch(0.6 0.01 250);
+  --persona-radius: 0.75rem;
+  --persona-font-display: "Inter", sans-serif;
 }
 
 .dark {
@@ -126,6 +142,82 @@
   --category-experience: oklch(0.7 0.12 150);
   --category-program: oklch(0.7 0.12 50);
   --category-course: oklch(0.7 0.12 300);
+}
+
+/* ==========================================
+   Persona Theme Specifications
+   ========================================== */
+
+/* theme-meomulm (Youth / Workation / Minimal Charcoal) */
+.theme-meomulm {
+  --persona-primary: oklch(0.3 0.02 250);
+  --persona-bg: oklch(0.98 0.005 250);
+  --persona-surface: oklch(1 0 0);
+  --persona-text: oklch(0.15 0.01 250);
+  --persona-muted: oklch(0.6 0.01 250);
+  --persona-radius: 0.75rem;
+  --persona-font-display: "Inter", sans-serif;
+}
+:is(.dark .theme-meomulm, .dark.theme-meomulm) {
+  --persona-primary: oklch(0.92 0.01 250);
+  --persona-bg: oklch(0.12 0.01 250);
+  --persona-surface: oklch(0.18 0.01 250);
+  --persona-text: oklch(0.95 0.005 250);
+  --persona-muted: oklch(0.55 0.01 250);
+}
+
+/* theme-masil (Warm / Bubbly / Friendly Coral) */
+.theme-masil {
+  --persona-primary: oklch(0.65 0.2 40);
+  --persona-bg: oklch(0.99 0.01 45);
+  --persona-surface: oklch(1 0 0);
+  --persona-text: oklch(0.2 0.03 35);
+  --persona-muted: oklch(0.65 0.05 45);
+  --persona-radius: 1.25rem;
+  --persona-font-display: "Outfit", "Inter", sans-serif;
+}
+:is(.dark .theme-masil, .dark.theme-masil) {
+  --persona-primary: oklch(0.75 0.15 45);
+  --persona-bg: oklch(0.15 0.02 35);
+  --persona-surface: oklch(0.22 0.03 35);
+  --persona-text: oklch(0.95 0.01 45);
+  --persona-muted: oklch(0.6 0.03 45);
+}
+
+/* theme-haengrang (Traditional Premium / Wood Beige) */
+.theme-haengrang {
+  --persona-primary: oklch(0.45 0.08 75);
+  --persona-bg: oklch(0.97 0.015 80);
+  --persona-surface: oklch(0.99 0.005 80);
+  --persona-text: oklch(0.15 0.02 80);
+  --persona-muted: oklch(0.55 0.03 75);
+  --persona-radius: 0.375rem;
+  --persona-font-display: "Playfair Display", "Noto Serif KR", serif;
+}
+:is(.dark .theme-haengrang, .dark.theme-haengrang) {
+  --persona-primary: oklch(0.75 0.06 80);
+  --persona-bg: oklch(0.14 0.01 70);
+  --persona-surface: oklch(0.2 0.015 75);
+  --persona-text: oklch(0.92 0.01 80);
+  --persona-muted: oklch(0.6 0.02 75);
+}
+
+/* theme-local (Cheerful Energetic / Bright Green) */
+.theme-local {
+  --persona-primary: oklch(0.65 0.16 135);
+  --persona-bg: oklch(0.99 0.01 140);
+  --persona-surface: oklch(1 0 0);
+  --persona-text: oklch(0.18 0.05 130);
+  --persona-muted: oklch(0.6 0.06 135);
+  --persona-radius: 1.0rem;
+  --persona-font-display: "Inter", sans-serif;
+}
+:is(.dark .theme-local, .dark.theme-local) {
+  --persona-primary: oklch(0.72 0.14 135);
+  --persona-bg: oklch(0.12 0.02 140);
+  --persona-surface: oklch(0.18 0.03 135);
+  --persona-text: oklch(0.95 0.02 140);
+  --persona-muted: oklch(0.55 0.03 135);
 }
 
 @layer base {

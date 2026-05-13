@@ -1,29 +1,29 @@
 {
   "nav": {
-    "stay": "安居",
-    "experience": "闲游",
-    "localProduct": "风味",
-    "course": "寻踪"
+    "stay": "隐居之所",
+    "experience": "深度体验",
+    "localProduct": "匠心美食",
+    "course": "治愈之旅"
   },
   "hero": {
-    "title": "听风观海，悠然所远",
-    "subtitle": "感受慢节奏的宁静时光"
+    "title": "所愿雅宿",
+    "subtitle": "风与海浪停歇之处。为您量身定制的宁静海岸之旅。"
   },
   "section": {
-    "recommendedStay": "禅意安居",
-    "popularExperience": "自然闲游",
-    "localProduct": "乡土风味",
-    "recommendedCourse": "治愈之旅"
+    "recommendedStay": "宁静空间",
+    "popularExperience": "灵感时刻",
+    "localProduct": "匠心之作",
+    "recommendedCourse": "编辑精选"
   },
   "badge": {
-    "stay": "居",
-    "experience": "闲",
-    "program": "味",
-    "course": "道"
+    "stay": "隐居",
+    "experience": "时刻",
+    "program": "匠心",
+    "course": "旅程"
   },
   "button": {
-    "viewAll": "一览",
-    "openMap": "观图",
-    "apply": "合作洽谈"
+    "viewAll": "探索更多 >",
+    "openMap": "探索周边",
+    "apply": "申请成为房东"
   }
 }

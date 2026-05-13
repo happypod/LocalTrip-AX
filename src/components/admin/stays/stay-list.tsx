@@ -45,6 +45,7 @@ export function StayList({ stays }: StayListProps) {
               <th className="px-6 py-4 font-semibold">지역</th>
               <th className="px-6 py-4 font-semibold">사업자/운영자</th>
               <th className="px-6 py-4 font-semibold">숙소명 (Slug)</th>
+              <th className="px-6 py-4 font-semibold hidden md:table-cell">지도</th>
               <th className="px-6 py-4 font-semibold">연락처</th>
               <th className="px-6 py-4 font-semibold">상태</th>
               <th className="px-6 py-4 font-semibold text-right">관리</th>
@@ -62,6 +63,18 @@ export function StayList({ stays }: StayListProps) {
                     <span className="font-medium text-gray-900">{stay.title}</span>
                     <span className="text-xs text-gray-400">{stay.slug}</span>
                   </div>
+                </td>
+                <td className="px-6 py-4 hidden md:table-cell">
+                  {stay.latitude && stay.longitude ? (
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded-md">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                      좌표 있음
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-400 bg-gray-50 border border-gray-100 px-2 py-1 rounded-md">
+                      좌표 미입력
+                    </span>
+                  )}
                 </td>
                 <td className="px-6 py-4 text-gray-500">
                   {stay.phone ? maskPhone(stay.phone) : "-"}

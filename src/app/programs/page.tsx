@@ -1,6 +1,6 @@
 import { PublishStatus } from "@prisma/client";
 import { getPrisma } from "@/lib/prisma";
-import { ProgramCard } from "@/components/programs/program-card";
+import { ProgramGridClient, type ProgramGridItem } from "@/components/programs/program-grid-client";
 import { FALLBACK_PROGRAMS, LocalIncomeProgramUI } from "@/lib/program-data";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -76,7 +76,7 @@ export default async function ProgramsPage({
   const activeCategory = queryCategory || "전체";
 
   const allPrograms = await getPrograms();
-  const programs = allPrograms.filter(isFoodProgram);
+  const programs: ProgramGridItem[] = allPrograms.filter(isFoodProgram);
   
   // Simple categories from data for the filter UI
   const categories = ["전체", ...new Set(programs.map(p => p.category).filter(Boolean) as string[])];
@@ -130,22 +130,7 @@ export default async function ProgramsPage({
         </div>
 
         {filteredPrograms.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPrograms.map((prog) => (
-              <ProgramCard
-                key={prog.id}
-                title={prog.title}
-                summary={prog.summary}
-                linkedLifeService={prog.linkedLifeService}
-                residentRole={prog.residentRole}
-                priceText={prog.priceText}
-                durationText={prog.durationText}
-                category={prog.category}
-                imageUrl={prog.images?.[0]}
-                slug={prog.slug}
-              />
-            ))}
-          </div>
+          <ProgramGridClient programs={filteredPrograms} />
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed rounded-xl">
             <p className="text-muted-foreground">

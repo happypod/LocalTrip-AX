@@ -6,6 +6,12 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useWishlist } from "@/context/wishlist-context";
+import { PersonaThemeSwitcher } from "@/components/theme/persona-theme-switcher";
+import { PersonaOnboardingDialog } from "@/components/theme/persona-onboarding-dialog";
+import { usePersonaCopy } from "@/hooks/use-persona-copy";
+import { useIsClient } from "@/hooks/use-is-client";
+import { usePersonaThemeStore } from "@/store/persona-theme-store";
+import { PersonaLanguageCode } from "@/lib/persona-theme";
 import { cn } from "@/lib/utils";
 import {
   faClock,
@@ -34,28 +40,9 @@ interface CurrencyItem {
 
 const languages: LanguageItem[] = [
   { code: "ko", label: "한국어", flag: "KR" },
-  { code: "zh", label: "繁體中文", flag: "繁" },
-  { code: "ja", label: "日本語", flag: "JP" },
-  { code: "th", label: "ภาษาไทย", flag: "TH" },
-  { code: "uk", label: "Українська", flag: "UA" },
-  { code: "ar", label: "العربية", flag: "AR" },
-  { code: "id", label: "Bahasa Indonesia", flag: "ID" },
-  { code: "ms", label: "Bahasa Melayu", flag: "MY" },
-  { code: "da", label: "Dansk", flag: "DK" },
-  { code: "de", label: "Deutsch", flag: "DE" },
   { code: "en", label: "English", flag: "EN" },
-  { code: "es", label: "Español", flag: "ES" },
-  { code: "fr", label: "Français", flag: "FR" },
-  { code: "it", label: "Italiano", flag: "IT" },
-  { code: "nl", label: "Nederlands", flag: "NL" },
-  { code: "pl", label: "Polski", flag: "PL" },
-  { code: "pt", label: "Português (Brasil)", flag: "BR" },
-  { code: "fi", label: "Suomi", flag: "FI" },
-  { code: "sv", label: "Svenska", flag: "SE" },
-  { code: "vi", label: "Tiếng Việt", flag: "VN" },
-  { code: "tr", label: "Türkçe", flag: "TR" },
-  { code: "el", label: "Ελληνικά", flag: "GR" },
-  { code: "ru", label: "Русский", flag: "RU" },
+  { code: "zh", label: "简体中文", flag: "CN" },
+  { code: "ja", label: "日本語", flag: "JP" },
 ];
 
 const currencies: CurrencyItem[] = [
@@ -115,12 +102,14 @@ function DesktopTopNav({
   pathname,
   selectedLang,
   selectedCurrency,
+  brandTitle,
   onOpenSwitcher,
   onOpenWishlist,
 }: {
   pathname: string;
   selectedLang: LanguageItem;
   selectedCurrency: CurrencyItem;
+  brandTitle: string;
   onOpenSwitcher: () => void;
   onOpenWishlist: () => void;
 }) {
@@ -130,7 +119,7 @@ function DesktopTopNav({
     <header className="hidden md:block sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-6 px-6">
         <Link href="/" className="text-xl font-black tracking-tight text-[#111827]">
-          소원머묾
+          {brandTitle}
         </Link>
 
         <nav aria-label="상단 유틸 메뉴" className="flex items-center gap-5 text-[15px] font-black text-[#2f3744]">
@@ -187,16 +176,18 @@ function DesktopTopNav({
 function MobileTopNav({
   selectedLang,
   selectedCurrency,
+  brandTitle,
   onOpenSwitcher,
 }: {
   selectedLang: LanguageItem;
   selectedCurrency: CurrencyItem;
+  brandTitle: string;
   onOpenSwitcher: () => void;
 }) {
   return (
     <header className="sticky top-0 z-50 flex h-12 items-center justify-between border-b border-gray-100 bg-white px-4 md:hidden">
       <Link href="/" className="text-xl font-black tracking-tight text-[#111827]">
-        소원머묾
+        {brandTitle}
       </Link>
       <LocaleCurrencyButton selectedLang={selectedLang} selectedCurrency={selectedCurrency} onClick={onOpenSwitcher} />
     </header>
@@ -212,10 +203,10 @@ function LocaleCurrencyModal({
   onCurrencySelect,
   onClose,
 }: {
-  modalTab: "lang" | "currency";
+  modalTab: "lang" | "currency" | "theme";
   selectedLang: LanguageItem;
   selectedCurrency: CurrencyItem;
-  onTabChange: (tab: "lang" | "currency") => void;
+  onTabChange: (tab: "lang" | "currency" | "theme") => void;
   onLangSelect: (lang: LanguageItem) => void;
   onCurrencySelect: (currency: CurrencyItem) => void;
   onClose: () => void;
@@ -243,6 +234,15 @@ function LocaleCurrencyModal({
             >
               통화
             </button>
+            <button
+              type="button"
+              onClick={() => onTabChange("theme")}
+              className={`relative pb-2 ${
+                modalTab === "theme" ? "border-b-2 border-gray-900 text-gray-900" : "text-gray-400 hover:text-gray-600"
+              }`}
+            >
+              테마
+            </button>
           </div>
 
           <button
@@ -256,7 +256,14 @@ function LocaleCurrencyModal({
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
-          {modalTab === "lang" ? (
+          {modalTab === "theme" ? (
+            <div>
+              <h4 className="mb-4 text-xs font-black uppercase tracking-wider text-gray-400">페르소나 테마 설정</h4>
+              <div className="py-2">
+                <PersonaThemeSwitcher />
+              </div>
+            </div>
+          ) : modalTab === "lang" ? (
             <div>
               <h4 className="mb-4 text-xs font-black uppercase tracking-wider text-gray-400">모든 언어</h4>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -344,11 +351,19 @@ function LocaleCurrencyModal({
 
 function MobileBottomNav({
   pathname,
+  labels,
   isCategoryOpen,
   setIsCategoryOpen,
   onOpenWishlist,
 }: {
   pathname: string;
+  labels: {
+    category: string;
+    nearby: string;
+    home: string;
+    wishlist: string;
+    my: string;
+  };
   isCategoryOpen: boolean;
   setIsCategoryOpen: (open: boolean) => void;
   onOpenWishlist: () => void;
@@ -358,33 +373,33 @@ function MobileBottomNav({
   const bottomItems = [
     {
       kind: "category" as const,
-      label: "카테고리",
+      label: labels.category,
       icon: faList,
     },
     {
       kind: "link" as const,
       href: "/map",
-      label: "내주변",
+      label: labels.nearby,
       icon: faLocationArrow,
       match: (path: string) => path.startsWith("/map") && !isCategoryOpen,
     },
     {
       kind: "link" as const,
       href: "/",
-      label: "홈",
+      label: labels.home,
       icon: faHouseChimney,
       match: (path: string) => path === "/" && !isCategoryOpen,
     },
     {
       kind: "button" as const,
-      label: "찜",
+      label: labels.wishlist,
       icon: faHeart,
       action: onOpenWishlist,
     },
     {
       kind: "link" as const,
       href: "/admin",
-      label: "마이",
+      label: labels.my,
       icon: faUser,
       match: (path: string) => path.startsWith("/admin") && !isCategoryOpen,
     },
@@ -415,7 +430,7 @@ function MobileBottomNav({
         }
 
         if (item.kind === "button") {
-          const isWishlist = item.label === "찜";
+          const isWishlist = item.label === labels.wishlist;
           return (
             <button
               key={item.label}
@@ -466,6 +481,8 @@ function CategoryOverlay({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const copy = usePersonaCopy();
+
   if (!isOpen) return null;
 
   return (
@@ -488,7 +505,7 @@ function CategoryOverlay({
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <span className="text-sm">🏨</span>
-            <span className="text-sm font-black text-gray-800">소원머묾 (숙박)</span>
+            <span className="text-sm font-black text-gray-800 font-persona-display">{copy.nav.stay} (숙박)</span>
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
@@ -511,7 +528,7 @@ function CategoryOverlay({
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <span className="text-sm">🏄</span>
-            <span className="text-sm font-black text-gray-800">인기노님 (체험)</span>
+            <span className="text-sm font-black text-gray-800 font-persona-display">{copy.nav.experience} (체험)</span>
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
@@ -534,7 +551,7 @@ function CategoryOverlay({
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <span className="text-sm">🍤</span>
-            <span className="text-sm font-black text-gray-800">소원별미 (미식/프로그램)</span>
+            <span className="text-sm font-black text-gray-800 font-persona-display">{copy.nav.localProduct} (미식/프로그램)</span>
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
@@ -557,7 +574,7 @@ function CategoryOverlay({
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <span className="text-sm">🗺️</span>
-            <span className="text-sm font-black text-gray-800">추천여정 (코스)</span>
+            <span className="text-sm font-black text-gray-800 font-persona-display">{copy.nav.course} (코스)</span>
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
@@ -705,12 +722,19 @@ function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
 export function PublicNavigationShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const copy = usePersonaCopy();
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
-  const [modalTab, setModalTab] = useState<"lang" | "currency">("lang");
-  const [selectedLang, setSelectedLang] = useState<LanguageItem>(languages[0]);
+  const [modalTab, setModalTab] = useState<"lang" | "currency" | "theme">("lang");
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyItem>(currencies[0]);
+
+  const currentLang = usePersonaThemeStore((state) => state.currentLang);
+  const setLang = usePersonaThemeStore((state) => state.setLang);
+  const isClient = useIsClient();
+  const effectiveLang = isClient ? currentLang : "ko";
+  const mappedCode = effectiveLang === "zh-cn" ? "zh" : effectiveLang === "ja-jp" ? "ja" : effectiveLang;
+  const selectedLang = languages.find((l) => l.code === mappedCode) || languages[0];
 
   if (isPublicChromeHidden(pathname)) {
     return <>{children}</>;
@@ -721,17 +745,29 @@ export function PublicNavigationShell({ children }: { children: ReactNode }) {
     setIsSwitcherOpen(true);
   };
 
+  const handleLangSelect = (lang: LanguageItem) => {
+    const mappedStoreCode = lang.code === "zh" ? "zh-cn" : lang.code === "ja" ? "ja-jp" : (lang.code as PersonaLanguageCode);
+    setLang(mappedStoreCode);
+    setIsSwitcherOpen(false);
+  };
+
   return (
     <>
       <DesktopTopNav
         pathname={pathname}
         selectedLang={selectedLang}
         selectedCurrency={selectedCurrency}
+        brandTitle={copy.hero.title}
         onOpenSwitcher={openSwitcher}
         onOpenWishlist={() => setIsWishlistOpen(true)}
       />
       {!isCategoryOpen && (
-        <MobileTopNav selectedLang={selectedLang} selectedCurrency={selectedCurrency} onOpenSwitcher={openSwitcher} />
+        <MobileTopNav
+          selectedLang={selectedLang}
+          selectedCurrency={selectedCurrency}
+          brandTitle={copy.hero.title}
+          onOpenSwitcher={openSwitcher}
+        />
       )}
 
       {isCategoryOpen ? (
@@ -745,6 +781,13 @@ export function PublicNavigationShell({ children }: { children: ReactNode }) {
 
       <MobileBottomNav
         pathname={pathname}
+        labels={{
+          category: `${copy.nav.stay}/${copy.nav.experience}/${copy.nav.localProduct}/${copy.nav.course}`,
+          nearby: copy.button.openMap,
+          home: copy.hero.title,
+          wishlist: "찜",
+          my: "마이",
+        }}
         isCategoryOpen={isCategoryOpen}
         setIsCategoryOpen={setIsCategoryOpen}
         onOpenWishlist={() => setIsWishlistOpen(true)}
@@ -755,16 +798,15 @@ export function PublicNavigationShell({ children }: { children: ReactNode }) {
         onClose={() => setIsWishlistOpen(false)} 
       />
 
+      <PersonaOnboardingDialog />
+
       {isSwitcherOpen && (
         <LocaleCurrencyModal
           modalTab={modalTab}
           selectedLang={selectedLang}
           selectedCurrency={selectedCurrency}
           onTabChange={setModalTab}
-          onLangSelect={(lang) => {
-            setSelectedLang(lang);
-            setIsSwitcherOpen(false);
-          }}
+          onLangSelect={handleLangSelect}
           onCurrencySelect={(currency) => {
             setSelectedCurrency(currency);
             setIsSwitcherOpen(false);

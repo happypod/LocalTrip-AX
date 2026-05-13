@@ -160,13 +160,13 @@ LeadEvent 저장 실패는 사용자 콘텐츠 열람을 막지 않는다.
 
 ## 10. Post-MVP 티켓
 
-상세 티켓은 [13_POST_MVP_TICKETS.md](./13_POST_MVP_TICKETS.md)의 T-053~T-060을 기준으로 한다.
+상세 티켓은 [13_POST_MVP_TICKETS.md](./13_POST_MVP_TICKETS.md)의 T-061~T-068을 기준으로 한다.
 
-- T-053 Accommodation Premium PR JSON 필드 설계
-- T-054 숙소 상세 Premium PR 노출 UI
-- T-055 관리자 Accommodation Premium PR 입력 UI
-- T-056 Premium PR LeadEvent 수집
-- T-057 B2B 콘텐츠 제작대행 신청 폼
-- T-058 B2B 제작대행 관리자 관리 화면
-- T-059 현장센터 제작 Workflow 문서화
-- T-060 Premium PR QA / 보안 기준
+- T-061 Accommodation Premium PR JSON 필드 설계
+- T-062 숙소 상세 Premium PR 노출 UI
+- T-063 관리자 Accommodation Premium PR 입력 UI
+- T-064 Premium PR LeadEvent 수집
+- T-065 B2B 콘텐츠 제작대행 신청 폼
+- T-066 B2B 제작대행 관리자 관리 화면
+- T-067 현장센터 제작 Workflow 문서화
+- T-068 Premium PR QA / 보안 기준

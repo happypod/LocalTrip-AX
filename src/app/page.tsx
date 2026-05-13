@@ -1,22 +1,11 @@
-import Link from "next/link";
 import { getPrisma } from "@/lib/prisma";
-import { EventSlider } from "@/components/home/event-slider";
-import { HeroSearch } from "@/components/home/hero-search";
-import { InteractiveSlider } from "@/components/home/interactive-slider";
+import { HomeClient } from "@/components/home/home-client";
 import {
   FALLBACK_STAYS,
   FALLBACK_EXPERIENCES,
   FALLBACK_PROGRAMS,
   FALLBACK_COURSES,
 } from "@/lib/home-data";
-import {
-  faChevronRight,
-  faCircleCheck,
-  faCompass,
-  faMapLocationDot,
-  faUsers,
-} from "@/lib/fontawesome";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 export const dynamic = "force-dynamic";
 
@@ -204,101 +193,16 @@ async function getHomeData() {
   }
 }
 
-function SectionHeader({ title, href }: { title: string; href: string }) {
-  return (
-    <div className="mb-4 flex items-center justify-between">
-      <h2 className="text-2xl font-black tracking-tight text-[#161d1f]">{title}</h2>
-      <Link href={href} className="flex items-center gap-0.5 text-sm font-bold text-[#2b3234] hover:text-[#ae2f34]">
-        전체보기 <FontAwesomeIcon icon={faChevronRight} className="h-3.5 w-3.5" />
-      </Link>
-    </div>
-  );
-}
-
 export default async function Home() {
   const { stays, experiences, programs, courses, events } = await getHomeData();
 
   return (
-    <main className="min-h-screen bg-[#f4fafd] text-[#161d1f]">
-      <section
-        className="relative min-h-[580px] overflow-hidden bg-cover bg-center md:min-h-[640px]"
-        style={{ backgroundImage: "url('/images/hero-main.jpg')" }}
-      >
-        <div className="absolute inset-0 bg-black/30" />
-        <div className="relative mx-auto flex min-h-[580px] max-w-7xl flex-col px-5 py-5 md:min-h-[640px]">
-          <div className="flex flex-1 flex-col items-center justify-center pb-20 text-center text-white">
-            <h1 className="text-5xl font-black tracking-tight drop-shadow-lg md:text-7xl">
-              소원머묾
-            </h1>
-            <p className="mt-4 text-base md:text-xl font-extrabold drop-shadow leading-relaxed text-white/95">
-              당신의 바람(所願)이 머무는 고요한 시간,<br className="md:hidden" /> 태안 바다에서의 특별한 하루.
-            </p>
-
-            <HeroSearch />
-          </div>
-        </div>
-      </section>
-
-      <div className="mx-auto max-w-7xl px-5 pb-16 pt-6">
-        <EventSlider events={events} />
-        <section className="py-5">
-          <SectionHeader title="추천 머묾" href="/stays" />
-          <InteractiveSlider items={stays} hrefPrefix="/stays" badge="쉼" badgeVariant="stay" />
-        </section>
-
-        <section className="py-8">
-          <SectionHeader title="인기 노님" href="/experiences" />
-          <InteractiveSlider items={experiences} hrefPrefix="/experiences" badge="놀이" badgeVariant="experience" />
-        </section>
-
-        <section className="py-8">
-          <SectionHeader title="소원 별미" href="/programs" />
-          <InteractiveSlider items={programs} hrefPrefix="/programs" badge="맛" badgeVariant="program" />
-        </section>
-
-        <section className="py-8">
-          <SectionHeader title="여정의 기록" href="/courses" />
-          <InteractiveSlider items={courses} hrefPrefix="/courses" badge="기록" badgeVariant="course" showPrice={false} />
-        </section>
-
-        <section className="grid gap-5 py-8 md:grid-cols-2">
-          <Link href="/partner/apply" className="group flex items-center justify-between rounded-2xl bg-white/80 p-7 shadow-[0_16px_50px_-32px_rgba(0,0,0,0.4)] ring-1 ring-[#dde4e6] backdrop-blur-xl transition hover:-translate-y-1">
-            <div>
-              <h3 className="text-xl font-black">파트너 입점 신청</h3>
-              <p className="mt-2 text-sm font-medium text-[#584140]">파트너 입점 설명하고 신청합니다.</p>
-              <span className="mt-5 inline-flex rounded-full bg-[#161d1f] px-5 py-2 text-sm font-black text-white group-hover:bg-[#ae2f34]">
-                파트너 신청
-              </span>
-            </div>
-            <FontAwesomeIcon icon={faCircleCheck} className="h-20 w-20 text-[#161d1f]" />
-          </Link>
-
-          <Link href="/map" className="group flex items-center justify-between rounded-2xl bg-white/80 p-7 shadow-[0_16px_50px_-32px_rgba(0,0,0,0.4)] ring-1 ring-[#dde4e6] backdrop-blur-xl transition hover:-translate-y-1">
-            <div>
-              <h3 className="text-xl font-black">로컬 지도 보기</h3>
-              <p className="mt-2 text-sm font-medium text-[#584140]">지역의 숙소와 체험 위치를 모아봅니다.</p>
-              <span className="mt-5 inline-flex rounded-full bg-[#161d1f] px-5 py-2 text-sm font-black text-white group-hover:bg-[#006a65]">
-                지도 보기
-              </span>
-            </div>
-            <FontAwesomeIcon icon={faMapLocationDot} className="h-20 w-20 text-[#161d1f]" />
-          </Link>
-        </section>
-
-        <footer className="mt-7 flex flex-col gap-4 border-t border-[#dde4e6] py-7 text-sm text-[#584140] md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap items-center gap-5">
-            <span className="text-base font-black text-[#161d1f]">소원머묾</span>
-            <span>관광문의</span>
-            <span>010-0233-4548</span>
-            <span>www.sowontrip.com</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <FontAwesomeIcon icon={faUsers} className="h-5 w-5" />
-            <FontAwesomeIcon icon={faCompass} className="h-5 w-5" />
-            <FontAwesomeIcon icon={faMapLocationDot} className="h-5 w-5" />
-          </div>
-        </footer>
-      </div>
-    </main>
+    <HomeClient
+      stays={stays}
+      experiences={experiences}
+      programs={programs}
+      courses={courses}
+      events={events}
+    />
   );
 }

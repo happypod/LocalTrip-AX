@@ -21,6 +21,11 @@ interface StayData {
   capacityText?: string;
   images?: string[];
   status?: string;
+  latitude?: string | number | null;
+  longitude?: string | number | null;
+  mapAddress?: string | null;
+  mapPlaceId?: string | null;
+  mapProvider?: string | null;
 }
 
 const STAY_SLUG_PATTERN = /^[a-z0-9-]+$/;
@@ -69,7 +74,11 @@ function getImages(images: string[] | undefined) {
   return (images ?? []).map((image) => image.trim()).filter(Boolean);
 }
 
+import { parseMapFields } from "@/lib/admin-map-input";
+
 function getStayInput(data: StayData) {
+  const mapData = parseMapFields(data);
+
   return {
     regionId: getRequiredString(data.regionId, "지역"),
     businessProfileId: getOptionalString(data.businessProfileId),
@@ -86,6 +95,7 @@ function getStayInput(data: StayData) {
     capacityText: getOptionalString(data.capacityText),
     images: getImages(data.images),
     status: getPublishStatus(data.status),
+    ...mapData,
   };
 }
 

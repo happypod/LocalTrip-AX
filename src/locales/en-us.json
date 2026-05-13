@@ -1,29 +1,29 @@
 {
   "nav": {
-    "stay": "Stay",
-    "experience": "Activity",
-    "localProduct": "Dine",
-    "course": "Course"
+    "stay": "Stays",
+    "experience": "Activities",
+    "localProduct": "Local Market",
+    "course": "Itineraries"
   },
   "hero": {
-    "title": "Where Ocean Meets Forest, Sowon-myeon",
-    "subtitle": "Discover local journeys tailored just for you"
+    "title": "Sowon Local Trip",
+    "subtitle": "Discover the true charm of the Taean coast. Start your special journey connecting with locals and the sea."
   },
   "section": {
-    "recommendedStay": "Local Stays",
-    "popularExperience": "Popular Activities",
-    "localProduct": "Local Eats",
-    "recommendedCourse": "Curated Courses"
+    "recommendedStay": "Where to Stay",
+    "popularExperience": "Things to Do",
+    "localProduct": "Taste of the Village",
+    "recommendedCourse": "Curated Itineraries"
   },
   "badge": {
-    "stay": "Stay",
-    "experience": "Act",
-    "program": "Eat",
-    "course": "Trip"
+    "stay": "STAY",
+    "experience": "ACTIVITY",
+    "program": "LOCAL",
+    "course": "TOUR"
   },
   "button": {
-    "viewAll": "View All",
-    "openMap": "Explore Map",
-    "apply": "Partner Up"
+    "viewAll": "View All >",
+    "openMap": "Open Map",
+    "apply": "Become a Partner"
   }
 }

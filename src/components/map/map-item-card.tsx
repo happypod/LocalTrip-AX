@@ -5,7 +5,7 @@ import Link from "next/link";
 import { MapItem } from "@/lib/map-data";
 import { Bed, Leaf, HeartHandshake, Compass, MapPin, ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { trackLeadEvent, LeadItemType } from "@/lib/lead-event";
+import { trackMapLeadEvent } from "@/lib/track-map-lead-event";
 
 interface MapItemCardProps {
   item: MapItem;
@@ -15,22 +15,13 @@ export function MapItemCard({ item }: MapItemCardProps) {
   const [imgError, setImgError] = useState(false);
 
   const handleTrack = () => {
-    // map the mapItem type to LeadItemType
-    const itemTypeMap: Record<string, LeadItemType> = {
-      stay: "accommodation",
-      experience: "experience",
-      program: "local_income_program",
-      course: "course",
-    };
-    
-    const mappedType = itemTypeMap[item.itemType] || "general";
-
-    trackLeadEvent({
-      itemType: mappedType,
-      itemId: item.id,
-      itemSlug: item.href.split("/").pop() || "",
-      actionType: "map_click",
-      targetUrl: item.href,
+    trackMapLeadEvent({
+      action: "detail_click",
+      targetId: item.id,
+      targetType: item.itemType,
+      targetSlug: item.slug,
+      targetTitle: item.title,
+      regionId: item.regionId,
     });
   };
 
@@ -40,6 +31,7 @@ export function MapItemCard({ item }: MapItemCardProps) {
       case "experience": return "bg-category-experience text-white";
       case "program": return "bg-category-program text-white";
       case "course": return "bg-category-course text-white";
+      case "business": return "bg-zinc-700 text-white";
       default: return "bg-muted text-muted-foreground";
     }
   };
@@ -50,6 +42,7 @@ export function MapItemCard({ item }: MapItemCardProps) {
       case "experience": return "체험";
       case "program": return "주민소득상품";
       case "course": return "추천 코스";
+      case "business": return "운영자";
       default: return "기타";
     }
   };
@@ -60,6 +53,7 @@ export function MapItemCard({ item }: MapItemCardProps) {
       case "experience": return <Leaf className="w-3.5 h-3.5" />;
       case "program": return <HeartHandshake className="w-3.5 h-3.5" />;
       case "course": return <Compass className="w-3.5 h-3.5" />;
+      case "business": return <MapPin className="w-3.5 h-3.5" />;
       default: return null;
     }
   };

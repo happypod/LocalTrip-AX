@@ -1,6 +1,7 @@
 "use server";
 
 import { requireAdminSession } from "@/lib/admin-auth";
+import { parseMapFields } from "@/lib/admin-map-input";
 import { getPrisma } from "@/lib/prisma";
 import { PublishStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -73,6 +74,13 @@ export async function createBusiness(formData: FormData) {
   const address = getOptionalString(formData, "address");
   const description = getOptionalString(formData, "description");
   const status = getPublishStatus(formData);
+  const mapData = parseMapFields({
+    latitude: getOptionalString(formData, "latitude"),
+    longitude: getOptionalString(formData, "longitude"),
+    mapAddress: getOptionalString(formData, "mapAddress"),
+    mapPlaceId: getOptionalString(formData, "mapPlaceId"),
+    mapProvider: getOptionalString(formData, "mapProvider"),
+  });
 
   if (!regionId || !name) {
     throw new Error("지역과 사업자/업체명은 필수입니다.");
@@ -93,10 +101,12 @@ export async function createBusiness(formData: FormData) {
       address,
       description,
       status,
+      ...mapData,
     },
   });
 
   revalidatePath("/admin/businesses");
+  revalidatePath("/map");
 }
 
 export async function updateBusiness(id: string, formData: FormData) {
@@ -114,6 +124,13 @@ export async function updateBusiness(id: string, formData: FormData) {
   const address = getOptionalString(formData, "address");
   const description = getOptionalString(formData, "description");
   const status = getPublishStatus(formData);
+  const mapData = parseMapFields({
+    latitude: getOptionalString(formData, "latitude"),
+    longitude: getOptionalString(formData, "longitude"),
+    mapAddress: getOptionalString(formData, "mapAddress"),
+    mapPlaceId: getOptionalString(formData, "mapPlaceId"),
+    mapProvider: getOptionalString(formData, "mapProvider"),
+  });
 
   if (!regionId || !name) {
     throw new Error("지역과 사업자/업체명은 필수입니다.");
@@ -135,11 +152,13 @@ export async function updateBusiness(id: string, formData: FormData) {
       address,
       description,
       status,
+      ...mapData,
     },
   });
 
   revalidatePath("/admin/businesses");
   revalidatePath(`/admin/businesses/${id}/edit`);
+  revalidatePath("/map");
 }
 
 export async function updateBusinessStatus(id: string, status: PublishStatus) {
@@ -157,4 +176,5 @@ export async function updateBusinessStatus(id: string, status: PublishStatus) {
   });
 
   revalidatePath("/admin/businesses");
+  revalidatePath("/map");
 }

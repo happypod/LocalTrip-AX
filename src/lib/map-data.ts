@@ -4,7 +4,7 @@ import { FALLBACK_EXPERIENCES } from "./experience-data";
 import { FALLBACK_PROGRAMS } from "./program-data";
 import { FALLBACK_COURSES } from "./course-data";
 
-export type MapItemType = "stay" | "experience" | "program" | "course";
+export type MapItemType = "stay" | "experience" | "program" | "course" | "business";
 
 export interface MapItem {
   id: string;
@@ -15,8 +15,9 @@ export interface MapItem {
   href: string;
   regionId: string;
   regionName: string; // e.g. "만리포", "천리포", etc.
-  lat?: number | null;
-  lng?: number | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  mapAddress?: string | null;
   tags?: string[];
   image?: string | null;
   status: string;

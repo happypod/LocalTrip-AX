@@ -12,6 +12,15 @@ import jaJpZen from "../locales/ja-jp-zen.json";
 export type PersonaThemeId = "masil" | "haengrang" | "meomulm" | "local";
 export type PersonaLanguageCode = "ko" | "en" | "zh-cn" | "ja-jp";
 
+export const PERSONA_THEMES: { id: PersonaThemeId; label: string }[] = [
+  { id: "masil", label: "소원마실" },
+  { id: "haengrang", label: "소원행랑" },
+  { id: "meomulm", label: "소원머묾" },
+  { id: "local", label: "소원마실 와슈" },
+];
+
+export const defaultPersonaTheme: PersonaThemeId = "masil";
+
 export interface PersonaDictionary {
   nav: {
     stay: string;
@@ -56,7 +65,7 @@ export const PERSONA_DICTIONARIES: Record<string, PersonaDictionary> = {
   "ja-jp-zen": jaJpZen as PersonaDictionary,
 };
 
-export const DEFAULT_DICTIONARY_KEY = "ko-meomulm";
+export const DEFAULT_DICTIONARY_KEY = "ko-masil";
 
 /**
  * Maps requested Language + Theme combinations to final dictionary identifiers based on availability.
@@ -89,11 +98,11 @@ function resolveDictionaryKey(lang: PersonaLanguageCode, theme: PersonaThemeId):
  * Implements layered fallback hierarchy:
  * 1. Exact mapped combo
  * 2. Standard language baseline (e.g. en-us)
- * 3. Global fallback (ko-meomulm)
+ * 3. Global fallback (ko-masil)
  */
 export function getPersonaDictionary(
   lang: PersonaLanguageCode = "ko",
-  theme: PersonaThemeId = "meomulm"
+  theme: PersonaThemeId = "masil"
 ): PersonaDictionary {
   const resolvedKey = resolveDictionaryKey(lang, theme);
   const targetDict = PERSONA_DICTIONARIES[resolvedKey];
@@ -103,7 +112,7 @@ export function getPersonaDictionary(
   }
 
   // Fallback to standard language package if available
-  const fallbackLangKey = lang === "ko" ? "ko-meomulm" : lang === "en" ? "en-us" : lang === "zh-cn" ? "zh-cn" : "ja-jp";
+  const fallbackLangKey = lang === "ko" ? "ko-masil" : lang === "en" ? "en-us" : lang === "zh-cn" ? "zh-cn" : "ja-jp";
   const langDict = PERSONA_DICTIONARIES[fallbackLangKey];
   if (langDict) {
     return langDict;

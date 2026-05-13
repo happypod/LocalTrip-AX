@@ -1,6 +1,6 @@
 import { PublishStatus } from "@prisma/client";
 import { getPrisma } from "@/lib/prisma";
-import { ExperienceCard } from "@/components/experiences/experience-card";
+import { ExperienceGridClient, type ExperienceGridItem } from "@/components/experiences/experience-grid-client";
 import { FALLBACK_EXPERIENCES, ExperienceUI } from "@/lib/experience-data";
 import { FALLBACK_PROGRAMS } from "@/lib/program-data";
 import { ChevronRight } from "lucide-react";
@@ -165,7 +165,7 @@ export default async function ExperiencesPage({
 
   const experiencesOnly = await getExperiences();
   const programExperiences = await getProgramsAsExperiences();
-  let allExperiences = [...experiencesOnly, ...programExperiences];
+  const allExperiences: ExperienceGridItem[] = [...experiencesOnly, ...programExperiences];
   
   // Simple categories from data for the filter UI
   const categories = ["전체", ...new Set(allExperiences.map(e => e.category).filter(Boolean) as string[])];
@@ -212,23 +212,7 @@ export default async function ExperiencesPage({
         </div>
 
         {filteredExperiences.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredExperiences.map((exp) => (
-              <ExperienceCard
-                key={exp.id}
-                title={exp.title}
-                summary={exp.summary}
-                location={exp.location}
-                durationText={exp.durationText}
-                priceText={exp.priceText}
-                capacityText={exp.capacityText}
-                category={exp.category}
-                imageUrl={exp.images?.[0]}
-                slug={exp.slug}
-                href={"href" in exp ? exp.href : undefined}
-              />
-            ))}
-          </div>
+          <ExperienceGridClient experiences={filteredExperiences} />
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed rounded-xl">
             <p className="text-muted-foreground">

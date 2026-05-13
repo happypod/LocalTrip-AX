@@ -3,6 +3,9 @@
 import { useMemo, useState } from "react";
 import { CourseCard } from "@/components/courses/course-card";
 import { cn } from "@/lib/utils";
+import { usePersonaThemeStore } from "@/store/persona-theme-store";
+import { sortByPersona } from "@/lib/persona-curation";
+import { useIsClient } from "@/hooks/use-is-client";
 
 export type CourseFilterItem = {
   id: string;
@@ -84,6 +87,9 @@ export function CourseFilterGrid({ courses }: { courses: CourseFilterItem[] }) {
   const [selectedTarget, setSelectedTarget] = useState("전체");
   const [selectedDuration, setSelectedDuration] = useState("전체");
 
+  const currentTheme = usePersonaThemeStore((state) => state.currentTheme);
+  const isClient = useIsClient();
+
   const targetFilters = useMemo(
     () => TARGET_FILTERS.filter((filter) => courses.some((course) => matchesTargetFilter(course, filter))),
     [courses],
@@ -94,7 +100,8 @@ export function CourseFilterGrid({ courses }: { courses: CourseFilterItem[] }) {
     [courses],
   );
 
-  const filteredCourses = useMemo(
+  // 1. Perform active category filter
+  const activeFiltered = useMemo(
     () =>
       courses.filter(
         (course) =>
@@ -103,6 +110,11 @@ export function CourseFilterGrid({ courses }: { courses: CourseFilterItem[] }) {
       ),
     [courses, selectedDuration, selectedTarget],
   );
+
+  const filteredCourses = useMemo(() => {
+    if (!isClient) return activeFiltered;
+    return sortByPersona(activeFiltered, currentTheme, (i) => `${i.title} ${i.summary} ${i.targetType || ""}`);
+  }, [activeFiltered, currentTheme, isClient]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -153,7 +165,13 @@ export function CourseFilterGrid({ courses }: { courses: CourseFilterItem[] }) {
       </div>
 
       {filteredCourses.length > 0 ? (
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="flex flex-col gap-4">
+          {isClient && (
+            <div className="inline-flex items-center gap-1.5 self-start rounded-full bg-persona-primary/5 px-3 py-1 text-[11px] font-extrabold text-persona-primary/80 border border-persona-primary/5">
+              <span>✨ 여행 취향에 어울리는 여정의 기록을 먼저 추천해드려요.</span>
+            </div>
+          )}
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {filteredCourses.map((course) => (
             <CourseCard
               key={course.id}
@@ -169,6 +187,7 @@ export function CourseFilterGrid({ courses }: { courses: CourseFilterItem[] }) {
             />
           ))}
         </div>
+      </div>
       ) : (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-20 text-center">
           <p className="text-muted-foreground">선택한 조건에 맞는 여정의 기록이 없습니다.</p>

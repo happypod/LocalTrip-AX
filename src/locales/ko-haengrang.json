@@ -1,29 +1,29 @@
 {
   "nav": {
-    "stay": "행랑",
-    "experience": "소요",
-    "localProduct": "풍미",
-    "course": "유람"
+    "stay": "머무는 방",
+    "experience": "마을의 정취",
+    "localProduct": "객주 밥상",
+    "course": "행랑객 여정"
   },
   "hero": {
-    "title": "산천과 해풍을 노니는 고요한 시간",
-    "subtitle": "태안 소원면의 깊은 풍경에 스며듭니다"
+    "title": "소원행랑",
+    "subtitle": "바람과 파도가 쉬어가는 곳. 당신을 위한 정갈한 방과 귀한 밥상을 내어드립니다."
   },
   "section": {
-    "recommendedStay": "기품 있는 행랑",
-    "popularExperience": "풍류를 담은 소요",
-    "localProduct": "자연의 풍미",
-    "recommendedCourse": "운치 있는 유람기"
+    "recommendedStay": "정갈한 쉼터",
+    "popularExperience": "마을이 내어준 정취",
+    "localProduct": "정성 담긴 마을 밥상",
+    "recommendedCourse": "추천하는 행랑 여정"
   },
   "badge": {
-    "stay": "거처",
-    "experience": "소요",
-    "program": "풍미",
-    "course": "유람"
+    "stay": "머묾",
+    "experience": "경험",
+    "program": "정성",
+    "course": "여정"
   },
   "button": {
-    "viewAll": "모두 보기",
-    "openMap": "지도 유람",
-    "apply": "제휴 문의"
+    "viewAll": "모두 보기 >",
+    "openMap": "마을 지도 보기",
+    "apply": "행랑 파트너 신청"
   }
 }

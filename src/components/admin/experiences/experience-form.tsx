@@ -25,7 +25,7 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
 
     const formData = new FormData(e.currentTarget);
     const slug = formData.get("slug") as string;
-    
+
     if (!/^[a-z0-9-]+$/.test(slug)) {
       setError("슬러그는 영문 소문자, 숫자, 하이픈(-)만 사용할 수 있습니다.");
       setIsPending(false);
@@ -49,6 +49,11 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
       durationText: formData.get("durationText") as string,
       status: formData.get("status") as string,
       images: imagesInput.split(/[\n,]+/).map(url => url.trim()).filter(Boolean),
+      latitude: formData.get("latitude") as string,
+      longitude: formData.get("longitude") as string,
+      mapAddress: formData.get("mapAddress") as string,
+      mapPlaceId: formData.get("mapPlaceId") as string,
+      mapProvider: formData.get("mapProvider") as string,
     };
 
     try {
@@ -68,10 +73,10 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
     }
   }
 
-  const experienceBusinesses = businesses.filter(b => 
-    b.businessType?.includes("experience") || 
-    b.businessType?.includes("체험") || 
-    b.businessType?.includes("가이드") || 
+  const experienceBusinesses = businesses.filter(b =>
+    b.businessType?.includes("experience") ||
+    b.businessType?.includes("체험") ||
+    b.businessType?.includes("가이드") ||
     b.businessType?.includes("공방")
   );
   const otherBusinesses = businesses.filter(b => !experienceBusinesses.includes(b));
@@ -101,13 +106,13 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
         {/* 기본 정보 */}
         <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-4">
           <h2 className="text-lg font-bold border-b pb-2">기본 정보</h2>
-          
+
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">지역 (Region) <span className="text-red-500">*</span></label>
-            <select 
-              name="regionId" 
+            <select
+              name="regionId"
               defaultValue={initialData?.regionId || ""}
-              required 
+              required
               className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             >
               <option value="" disabled>지역을 선택하세요</option>
@@ -119,8 +124,8 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
 
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">체험 운영자 (Business Profile)</label>
-            <select 
-              name="businessProfileId" 
+            <select
+              name="businessProfileId"
               defaultValue={initialData?.businessProfileId || ""}
               className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             >
@@ -135,10 +140,10 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
 
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">체험명 <span className="text-red-500">*</span></label>
-            <input 
-              name="title" 
+            <input
+              name="title"
               defaultValue={initialData?.title}
-              required 
+              required
               placeholder="예: 만리포 노을길 산책"
               className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
@@ -146,10 +151,10 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
 
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">슬러그 (Slug) <span className="text-red-500">*</span></label>
-            <input 
-              name="slug" 
+            <input
+              name="slug"
               defaultValue={initialData?.slug}
-              required 
+              required
               placeholder="mallipo-sunset-walk"
               pattern="[a-z0-9-]+"
               className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -159,10 +164,10 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
 
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">요약 (Summary) <span className="text-red-500">*</span></label>
-            <input 
-              name="summary" 
+            <input
+              name="summary"
               defaultValue={initialData?.summary}
-              required 
+              required
               placeholder="해 질 녘 만리포 해변을 따라 걷는 낭만적인 산책"
               className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
@@ -170,8 +175,8 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
 
           <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">상세 설명 / 안전 안내</label>
-            <textarea 
-              name="description" 
+            <textarea
+              name="description"
               defaultValue={initialData?.description || ""}
               rows={6}
               placeholder="체험에 대한 상세한 설명, 안전 안내, 준비물 등을 적어주세요.&#10;예: 기상 상황에 따라 운영이 변경될 수 있습니다. 어린이는 보호자 동반이 필요합니다."
@@ -187,8 +192,8 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
             <h2 className="text-lg font-bold border-b pb-2">노출 설정</h2>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">상태 (Status) <span className="text-red-500">*</span></label>
-              <select 
-                name="status" 
+              <select
+                name="status"
                 defaultValue={initialData?.status || "draft"}
                 className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-medium"
               >
@@ -205,8 +210,8 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
             <h2 className="text-lg font-bold border-b pb-2">운영 정보</h2>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">소요 시간 (Duration Text)</label>
-              <input 
-                name="durationText" 
+              <input
+                name="durationText"
                 defaultValue={initialData?.durationText || ""}
                 placeholder="예: 1시간 30분"
                 className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -214,8 +219,8 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">가격 안내 (Price Text)</label>
-              <input 
-                name="priceText" 
+              <input
+                name="priceText"
                 defaultValue={initialData?.priceText || ""}
                 placeholder="예: 성인 15,000원 / 아동 10,000원"
                 className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -223,8 +228,8 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">인원 안내 (Capacity Text)</label>
-              <input 
-                name="capacityText" 
+              <input
+                name="capacityText"
                 defaultValue={initialData?.capacityText || ""}
                 placeholder="예: 최소 2인 / 최대 10인"
                 className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -237,8 +242,8 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
             <h2 className="text-lg font-bold border-b pb-2">위치/외부 문의 링크 (CTA)</h2>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">만남 장소/위치 (Location)</label>
-              <input 
-                name="location" 
+              <input
+                name="location"
                 defaultValue={initialData?.location || ""}
                 placeholder="예: 만리포 해수욕장 관광안내소 앞"
                 className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -246,8 +251,8 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">전화번호</label>
-              <input 
-                name="phone" 
+              <input
+                name="phone"
                 defaultValue={initialData?.phone || ""}
                 placeholder="010-0000-0000"
                 className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -255,8 +260,8 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">카카오톡 문의 URL</label>
-              <input 
-                name="kakaoUrl" 
+              <input
+                name="kakaoUrl"
                 defaultValue={initialData?.kakaoUrl || ""}
                 placeholder="https://open.kakao.com/o/..."
                 className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -264,8 +269,8 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">네이버 예약 URL</label>
-              <input 
-                name="naverBookingUrl" 
+              <input
+                name="naverBookingUrl"
                 defaultValue={initialData?.naverBookingUrl || ""}
                 placeholder="https://booking.naver.com/..."
                 className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -273,8 +278,8 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
             </div>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">홈페이지 URL</label>
-              <input 
-                name="websiteUrl" 
+              <input
+                name="websiteUrl"
                 defaultValue={initialData?.websiteUrl || ""}
                 placeholder="https://..."
                 className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -287,7 +292,7 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
             <h2 className="text-lg font-bold border-b pb-2">이미지 URL 목록</h2>
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-gray-700">이미지 URL</label>
-              <textarea 
+              <textarea
                 value={imagesInput}
                 onChange={(e) => setImagesInput(e.target.value)}
                 rows={4}
@@ -295,6 +300,74 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
                 className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
               />
               <span className="text-xs text-gray-500">쉼표(,) 또는 줄바꿈으로 구분하여 여러 개를 입력할 수 있습니다. 첫 번째 이미지가 대표 이미지로 사용됩니다. 이미지가 없으면 fallback UI가 노출됩니다.</span>
+            </div>
+          </section>
+
+          {/* 지도 표시 정보 */}
+          <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-4">
+            <h2 className="text-lg font-bold border-b pb-2">지도 표시 정보</h2>
+            <div className="p-4 text-sm text-blue-600 bg-blue-50 rounded-xl">
+              <strong>안내:</strong> 좌표가 입력된 콘텐츠만 공개 지도에서 marker로 표시됩니다. 좌표가 비어 있어도 목록과 상세 화면은 정상 노출됩니다.
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-gray-700">지도용 주소</label>
+              <input
+                name="mapAddress"
+                defaultValue={initialData?.mapAddress || ""}
+                placeholder="지도 API 검색용 주소"
+                className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-700">위도 (Latitude)</label>
+                <input
+                  type="number"
+                  step="any"
+                  name="latitude"
+                  defaultValue={initialData?.latitude || ""}
+                  placeholder="예: 36.7876"
+                  className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-700">경도 (Longitude)</label>
+                <input
+                  type="number"
+                  step="any"
+                  name="longitude"
+                  defaultValue={initialData?.longitude || ""}
+                  placeholder="예: 126.1360"
+                  className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-gray-700">외부 장소 ID (Place ID)</label>
+              <input
+                name="mapPlaceId"
+                defaultValue={initialData?.mapPlaceId || ""}
+                placeholder="외부 장소 고유 식별자"
+                className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-gray-700">지도 제공자</label>
+              <select
+                name="mapProvider"
+                defaultValue={initialData?.mapProvider || ""}
+                className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              >
+                <option value="">(선택 안함)</option>
+                <option value="manual">직접 입력 (manual)</option>
+                <option value="naver">네이버 지도 (naver)</option>
+                <option value="kakao">카카오맵 (kakao)</option>
+                <option value="google">구글 지도 (google)</option>
+              </select>
             </div>
           </section>
 

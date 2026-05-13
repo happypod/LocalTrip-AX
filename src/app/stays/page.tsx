@@ -1,5 +1,5 @@
 import { getPrisma } from "@/lib/prisma";
-import { StayCard } from "@/components/stays/stay-card";
+import { StayGridClient } from "@/components/stays/stay-grid-client";
 import { FALLBACK_STAYS } from "@/lib/stay-data";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -73,20 +73,7 @@ export default async function StaysPage() {
 
       <main className="px-6 py-12 max-w-screen-xl mx-auto w-full">
         {stays.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {stays.map((stay) => (
-              <StayCard
-                key={stay.id}
-                title={stay.title}
-                summary={stay.summary}
-                address={stay.address}
-                priceText={stay.priceText}
-                capacityText={stay.capacityText}
-                imageUrl={stay.images?.[0]}
-                slug={stay.slug}
-              />
-            ))}
-          </div>
+          <StayGridClient stays={stays} />
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-muted-foreground">현재 등록된 머묾 공간이 없습니다.</p>

@@ -289,7 +289,7 @@
 - **실행 결과 (2026-05-13 완료)**:
   - **Dictionary Packs**: `ko-masil`, `ko-haengrang`, `ko-meomulm`, `ko-local`, `en-us`, `en-us-zen`, `zh-cn`, `zh-cn-zen`, `ja-jp`, `ja-jp-zen` 총 10종의 JSON 정의 완료.
   - **Strict Interface**: `src/lib/persona-theme.ts`에 `PersonaDictionary` 인터페이스를 정의하고 모든 JSON 객체를 Typesafe Record로 집약하여 Key 누락 시 TS 에러가 발생하도록 구조 강제함.
-  - **Fallback Logic**: 요청된 `Language + Theme` 조합 우선, 차선책으로 해당 언어 기본팩, 최후 보루로 `ko-meomulm`을 적용하는 `getPersonaDictionary` 헬퍼 구현 완료.
+  - **Fallback Logic**: 요청된 `Language + Theme` 조합 우선, 차선책으로 해당 언어 기본팩, 최후 보루로 `ko-masil`을 적용하는 `getPersonaDictionary` 헬퍼 구현 완료.
   - **Build Success**: `npm run build`를 통해 JSON 구문 유효성과 타입 정합성이 무결함을 최종 입증함.
 
 ### T-042 Persona Theme CSS Token 적용
@@ -312,28 +312,36 @@
   - Tailwind v4 `@theme inline`에 필요한 token 매핑
 - 완료 기준:
   - body class 변경만으로 기본 색상/톤이 바뀐다.
+- **실행 결과 (2026-05-13 완료)**:
+  - **Tailwind Configuration**: `src/app/globals.css` 내의 `@theme inline`에 `bg-persona-primary`, `rounded-persona`, `font-persona-display` 등 7개의 유틸리티 매핑 등록 완료.
+  - **Base & Theme Overrides**: `:root` 및 `.theme-xxx`를 선언하여 `masil`, `haengrang`, `meomulm`, `local`별 시각적 색상코드(OKLCH) 및 반경, 서체 정의 완료.
+  - **Strict Dark Mode**: 각각의 테마 클래스에 대응하는 `:is(.dark .theme-xxx, .dark.theme-xxx)` 구문을 모두 완비하여 다크 모드 대응 시에도 정상 대비율 보장.
+  - **Documentation**: `docs/08_DESIGN_TOKENS.md`를 갱신하여 페르소나 토큰 상세 설명서 및 shadcn/카테고리 토큰 보존 규칙 명시 완료.
+  - **Verification**: `npm run lint/build` 전격 통과하여 안전한 공존성을 입증함.
 
 ### T-043 PersonaThemeProvider 구현
 
-- 목적: 전역 상태로 현재 theme/language/currency를 관리한다.
+- 목적: 전역 상태로 현재 theme/language와 첫 방문 온보딩 상태를 관리한다.
 - 구현 기준:
-  - Zustand는 설치하지 않는다.
-  - React Context + localStorage 기반으로 구현한다.
-  - 기본 theme: `meomulm`
+  - Zustand persist 기반으로 구현한다.
+  - 기본 theme: `masil`
   - 기본 language: `ko`
-  - 기본 currency: `KRW`
 - localStorage key:
-  - `sowon-persona-theme`
-  - `sowon-persona-language`
-  - `sowon-persona-currency`
-  - `sowon-persona-onboarded`
+  - `sowon-persona-storage` (Zustand persist key)
 - 작업 범위:
+- **실행 결과 (2026-05-13 완료)**:
+  - **Zustand Store**: `src/store/persona-theme-store.ts` 구현 (persist 적용, key: `sowon-persona-storage`, 지원 테마: `masil`, `haengrang`, `meomulm`, `local`)
+  - **Theme Provider**: `src/components/theme/persona-theme-provider.tsx` 구현 (`document.body`의 `theme-*` class와 `data-persona-theme`를 외부 DOM 동기화로 제어)
+  - **Theme Switcher**: `src/components/theme/persona-theme-switcher.tsx` 구현 (상단 네비게이션 `LocaleCurrencyModal` 내 '테마' 탭에 통합)
+  - **인계사항 (T-044)**:
+    - T-044에서 locale JSON 기반 문구 치환 (`usePersonaDictionary` 적용)
+    - T-044에서 hero/nav/section/badge/button 텍스트 매핑
+    - 온보딩 팝업(최초 접속 시 페르소나 선택 팝업)은 별도 티켓에서 진행
   - `src/components/theme/persona-theme-provider.tsx`
-  - `src/components/theme/use-persona-theme.ts`
   - body class에 `theme-${themeId}` 적용
   - hydration mismatch 방지
 - 완료 기준:
-  - 새로고침 후에도 선택한 theme/language/currency가 유지된다.
+  - 새로고침 후에도 선택한 theme/language가 유지된다.
   - `/admin` 계열과 충돌하지 않는다.
 
 ### T-044 Global Nav Dictionary 적용
@@ -362,6 +370,10 @@
   - `ja-jp + haengrang/meomulm` -> `ja-jp-zen`
 - 완료 기준:
   - 언어/테마 변경 시 네비 문구가 즉시 변경된다.
+- **실행 결과 (2026-05-13 완료)**:
+  - **Context Hook**: `src/hooks/use-persona-copy.ts` 커스텀 훅을 생성하여 마운트 전 `ko-masil` fallback 렌더링을 보장해 SSR 하이드레이션 미스매치 방어형 딕셔너리 리졸버 완비.
+  - **Global Navigation Layer**: `src/components/layout/public-navigation-shell.tsx` 내의 모바일 카테고리 오버레이 및 상단 네비의 하드코딩된 "숙소, 체험, 주민소득상품, 추천 코스" 명칭을 `copy.nav` 기반 동적 매핑으로 전환 완료.
+  - **Persistent Store Link**: 상단 우측의 언어 선택 버튼과 `usePersonaThemeStore`를 상호 연계하여, 사용자가 KR/EN/CN/JP 언어를 변경할 때 페르소나 상태 엔진에 반영되고 `localStorage`에 즉시 영구 영속되도록 결합 완료.
 
 ### T-045 Home Hero / Section Dictionary 적용
 
@@ -382,8 +394,12 @@
   - button viewAll/openMap/apply 적용
 - 완료 기준:
   - 홈 첫 화면이 theme/language 조합에 따라 카피와 어조가 달라진다.
+- **실행 결과 (2026-05-13 완료)**:
+  - **Component Decoupling**: 기존 `src/app/page.tsx` (서버 컴포넌트)의 무거운 UI 렌더링 트리를 클라이언트 기반의 `src/components/home/home-client.tsx`로 완벽 분리 이관하여 데이터는 서버 사이드에서 캐시 fetch 하고 문구 처리는 클라이언트의 페르소나 전역 상태에 실시간 반응하도록 리팩토링 완료.
+  - **Text Nodes Localized**: 홈 히어로 섹션 타이틀/서브타이틀, 4종 메인 섹션 헤더명, 슬라이더 내부 전수 배지(`copy.badge`), 그리고 "다 보기/지도 검색/함께 하기" CTA 버튼 명칭을 딕셔너리로 100% 교체 완료.
+  - **Robust Design Fallback**: 테마나 언어 변경 시 즉각 문체(Tone of Voice)가 연동되어 번역 반영됨을 검증 완료.
 
-### T-046 Theme Selector UI
+### T-043-B Theme Selector UI (T-043 포함)
 
 - 목적: 사용자가 직접 페르소나 테마를 바꿀 수 있는 UI를 제공한다.
 - 작업 범위:
@@ -396,8 +412,10 @@
     - 충청도 바이브
 - 완료 기준:
   - 사용자가 수동으로 테마를 선택 가능하다.
+- **실행 결과 (2026-05-13 완료)**:
+  - **Modal Tab Integration**: `PublicNavigationShell` 내 GNB `LocaleCurrencyModal` 컴포넌트에 '테마' 탭을 새롭게 배치하고 `PersonaThemeSwitcher`를 탑재하여, 사용자가 자유롭게 4대 페르소나 테마를 즉시 스위칭할 수 있는 전용 UI 제공 완료.
 
-### T-047 First Visit Theme Onboarding
+### T-045 First Visit Theme Onboarding
 
 - 목적: 첫 방문자에게 여행 목적 기반 테마 추천 팝업을 제공한다.
 - 질문:
@@ -408,13 +426,129 @@
   - `바다를 보며 영감을 얻는 나만의 시간이 필요해요.` -> `meomulm`
   - `현지 말맛으로 둘러볼래유.` -> `local`
 - 저장:
-  - `sowon-persona-onboarded=true`
+  - `sowon-persona-storage` 안의 Zustand `hasCompletedOnboarding` 값으로 구현
 - 완료 기준:
   - 첫 방문 시 팝업 노출
   - 선택 후 테마 적용
   - 재방문 시 미노출
+- **실행 결과 (2026-05-13 완료)**:
+  - **Zustand Store Extension**: 전역 스토어(`persona-theme-store.ts`)에 `hasCompletedOnboarding` 불리언 플래그 및 `complete/reset` 액션을 추가하여 상태 영속화 시스템 확보 완료.
+  - **Premium Design Dialog**: `@base-ui/react/dialog`를 래핑한 고품질 일러스트 레이아웃 스타일의 `PersonaOnboardingDialog` 컴포넌트를 신규 제작, 직관적인 4개 버튼 배치 및 마우스 호버/탭 시각 효과 보강 완료.
+  - **Route Exclusion Protection**: `/admin` 및 `/admin/login` 등의 경로에서는 온보딩 모달이 절대로 활성화되지 않도록 라우트 예외 차단 로직을 적용함.
+  - **Re-entry System**: 테마 설정 모달 최하단에 **"취향 테스트 다시 받기"** 버튼 배너를 추가하여 언제든 설문지를 리셋하고 온보딩을 다시 받을 수 있도록 재진입로 확보 완료.
 
-### T-048 Persona Theme / i18n QA
+### T-046 페르소나별 콘텐츠 큐레이션/정렬 규칙 적용
+
+- 목적: 선택한 페르소나 테마에 따른 규칙 기반 콘텐츠 자동 정렬 및 섹션 배치 최적화.
+- 규칙:
+  - `masil`: 가족/체험/체류형 중심 (체험 > 상품 > 숙소 > 코스)
+  - `haengrang`: 정갈한 숙소/전통/힐링 중심 (숙소 > 상품 > 코스 > 체험)
+  - `meomulm`: 감성/워케이션/바다 중심 (숙소 > 코스 > 체험 > 상품)
+  - `local`: 지역성/어촌마을/주민 상품 중심 (상품 > 체험 > 코스 > 숙소)
+- 완료 기준:
+  - 테마 변경 시 홈 화면의 4대 슬라이더 내부 순서 및 섹션 상하 노출 순위 즉시 반응형 스위칭.
+  - 4대 목록(숙소, 체험, 상품, 코스) 그리드 큐레이션 정렬 적용 완료.
+- **실행 결과 (2026-05-13 완료)**:
+  - **Stable Sorting Utility**: `src/lib/persona-curation.ts`를 생성하여 가중치 키워드 검사 기반의 순수 함수 정렬 로직 완비. 원본 데이터 개수 보존 및 동점자 삽입 정렬 안정성 100% 보장.
+  - **Reordered Home**: `HomeClient` 내부에 Reactive 정렬기를 내장하여 페르소나 스위칭 시 카드와 섹션 순서가 자연스럽게 변경되도록 구현.
+  - **Grid List Extraction**: `StayGridClient`, `ExperienceGridClient`, `ProgramGridClient` 및 기존 `CourseFilterGrid` 내부에 클라이언트 큐레이션 엔진을 삽입하여 4종 전체 목록의 순위 개인화 완료.
+  - **Minimal UI Hint**: 사용자가 체감할 수 있도록 리스트 상단에 은은하고 고급스러운 큐레이션 적용 뱃지 힌트(`✨ 여행 취향에 어울리는...`) 추가.
+
+### T-047 콘텐츠 다국어 관리 방식 검토 및 운영 기준 문서화
+
+- 목적: 운영 콘텐츠의 다국어 적용 여부 및 DB 확장 방식을 기획한다.
+- 작업 범위:
+  - 방식 A(한국어 유지), B(JSON 필드), C(Translation 테이블 분리) 비교
+  - LocalTrip AX MVP 권장안 및 Fallback 정책 정의
+  - 신규 문서 `docs/15_CONTENT_I18N_STRATEGY.md` 추가
+- **실행 결과 (2026-05-13 완료)**:
+  - MVP 단계에서는 방식 A(한국어 원문 유지)를 채택하고, 확장 단계에서 방식 C(`ContentTranslation` 테이블 분리)를 적용하는 로드맵 문서화 완료.
+  - Fallback 정책 및 관리자 UX 기준 수립.
+
+### T-048 ContentTranslation Prisma 모델 설계
+
+- 목적: 확장 단계(Post-MVP)를 대비한 `ContentTranslation` 테이블 스키마를 정의한다.
+- 작업 범위:
+  - `schema.prisma` 내 `ContentTranslation` 모델 추가 (실제 `db push` 여부는 보류)
+  - `targetType`, `targetId`, `locale`, `title`, `summary`, `description` 등 스키마 구체화
+- **실행 결과 (2026-05-13 완료)**:
+  - `prisma/schema.prisma` 내 `ContentTranslation` 모델 및 `Region` 연관 관계 추가.
+  - `[targetType, targetId, locale]` 복합 Unique 제약 조건 및 인덱스 구성 완료.
+  - `npx prisma validate`, `generate` 및 빌드 검증 성공 확인.
+  - 운영 환경에 `db push`나 `migration`을 직접 수행하지 않고 문서 및 스키마 선행 반영만 진행함.
+### T-049 지도 API 연동 기획
+
+- 목적: `/map` placeholder를 실제 지도 API로 전환하기 위한 기술/비용/데이터 기준을 정한다.
+- 완료 기준:
+  - 지도 API 후보, 비용, 키 관리, 좌표 데이터 정책 문서화
+- **실행 결과 (2026-05-13 완료)**:
+  - Naver Maps, Kakao Maps, Google Maps, OpenStreetMap 등 지도 API 비교 완료.
+  - 내국인 수요층 타겟팅을 위한 **Naver Maps** 1차 도입 권장 및 외인 타겟 다국어 지원 확장을 대비한 **Google Maps** 전략 수립.
+  - 좌표 데이터 모델 정책(`latitude`, `longitude`, `mapAddress` 등 1차 수동 입력 후 2차 지오코딩 API) 및 Vercel 환경변수 운용 정책 명세 완료. (Event 제외)
+  - 위 내용을 포함하여 `docs/16_MAP_API_STRATEGY.md` 문서 신규 작성 및 배포.
+
+### T-050 지도 좌표 필드 Prisma 설계
+
+- 목적: 지도 렌더링에 필수적인 위도(latitude), 경도(longitude) 스키마를 모델에 추가한다.
+- 작업 범위:
+  - `Accommodation`, `Experience`, `LocalIncomeProgram`, `BusinessProfile` 모델에 `latitude Float?`, `longitude Float?`, `mapAddress String?`, `mapPlaceId String?`, `mapProvider String?` 필드 추가.
+  - (주의: 실제 db push 여부는 승인 후 진행)
+- **실행 결과 (2026-05-13 완료)**:
+  - 지정된 모델들에 지도 관련 선택 필드들 추가 완료. Event는 T-069 이후 region 기반 정비 전까지 제외.
+  - Course 모델은 직접 좌표를 가지지 않고 향후 하위 아이템 기반으로 추론하도록 예외 처리 원칙 문서화 완료.
+  - 관련 DB 스키마 수정 반영 (db push 보류).
+### T-051 관리자 좌표 입력 UI
+
+- 목적: 백오피스에서 운영자가 직접 각 콘텐츠의 좌표를 입력할 수 있는 폼을 구성한다.
+- 작업 범위:
+  - 콘텐츠 생성/수정 폼에 위도, 경도, 지도 표출용 정규화 주소 입력 필드 추가.
+  - (옵션) "주소로 좌표 찾기" 지오코딩 버튼 초안 구현 (동작 여부는 API 연결 단계에서 결정).
+
+### T-052 공개 지도 API 연동
+
+- 목적: 클라이언트 사이드에서 실제 Interactive 지도를 렌더링하도록 `/map` 라우트를 전환한다.
+- 작업 범위:
+  - `next/script`를 통한 지도 SDK 로드.
+  - `MapShell` 내 `ssr: false`의 클라이언트 지도 컴포넌트 마운트 및 `MapMarkerItem` 타입 적용.
+- **실행 결과 (2026-05-13 완료)**:
+  - `next/script`를 사용하여 Naver Maps API 비동기 로딩 및 렌더링 구현 (`PublicMapClient`).
+  - 환경변수(`NEXT_PUBLIC_NAVER_MAP_CLIENT_ID`) 부재 또는 로드 실패 시, 기존 목록형 UI를 그대로 렌더링하는 우아한 Fallback 구현.
+  - 좌표 데이터 유무에 따라 '지도 표시 콘텐츠'와 '위치 준비 중 콘텐츠'로 분리 렌더링 적용.
+  - 카테고리 필터링 및 마커 상호작용(카드 스크롤 이동) 기능 추가.
+
+### T-053 지도 마커 LeadEvent 연결
+
+- 목적: 사용자가 맵 상호작용 시 트래킹할 수 있는 행동 데이터를 수집한다.
+- 작업 범위:
+  - 마커 클릭이나 길찾기 시 기존 `website_click` 이벤트 타입을 재사용하되 `metadata: { source: "map_marker" }` 페이로드를 담아 서버 액션으로 전송.
+- **실행 결과 (2026-05-13 완료)**:
+  - `src/app/api/lead-events/map/route.ts` API 및 `src/lib/track-map-lead-event.ts` 클라이언트 유틸리티 생성.
+  - 신규 enum 추가 없이 `website_click` 이벤트 타입과 `metadata.source = "map_marker"` 조합을 활용해 지도 상호작용 로깅(`marker_click`, `detail_click`).
+  - 이벤트 전송 실패가 사용자 경험(UX)을 차단하지 않도록 `navigator.sendBeacon` 및 `keepalive` 최선(best-effort) 처리 적용.
+  - Event 모델은 지도 마커 및 상호작용 대상에서 이번 단계에서는 제외.
+
+### T-054 관리자 콘텐츠 다국어 입력 UI
+
+- 목적: 관리자가 숙소, 체험, 코스 등의 콘텐츠에 대해 다국어 번역을 직접 입력할 수 있는 화면을 구성한다.
+- 작업 범위:
+  - 관리자 폼 상단에 언어별(KR, EN, CN, JP) 탭 추가
+  - 외국어 탭 활성화 시 번역본 필드 편집 허용
+
+### T-055 공개 상세 화면 콘텐츠 번역 Fallback 적용
+
+- 목적: 사용자가 선택한 언어에 맞춰 번역된 운영 콘텐츠를 렌더링하고, 미존재 시 Fallback 로직을 수행한다.
+- 작업 범위:
+  - SSR 페이지 단에서 DB 조회 시 `include: { translations: true }` 적용
+  - 선택 언어 -> 영어 -> 한국어 원문 순서로 노출 로직 추가
+
+### T-056 AI 번역 초안 생성 Placeholder
+
+- 목적: 관리자가 다국어 탭에서 손쉽게 기본 번역을 생성할 수 있도록 AI 프롬프트 연동 기반을 마련한다.
+- 작업 범위:
+  - "한국어 기반 AI 초안 생성" 버튼 UI 배치
+  - API Mock 구현
+
+### T-057 Persona Theme / i18n QA
 
 - 목적: 4개 theme와 4개 language 조합에서 UI 깨짐과 텍스트 overflow를 점검한다.
 - 작업 범위:
@@ -429,25 +563,19 @@
 
 ## 10순위: 운영 기능 고도화
 
-### T-049 지도 API 연동 기획
-
-- 목적: `/map` placeholder를 실제 지도 API로 전환하기 위한 기술/비용/데이터 기준을 정한다.
-- 완료 기준:
-  - 지도 API 후보, 비용, 키 관리, 좌표 데이터 정책 문서화
-
-### T-050 이미지 최적화
+### T-058 이미지 최적화
 
 - 목적: 남아 있는 `<img>` LCP warning을 `next/image` 또는 로컬 최적화 전략으로 해소한다.
 - 완료 기준:
   - `npm run lint`에서 이미지 LCP warning 0건
 
-### T-051 운영 로그/모니터링
+### T-059 운영 로그/모니터링
 
 - 목적: 운영 중 API 오류, 문의 저장 실패, LeadEvent 실패를 추적한다.
 - 완료 기준:
   - 모니터링 도구와 alert 기준 문서화
 
-### T-052 AI 실제 연동 기획
+### T-060 AI 실제 연동 기획
 
 - 목적: AX 도우미 placeholder를 실제 AI API 기능으로 전환하기 위한 비용/승인/로그 기준을 정의한다.
 - 완료 기준:
@@ -461,7 +589,7 @@
 
 - [14_B2B_PREMIUM_PR.md](./14_B2B_PREMIUM_PR.md)
 
-### T-053 Accommodation Premium PR JSON 필드 설계
+### T-061 Accommodation Premium PR JSON 필드 설계
 
 - 목적: 기존 숙소 데이터 구조를 크게 흔들지 않고 프리미엄 PR 옵션을 저장할 수 있는 확장 필드를 추가한다.
 - 작업 범위:
@@ -484,7 +612,7 @@
   - Prisma schema와 데이터 모델 문서에 `premiumPr` 구조가 정의되어 있다.
   - 기존 숙소 생성/수정/공개 조회가 깨지지 않는다.
 
-### T-054 숙소 상세 Premium PR 노출 UI
+### T-062 숙소 상세 Premium PR 노출 UI
 
 - 목적: 프리미엄 옵션을 구매한 숙소만 상세 페이지 안에서 VR/영상 콘텐츠를 노출한다.
 - 작업 범위:
@@ -504,7 +632,7 @@
   - 프리미엄 숙소와 일반 숙소의 상세 화면 분기가 안정적으로 동작한다.
   - 모바일에서 모달 닫기와 터치 영역이 정상 동작한다.
 
-### T-055 관리자 Accommodation Premium PR 입력 UI
+### T-063 관리자 Accommodation Premium PR 입력 UI
 
 - 목적: 운영자가 숙소별 프리미엄 PR 옵션을 직접 등록/수정할 수 있게 한다.
 - 작업 범위:
@@ -523,7 +651,7 @@
   - 관리자에서 프리미엄 PR 정보를 저장/수정할 수 있다.
   - 잘못된 URL은 서버에서 거부된다.
 
-### T-056 Premium PR LeadEvent 수집
+### T-064 Premium PR LeadEvent 수집
 
 - 목적: 프리미엄 PR 콘텐츠의 성과를 측정할 수 있도록 클릭 이벤트를 수집한다.
 - 작업 범위:
@@ -540,7 +668,7 @@
   - 프리미엄 콘텐츠 클릭이 관리자 성과 분석에 사용할 수 있는 형태로 저장된다.
   - LeadEvent 저장 실패가 사용자 경험을 막지 않는다.
 
-### T-057 B2B 콘텐츠 제작대행 신청 폼
+### T-065 B2B 콘텐츠 제작대행 신청 폼
 
 - 목적: 숙박업주가 플랫폼 안에서 프리미엄 PR 제작대행을 문의할 수 있게 한다.
 - 작업 범위:
@@ -563,7 +691,7 @@
   - 업주가 제작대행 상담 요청을 제출할 수 있다.
   - 저장 실패 시 성공으로 응답하지 않는다.
 
-### T-058 B2B 제작대행 관리자 관리 화면
+### T-066 B2B 제작대행 관리자 관리 화면
 
 - 목적: 운영자/현장센터가 제작대행 문의를 접수하고 상태를 관리한다.
 - 작업 범위:
@@ -582,7 +710,7 @@
 - 완료 기준:
   - 제작대행 문의 목록, 상세, 상태 변경이 가능하다.
 
-### T-059 현장센터 제작 Workflow 문서화
+### T-067 현장센터 제작 Workflow 문서화
 
 - 목적: 플랫폼 운영 조직과 지역 활동가가 프리미엄 콘텐츠를 제작/납품하는 운영 절차를 정한다.
 - 작업 범위:
@@ -599,7 +727,7 @@
 - 완료 기준:
   - 운영자가 실제 현장 업무에 쓸 수 있는 체크리스트가 문서화되어 있다.
 
-### T-060 Premium PR QA / 보안 기준
+### T-068 Premium PR QA / 보안 기준
 
 - 목적: 프리미엄 PR 기능이 플랫폼 품질과 개인정보/보안 기준을 해치지 않도록 QA한다.
 - QA 항목:
@@ -618,7 +746,7 @@
 
 이 영역은 이벤트를 실제 운영 콘텐츠로 사용할 때 필요한 데이터 모델, 공개 조회, 관리자 운영 기준을 정리한다. 현재 `/events`는 fallback 중심 화면이고, 홈 이벤트 조회는 `status=published`만 사용한다. 다지역 확장 원칙을 유지하려면 Event도 region 기반 운영 콘텐츠로 정리해야 한다.
 
-### T-061 Event regionId 및 공개 조회 구조 정비
+### T-069 Event regionId 및 공개 조회 구조 정비
 
 - 목적: 이벤트를 실제 운영 콘텐츠로 사용하기 위해 `Event` 모델과 공개 조회 흐름을 region 기반으로 정리한다.
 - 작업 범위:
@@ -635,7 +763,7 @@
   - `/`, `/events`에서 소원권역 published 이벤트만 노출된다.
   - 이벤트가 없어도 fallback 또는 빈 상태 UI가 깨지지 않는다.
 
-### T-062 Event 관리자 CRUD region 검증
+### T-070 Event 관리자 CRUD region 검증
 
 - 목적: 관리자 이벤트 생성/수정/상태 변경에서 region 검증과 공개 노출 정책을 보장한다.
 - 작업 범위:
@@ -647,7 +775,7 @@
 - 완료 기준:
   - 관리자 이벤트 CRUD가 regionId와 status 정책을 지킨다.
 
-### T-063 Event 공개 노출 QA
+### T-071 Event 공개 노출 QA
 
 - 목적: 이벤트 운영 콘텐츠가 공개 화면에서 정책에 맞게 노출되는지 검증한다.
 - QA 항목:

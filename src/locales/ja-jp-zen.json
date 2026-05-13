@@ -1,29 +1,29 @@
 {
   "nav": {
-    "stay": "逗留",
-    "experience": "散策",
-    "localProduct": "美味",
-    "course": "旅路"
+    "stay": "滞在",
+    "experience": "特別な体験",
+    "localProduct": "匠の味と技",
+    "course": "癒しの旅"
   },
   "hero": {
-    "title": "潮風と静寂が織りなすひととき",
-    "subtitle": "所遠面の豊かな自然に包まれる旅"
+    "title": "ソウォン・リトリート",
+    "subtitle": "風と波がひと休みする場所。あなただけの静かな海辺のひとときをご用意しています。"
   },
   "section": {
-    "recommendedStay": "上質な逗留",
-    "popularExperience": "心遊ぶ散策",
-    "localProduct": "里の美味",
-    "recommendedCourse": "趣ある旅路"
+    "recommendedStay": "静寂の空間",
+    "popularExperience": "インスピレーションの瞬間",
+    "localProduct": "心を込めた品々",
+    "recommendedCourse": "エディターの厳選"
   },
   "badge": {
-    "stay": "宿",
-    "experience": "遊",
-    "program": "味",
-    "course": "道"
+    "stay": "滞在",
+    "experience": "瞬間",
+    "program": "匠",
+    "course": "旅程"
   },
   "button": {
-    "viewAll": "一覧",
-    "openMap": "絵図",
-    "apply": "お問い合わせ"
+    "viewAll": "もっと探す >",
+    "openMap": "周辺を探索する",
+    "apply": "ホストになる"
   }
 }

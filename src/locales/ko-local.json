@@ -1,29 +1,29 @@
 {
   "nav": {
-    "stay": "숙소",
-    "experience": "체험",
-    "localProduct": "로컬푸드",
-    "course": "추천코스"
+    "stay": "주무시는 곳",
+    "experience": "노는 곳",
+    "localProduct": "동네 장터",
+    "course": "마실 코스"
   },
   "hero": {
-    "title": "로컬과 상생하는 태안 여행",
-    "subtitle": "지역주민의 정성을 연결합니다"
+    "title": "소원마실 와슈",
+    "subtitle": "태안 바다 보러 안 올텨? 동네 사람들이랑 오순도순 잼나게 놀다 가셔유."
   },
   "section": {
-    "recommendedStay": "로컬 숙박",
-    "popularExperience": "인기 체험",
-    "localProduct": "주민특산품",
-    "recommendedCourse": "기획 투어코스"
+    "recommendedStay": "뜨뜻한 아랫목",
+    "popularExperience": "잼나는 놀거리",
+    "localProduct": "동네방네 맛난 거",
+    "recommendedCourse": "어디로 갈텨?"
   },
   "badge": {
-    "stay": "숙박",
-    "experience": "체험",
-    "program": "상생",
+    "stay": "방",
+    "experience": "놀기",
+    "program": "별미",
     "course": "코스"
   },
   "button": {
-    "viewAll": "전체보기",
-    "openMap": "지도보기",
-    "apply": "입점안내"
+    "viewAll": "다 볼텨? >",
+    "openMap": "동네 지도 펴기",
+    "apply": "같이 할텨?"
   }
 }

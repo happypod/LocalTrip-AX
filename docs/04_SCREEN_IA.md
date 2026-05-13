@@ -17,9 +17,10 @@
 - `/courses`
   - `/courses`: [x] 추천 코스 목록 (T-009 완료)
   - `/courses/[slug]`: [x] 추천 코스 상세 (T-009 완료)
-- `/map`: [x] 권역 기반 탐색 플레이스홀더 (T-010 완료)
-  - 빌드 안전성을 위해 실제 지도 API 대신 `MapPlaceholder` 적용
-  - 숙소, 체험, 주민소득상품, 코스를 권역/아이템타입 기준으로 필터링
+- `/map`: [x] 권역 기반 공개 지도 탐색 (T-052 완료)
+  - `docs/16_MAP_API_STRATEGY.md` 기준에 따라 Naver Maps 실제 SDK 마운트 고도화 완료.
+  - 좌표(`latitude`, `longitude`) 유무에 따라 지도 마커와 '위치 준비 중' 목록 분리 표출.
+  - 숙소, 체험, 주민소득상품, 코스, 이벤트를 카테고리별 필터링.
 - `/partner/apply`
 
 ### T-005 홈 화면 구성
@@ -52,7 +53,7 @@
 - 공개 화면에는 `status=published` 데이터만 노출한다.
 - `draft`, `inactive` 데이터는 공개 화면에 노출하지 않는다.
 - 이미지가 없거나 실패하면 fallback UI를 보여준다.
-- 지도 화면은 MVP에서 API 연동 없이 placeholder로 충분하다.
+- 지도 화면은 Naver Maps 연동 완료. API Key 부재 시 목록형 Fallback 노출.
 
 ## Detail CTA Rules
 

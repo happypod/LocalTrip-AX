@@ -13,6 +13,7 @@ export function MapFilterTabs({ selectedType, onTypeSelect }: MapFilterTabsProps
     { id: "experience", label: "체험", colorClass: "text-category-experience bg-category-experience/10 border-category-experience/20" },
     { id: "program", label: "주민소득상품", colorClass: "text-category-program bg-category-program/10 border-category-program/20" },
     { id: "course", label: "추천 코스", colorClass: "text-category-course bg-category-course/10 border-category-course/20" },
+    { id: "business", label: "운영자", colorClass: "text-zinc-700 bg-zinc-100 border-zinc-200" },
   ];
 
   return (

@@ -2,28 +2,28 @@
   "nav": {
     "stay": "宿泊",
     "experience": "体験",
-    "localProduct": "美食",
-    "course": "コース"
+    "localProduct": "地元の特産品",
+    "course": "おすすめコース"
   },
   "hero": {
-    "title": "海と森が出会う場所、泰安所遠面",
-    "subtitle": "あなただけのローカルトリップを提案します"
+    "title": "ソウォン・ローカルトリップ",
+    "subtitle": "テアン(泰安)の海の本当の魅力を発見してください。地元の人々と海がつながる特別な旅が始まります。"
   },
   "section": {
     "recommendedStay": "おすすめの宿",
     "popularExperience": "人気の体験",
-    "localProduct": "ローカル美食",
-    "recommendedCourse": "おすすめコース"
+    "localProduct": "村の味わい",
+    "recommendedCourse": "厳選コース"
   },
   "badge": {
-    "stay": "泊",
-    "experience": "遊",
-    "program": "食",
-    "course": "旅"
+    "stay": "宿泊",
+    "experience": "体験",
+    "program": "ローカル",
+    "course": "コース"
   },
   "button": {
-    "viewAll": "すべて見る",
-    "openMap": "地図を見る",
-    "apply": "パートナー募集"
+    "viewAll": "すべて見る >",
+    "openMap": "マップを開く",
+    "apply": "パートナーになる"
   }
 }

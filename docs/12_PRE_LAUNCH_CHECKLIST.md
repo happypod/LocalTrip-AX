@@ -237,7 +237,7 @@ Policy:
 
 - Add `NEXT_PUBLIC_SITE_URL` to Vercel Production and redeploy.
 - Run real iOS/Android/PC device checks before public promotion.
-- If events become real operating content, complete T-061 to T-063 so Event follows `regionId + status=published` policy.
+- If events become real operating content, complete T-069 to T-071 so Event follows `regionId + status=published` policy.
 - Decide whether to connect a custom domain before QR/printed/public materials.
 
 ### P3: Post-Launch Improvements

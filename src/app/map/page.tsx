@@ -1,7 +1,7 @@
 import { PublishStatus } from "@prisma/client";
 import { getPrisma } from "@/lib/prisma";
 import { FALLBACK_MAP_ITEMS, MapItem, MapItemType } from "@/lib/map-data";
-import { MapShell } from "@/components/map/map-shell";
+import { PublicMapClient } from "@/components/map/public-map-client";
 import { ChevronRight, Info } from "lucide-react";
 import Link from "next/link";
 
@@ -22,22 +22,26 @@ async function getMapItems(): Promise<MapItem[]> {
     }
 
     // Fetch all items from DB in parallel
-    const [stays, experiences, programs, courses] = await Promise.all([
+    const [stays, experiences, programs, courses, businesses] = await Promise.all([
       prisma.accommodation.findMany({
         where: { regionId: sowonRegion.id, status: PublishStatus.published },
-        select: { id: true, slug: true, title: true, summary: true, images: true, address: true }
+        select: { id: true, slug: true, title: true, summary: true, images: true, address: true, latitude: true, longitude: true, mapAddress: true }
       }),
       prisma.experience.findMany({
         where: { regionId: sowonRegion.id, status: PublishStatus.published },
-        select: { id: true, slug: true, title: true, summary: true, images: true, location: true }
+        select: { id: true, slug: true, title: true, summary: true, images: true, location: true, latitude: true, longitude: true, mapAddress: true }
       }),
       prisma.localIncomeProgram.findMany({
         where: { regionId: sowonRegion.id, status: PublishStatus.published },
-        select: { id: true, slug: true, title: true, summary: true, images: true, location: true }
+        select: { id: true, slug: true, title: true, summary: true, images: true, location: true, latitude: true, longitude: true, mapAddress: true }
       }),
       prisma.course.findMany({
         where: { regionId: sowonRegion.id, status: PublishStatus.published },
         select: { id: true, slug: true, title: true, summary: true, images: true }
+      }),
+      prisma.businessProfile.findMany({
+        where: { regionId: sowonRegion.id, status: PublishStatus.published },
+        select: { id: true, name: true, description: true, address: true, websiteUrl: true, latitude: true, longitude: true, mapAddress: true }
       })
     ]);
 
@@ -55,28 +59,38 @@ async function getMapItems(): Promise<MapItem[]> {
 
     const mapItems: MapItem[] = [
       ...stays.map(s => ({
-        id: s.id, slug: s.slug, title: s.title, summary: s.summary, 
+        id: s.id, slug: s.slug, title: s.title, summary: s.summary,
         itemType: "stay" as MapItemType, href: `/stays/${s.slug}`,
         regionId: sowonRegion.id, regionName: guessRegion(s.address || s.slug),
-        image: s.images?.[0] || null, status: PublishStatus.published
+        image: s.images?.[0] || null, status: PublishStatus.published,
+        latitude: s.latitude, longitude: s.longitude, mapAddress: s.mapAddress
       })),
       ...experiences.map(e => ({
-        id: e.id, slug: e.slug, title: e.title, summary: e.summary, 
+        id: e.id, slug: e.slug, title: e.title, summary: e.summary,
         itemType: "experience" as MapItemType, href: `/experiences/${e.slug}`,
         regionId: sowonRegion.id, regionName: guessRegion(e.location || e.slug),
-        image: e.images?.[0] || null, status: PublishStatus.published
+        image: e.images?.[0] || null, status: PublishStatus.published,
+        latitude: e.latitude, longitude: e.longitude, mapAddress: e.mapAddress
       })),
       ...programs.map(p => ({
-        id: p.id, slug: p.slug, title: p.title, summary: p.summary, 
+        id: p.id, slug: p.slug, title: p.title, summary: p.summary,
         itemType: "program" as MapItemType, href: `/programs/${p.slug}`,
         regionId: sowonRegion.id, regionName: guessRegion(p.location || p.slug),
-        image: p.images?.[0] || null, status: PublishStatus.published
+        image: p.images?.[0] || null, status: PublishStatus.published,
+        latitude: p.latitude, longitude: p.longitude, mapAddress: p.mapAddress
       })),
       ...courses.map(c => ({
-        id: c.id, slug: c.slug, title: c.title, summary: c.summary, 
+        id: c.id, slug: c.slug, title: c.title, summary: c.summary,
         itemType: "course" as MapItemType, href: `/courses/${c.slug}`,
         regionId: sowonRegion.id, regionName: guessRegion(c.slug),
         image: c.images?.[0] || null, status: PublishStatus.published
+      })),
+      ...businesses.map(b => ({
+        id: b.id, slug: b.id, title: b.name, summary: b.description,
+        itemType: "business" as MapItemType, href: b.websiteUrl || `/map?business=${b.id}`,
+        regionId: sowonRegion.id, regionName: guessRegion(b.mapAddress || b.address || b.name),
+        image: null, status: PublishStatus.published,
+        latitude: b.latitude, longitude: b.longitude, mapAddress: b.mapAddress
       }))
     ];
 
@@ -121,7 +135,7 @@ export default async function MapPage({ searchParams }: MapPageProps) {
       </header>
 
       <main className="px-4 sm:px-6 py-6 sm:py-8 max-w-screen-xl mx-auto w-full flex flex-col gap-6">
-        
+
         {/* T-010 Rule Message */}
         <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-sm leading-relaxed text-foreground/80 shadow-sm flex items-start gap-3">
           <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
@@ -132,11 +146,11 @@ export default async function MapPage({ searchParams }: MapPageProps) {
         </div>
 
         {/* Interactive Map Shell (Client Component) */}
-        <MapShell 
-          initialItems={items} 
-          initialQuery={q} 
-          initialDate={date} 
-          initialGuests={guests} 
+        <PublicMapClient
+          initialItems={items}
+          initialQuery={q}
+          initialDate={date}
+          initialGuests={guests}
           initialType={type}
         />
 

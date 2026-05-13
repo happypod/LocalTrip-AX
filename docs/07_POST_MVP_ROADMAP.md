@@ -31,6 +31,7 @@ MVP는 T-001~T-028 기준으로 완료된 상태다. 이후 작업은 MVP 범위
 - body class 기반 CSS theme token 적용
 - 전역 네비와 홈 hero/section/badge/button 문구 1차 dictionary 적용
 - 첫 방문 온보딩 및 테마 선택 UI 구현
+- **콘텐츠 다국어 전략 수립 (T-047)**: 운영 콘텐츠(숙소, 체험 등)는 단기적으로 한국어 원문을 유지하되, 추후 `ContentTranslation` 테이블 분리 및 AI 번역 자동화를 통해 확장하는 단계별 i18n 아키텍처 반영.
 
 ## Phase 3: 운영 기능 고도화
 

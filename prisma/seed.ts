@@ -111,6 +111,9 @@ async function main() {
       images: ["/images/stays/stay-01.jpg"],
       phone: "010-0000-0001",
       kakaoUrl: "https://pf.kakao.com/_example1",
+      latitude: 36.7876,
+      longitude: 126.1360,
+      mapAddress: "충남 태안군 소원면 만리포길 123",
       status: PublishStatus.published,
     },
   });
@@ -178,6 +181,8 @@ async function main() {
       priceText: "15,000원",
       capacityText: "최대 10인",
       images: ["/images/experiences/exp-01.jpg"],
+      latitude: 36.7850,
+      longitude: 126.1380,
       status: PublishStatus.published,
     },
   });
@@ -239,6 +244,8 @@ async function main() {
       location: "천리포 마을 회관",
       priceText: "15,000원",
       images: ["/images/programs/prog-01.jpg"],
+      latitude: 36.7900,
+      longitude: 126.1400,
       status: PublishStatus.published,
     },
   });

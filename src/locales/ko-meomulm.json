@@ -1,29 +1,29 @@
 {
   "nav": {
-    "stay": "머묾",
-    "experience": "노님",
-    "localProduct": "별미",
-    "course": "기록"
+    "stay": "STAY",
+    "experience": "PLAY",
+    "localProduct": "TASTE",
+    "course": "STORY"
   },
   "hero": {
-    "title": "바다와 숲이 맞닿는 곳, 태안 소원면",
-    "subtitle": "당신만을 위한 여정을 제안합니다"
+    "title": "소원머묾",
+    "subtitle": "당신의 바람(所願)이 머무는 고요한 시간. 태안 바다에서 나만의 특별한 하루를 완성하세요."
   },
   "section": {
-    "recommendedStay": "소원 머묾",
-    "popularExperience": "인기 노님",
-    "localProduct": "소원 별미",
-    "recommendedCourse": "여정의 기록"
+    "recommendedStay": "머물기 좋은 공간",
+    "popularExperience": "영감을 주는 체험",
+    "localProduct": "로컬의 맛과 멋",
+    "recommendedCourse": "에디터 추천 코스"
   },
   "badge": {
-    "stay": "머묾",
-    "experience": "노님",
-    "program": "맛",
-    "course": "기록"
+    "stay": "STAY",
+    "experience": "TRIP",
+    "program": "TASTE",
+    "course": "COURSE"
   },
   "button": {
-    "viewAll": "전체 보기",
-    "openMap": "지도 탐색",
-    "apply": "입점 신청"
+    "viewAll": "전체보기 >",
+    "openMap": "로컬 맵 열기",
+    "apply": "호스트 지원하기"
   }
 }

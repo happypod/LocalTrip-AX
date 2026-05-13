@@ -23,15 +23,24 @@ interface ProgramData {
   naverBookingUrl?: string;
   websiteUrl?: string;
   status: string;
+  latitude?: string | number | null;
+  longitude?: string | number | null;
+  mapAddress?: string | null;
+  mapPlaceId?: string | null;
+  mapProvider?: string | null;
 }
 
 function normalizeRequiredText(value: string | undefined) {
   return value?.trim() ?? "";
 }
 
+import { parseMapFields } from "@/lib/admin-map-input";
+
 export async function createProgram(data: ProgramData) {
   await requireAdminSession();
   const prisma = getPrisma();
+
+  const mapData = parseMapFields(data);
 
   const title = normalizeRequiredText(data.title);
   const slug = normalizeRequiredText(data.slug).toLowerCase();
@@ -96,6 +105,7 @@ export async function createProgram(data: ProgramData) {
       naverBookingUrl: data.naverBookingUrl || null,
       websiteUrl: data.websiteUrl || null,
       status: data.status as PublishStatus,
+      ...mapData,
     }
   });
 
@@ -111,6 +121,8 @@ export async function updateProgram(id: string, data: Partial<ProgramData>) {
   await requireAdminSession();
   const prisma = getPrisma();
   
+  const mapData = parseMapFields(data);
+
   let slug = data.slug;
   if (slug) {
     slug = slug.trim().toLowerCase();
@@ -176,6 +188,7 @@ export async function updateProgram(id: string, data: Partial<ProgramData>) {
       ...(data.naverBookingUrl !== undefined && { naverBookingUrl: data.naverBookingUrl || null }),
       ...(data.websiteUrl !== undefined && { websiteUrl: data.websiteUrl || null }),
       ...(data.status !== undefined && { status: data.status as PublishStatus }),
+      ...mapData,
     }
   });
 
