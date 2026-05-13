@@ -3,6 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { PublishStatus } from "@prisma/client";
 import { requireAdminSession } from "@/lib/admin-auth";
+import {
+  DEFAULT_EVENT_GRADIENT,
+  DEFAULT_EVENT_HREF,
+  isAllowedEventGradient,
+  isAllowedEventHref,
+} from "@/lib/event-policy";
 import { getPrisma } from "@/lib/prisma";
 
 type PrismaClientInstance = ReturnType<typeof getPrisma>;
@@ -12,28 +18,6 @@ const PUBLISH_STATUSES: PublishStatus[] = [
   PublishStatus.published,
   PublishStatus.inactive,
 ];
-
-const DEFAULT_GRADIENT = "from-blue-50 to-indigo-100/40";
-
-const GRADIENT_PRESETS = new Set([
-  DEFAULT_GRADIENT,
-  "from-emerald-50 to-teal-100/40",
-  "from-amber-50 to-orange-100/40",
-  "from-rose-50 to-pink-100/40",
-  "from-violet-50 to-purple-100/40",
-  "from-slate-50 to-zinc-100/40",
-]);
-
-const EVENT_HREFS = new Set([
-  "/stays",
-  "/experiences",
-  "/programs",
-  "/courses",
-  "/map",
-  "/partner/apply",
-  "/events",
-  "/customer-center",
-]);
 
 export interface EventData {
   tag: string;
@@ -61,16 +45,16 @@ function assertPublishStatus(status: string): asserts status is PublishStatus {
 }
 
 function normalizeHref(value: string | undefined) {
-  const href = normalizeOptionalText(value, "/stays");
-  if (!EVENT_HREFS.has(href)) {
+  const href = normalizeOptionalText(value, DEFAULT_EVENT_HREF);
+  if (!isAllowedEventHref(href)) {
     throw new Error("허용되지 않은 이벤트 이동 경로입니다.");
   }
   return href;
 }
 
 function normalizeGradient(value: string | undefined) {
-  const gradient = normalizeOptionalText(value, DEFAULT_GRADIENT);
-  if (!GRADIENT_PRESETS.has(gradient)) {
+  const gradient = normalizeOptionalText(value, DEFAULT_EVENT_GRADIENT);
+  if (!isAllowedEventGradient(gradient)) {
     throw new Error("허용되지 않은 이벤트 배경값입니다.");
   }
   return gradient;

@@ -6,30 +6,18 @@ import Link from "next/link";
 import { Event, PublishStatus } from "@prisma/client";
 import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { createEvent, updateEvent } from "@/app/admin/events/actions";
+import {
+  DEFAULT_EVENT_GRADIENT,
+  DEFAULT_EVENT_HREF,
+  EVENT_GRADIENT_PRESETS,
+  EVENT_HREF_PRESETS,
+  normalizeEventGradientForDisplay,
+  normalizeEventHrefForDisplay,
+} from "@/lib/event-policy";
 
 interface EventFormProps {
   initialEvent?: Event | null;
 }
-
-const GRADIENT_PRESETS = [
-  { label: "Blue / Indigo", value: "from-blue-50 to-indigo-100/40" },
-  { label: "Emerald / Teal", value: "from-emerald-50 to-teal-100/40" },
-  { label: "Amber / Orange", value: "from-amber-50 to-orange-100/40" },
-  { label: "Rose / Pink", value: "from-rose-50 to-pink-100/40" },
-  { label: "Violet / Purple", value: "from-violet-50 to-purple-100/40" },
-  { label: "Slate / Zinc", value: "from-slate-50 to-zinc-100/40" },
-];
-
-const HREF_PRESETS = [
-  { label: "숙소 목록", value: "/stays" },
-  { label: "체험 목록", value: "/experiences" },
-  { label: "주민소득상품 목록", value: "/programs" },
-  { label: "추천 코스 목록", value: "/courses" },
-  { label: "로컬 지도", value: "/map" },
-  { label: "입점신청", value: "/partner/apply" },
-  { label: "이벤트 목록", value: "/events" },
-  { label: "고객센터", value: "/customer-center" },
-];
 
 export function EventForm({ initialEvent }: EventFormProps) {
   const router = useRouter();
@@ -43,9 +31,15 @@ export function EventForm({ initialEvent }: EventFormProps) {
     initialEvent?.description || ""
   );
   const [gradient, setGradient] = useState(
-    initialEvent?.gradient || "from-blue-50 to-indigo-100/40"
+    initialEvent?.gradient
+      ? normalizeEventGradientForDisplay(initialEvent.gradient)
+      : DEFAULT_EVENT_GRADIENT
   );
-  const [href, setHref] = useState(initialEvent?.href || "/stays");
+  const [href, setHref] = useState(
+    initialEvent?.href
+      ? normalizeEventHrefForDisplay(initialEvent.href)
+      : DEFAULT_EVENT_HREF
+  );
   const [status, setStatus] = useState<PublishStatus>(
     initialEvent?.status || PublishStatus.draft
   );
@@ -150,14 +144,14 @@ export function EventForm({ initialEvent }: EventFormProps) {
             label="클릭 이동 경로 *"
             value={href}
             onChange={setHref}
-            options={HREF_PRESETS}
+            options={EVENT_HREF_PRESETS}
           />
 
           <SelectField
             label="배경 그라디언트 *"
             value={gradient}
             onChange={setGradient}
-            options={GRADIENT_PRESETS}
+            options={EVENT_GRADIENT_PRESETS}
           />
 
           <div className="flex flex-col gap-1.5">
@@ -232,7 +226,7 @@ function SelectField({
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: { label: string; value: string }[];
+  options: readonly { label: string; value: string }[];
 }) {
   return (
     <div className="flex flex-col gap-1.5">

@@ -7,6 +7,10 @@ import {
   faTicket,
   faUsers,
 } from "@/lib/fontawesome";
+import {
+  normalizeEventGradientForDisplay,
+  normalizeEventHrefForDisplay,
+} from "@/lib/event-policy";
 import { getPrisma } from "@/lib/prisma";
 import { PublishStatus } from "@prisma/client";
 
@@ -31,7 +35,9 @@ const tabs = [
   { code: "COURSE", label: "추천 코스" },
 ] as const;
 
-function getEventCategory(href: string) {
+type EventTabCode = (typeof tabs)[number]["code"];
+
+function getEventCategory(href: string): EventTabCode {
   if (href.startsWith("/stays")) return "STAY";
   if (href.startsWith("/experiences")) return "EXPERIENCE";
   if (href.startsWith("/programs")) return "PROGRAM";
@@ -52,7 +58,7 @@ function getEventIcon(href: string) {
   return { icon: faMapLocationDot, color: "text-indigo-600" };
 }
 
-async function getPublishedEvents() {
+async function getPublishedEvents(): Promise<EventItem[]> {
   try {
     const prisma = getPrisma();
     await prisma.$connect();
@@ -66,13 +72,29 @@ async function getPublishedEvents() {
       return [];
     }
 
-    return prisma.event.findMany({
+    const events = await prisma.event.findMany({
       where: {
         regionId: sowonRegion.id,
         status: PublishStatus.published,
       },
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        tag: true,
+        title: true,
+        subTitle: true,
+        description: true,
+        gradient: true,
+        href: true,
+        createdAt: true,
+      },
     });
+
+    return events.map((event) => ({
+      ...event,
+      href: normalizeEventHrefForDisplay(event.href),
+      gradient: normalizeEventGradientForDisplay(event.gradient),
+    }));
   } catch (error) {
     console.warn("Failed to load public events:", error);
     return [];
@@ -100,14 +122,14 @@ export default async function EventsPage({
         <div className="mb-8">
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-black tracking-tight text-gray-900">
-              이벤트
+              소식·혜택
             </h1>
             <span className="rounded-full bg-red-50 px-3.5 py-1 text-xs font-black uppercase tracking-wider text-[#ae2f34]">
-              Sowon News
+              Sowon Offers
             </span>
           </div>
           <p className="mt-2 text-sm font-medium text-gray-500">
-            소원권역에서 운영 중인 소식과 기획 콘텐츠를 확인하세요.
+            소원권역에서 운영 중인 혜택, 참여 소식, 기획 콘텐츠를 확인하세요.
           </p>
         </div>
 
@@ -133,7 +155,7 @@ export default async function EventsPage({
 
         {filteredEvents.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredEvents.map((event: EventItem) => {
+            {filteredEvents.map((event) => {
               const { icon, color } = getEventIcon(event.href);
 
               return (

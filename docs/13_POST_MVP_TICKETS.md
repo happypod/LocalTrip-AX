@@ -839,6 +839,12 @@
   - `/events` 빈 상태 확인
 - 완료 기준:
   - Event 공개 노출 QA 결과가 문서화되고 P1/P2 이슈가 없다.
+- **실행 결과 (2026-05-13 완료)**:
+  - `/events`와 홈 이벤트 조회가 모두 `sowon` regionId와 `status=published` 조건을 사용함을 확인했다.
+  - 공개 렌더링 전 `href`와 `gradient`를 `src/lib/event-policy.ts` allowlist 기준으로 정규화하도록 보완했다.
+  - DB에 오래된 seed gradient 값이 남아 있어도 공개 화면과 관리자 폼이 깨지지 않도록 legacy gradient preset을 allowlist에 포함했다.
+  - `/events` 탭 라벨, 빈 상태, footer의 깨진 한국어 문구를 정상 문구로 교정했다.
+  - 홈 이벤트 슬라이더도 같은 `href`/`gradient` 정규화 함수를 사용하도록 정리했다.
 # 완료 기록: Public DB Source of Truth 전환
 
 - 적용일: 2026-05-13

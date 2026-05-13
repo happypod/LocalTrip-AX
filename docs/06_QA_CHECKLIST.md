@@ -145,6 +145,16 @@
 - [x] `gradient`는 관리자 UI와 서버 allowlist가 같은 값 집합을 사용한다
 - [x] 이벤트 변경 후 `/admin/events`, `/events`, `/` 경로를 revalidate한다
 
+## T-071 Event Public Exposure QA
+
+- [x] `/events` 공개 조회가 `sowon` regionId와 `status=published` 조건을 모두 사용한다
+- [x] 홈 이벤트 섹션도 `sowon` regionId와 `status=published` 조건만 사용한다
+- [x] 공개 렌더링 전 `href`는 허용된 내부 경로만 사용하고, 잘못된 값은 `/events`로 fallback한다
+- [x] 공개 렌더링 전 `gradient`는 allowlist 값만 사용하고, 잘못된 값은 기본 배경으로 fallback한다
+- [x] `/events` 카테고리 탭이 허용된 내부 경로 기준으로 분류된다
+- [x] 이벤트가 없거나 필터 결과가 없을 때 빈 상태 UI가 깨지지 않는다
+- [x] 이벤트 공개 화면의 주요 한국어 문구가 정상 표시된다
+
 ## T-035 개인정보/문의/입점신청 QA
 
 - [x] 문의/입점신청 공개 폼 개인정보 수집 최소화 및 동의 Checkbox UI 정상

@@ -64,10 +64,10 @@ export const STATIC_TRANSLATIONS = {
     navExpTag: "체험",
     navProgTag: "미식/프로그램",
     navCourseTag: "코스",
-    eventTitle: "이벤트",
-    eventEmpty: "진행 중인 소식이 없습니다.",
-    eventEmptyDesc: "새 운영 소식이 등록되면 이곳에 표시됩니다.",
-    viewMore: "더보기",
+    eventTitle: "소식·혜택",
+    eventEmpty: "진행 중인 소식이나 혜택이 없습니다.",
+    eventEmptyDesc: "새 혜택, 참여 소식, 운영 안내가 등록되면 이곳에 표시됩니다.",
+    viewMore: "전체보기",
     slideLabel: "슬라이드",
   },
   en: {
@@ -135,9 +135,9 @@ export const STATIC_TRANSLATIONS = {
     navExpTag: "Experiences",
     navProgTag: "Gourmet",
     navCourseTag: "Courses",
-    eventTitle: "Events",
-    eventEmpty: "No ongoing events.",
-    eventEmptyDesc: "New updates will appear here once posted.",
+    eventTitle: "Offers & Events",
+    eventEmpty: "No offers or event notices right now.",
+    eventEmptyDesc: "New benefits, participation notices, and updates will appear here.",
     viewMore: "View More",
     slideLabel: "Slide",
   },
@@ -206,9 +206,9 @@ export const STATIC_TRANSLATIONS = {
     navExpTag: "体验",
     navProgTag: "美食",
     navCourseTag: "行程",
-    eventTitle: "活动",
-    eventEmpty: "暂无进行中的活动。",
-    eventEmptyDesc: "发布新的运营消息后将在此显示。",
+    eventTitle: "优惠活动",
+    eventEmpty: "暂无优惠或活动通知。",
+    eventEmptyDesc: "新的优惠、参与活动和运营通知发布后将在此显示。",
     viewMore: "查看更多",
     slideLabel: "轮播页",
   },
@@ -277,19 +277,43 @@ export const STATIC_TRANSLATIONS = {
     navExpTag: "体験",
     navProgTag: "グルメ",
     navCourseTag: "旅の記録",
-    eventTitle: "イベント",
-    eventEmpty: "進行中のイベントはありません。",
-    eventEmptyDesc: "新しいお知らせが登録されるとここに表示されます。",
+    eventTitle: "お得な情報",
+    eventEmpty: "現在、特典やイベントのお知らせはありません。",
+    eventEmptyDesc: "新しい特典、参加型イベント、運営からのお知らせがここに表示されます。",
     viewMore: "もっと見る",
     slideLabel: "スライド",
   },
 };
 
-export type StaticTranslationKey = keyof typeof STATIC_TRANSLATIONS.ko;
+type StaticLabels = typeof STATIC_TRANSLATIONS.ko;
 
-export function getStaticLabels(locale: string = "ko") {
+const THEME_STATIC_OVERRIDES: Record<string, Partial<StaticLabels>> = {
+  "ko-masil": {
+    eventTitle: "동네 소식·혜택",
+  },
+  "ko-haengrang": {
+    eventTitle: "소식과 혜택",
+  },
+  "ko-meomulm": {
+    eventTitle: "로컬 혜택",
+  },
+  "ko-local": {
+    eventTitle: "혜택소식 있슈",
+    eventEmpty: "아직 올라온 혜택소식이 없어유.",
+    eventEmptyDesc: "새 혜택이나 참여 소식이 생기면 여기에 올려둘게유.",
+    viewMore: "다 볼텨?",
+  },
+};
+
+export type StaticTranslationKey = keyof StaticLabels;
+
+export function getStaticLabels(locale: string = "ko", theme?: string) {
   if (locale in STATIC_TRANSLATIONS) {
-    return STATIC_TRANSLATIONS[locale as keyof typeof STATIC_TRANSLATIONS];
+    const labels = STATIC_TRANSLATIONS[locale as keyof typeof STATIC_TRANSLATIONS];
+    const themeOverride = theme
+      ? THEME_STATIC_OVERRIDES[`${locale}-${theme}`]
+      : undefined;
+    return themeOverride ? { ...labels, ...themeOverride } : labels;
   }
   return STATIC_TRANSLATIONS.ko;
 }

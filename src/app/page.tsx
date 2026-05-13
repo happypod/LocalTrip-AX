@@ -2,6 +2,10 @@ import { getPrisma } from "@/lib/prisma";
 import { HomeClient } from "@/components/home/home-client";
 import { getServerTranslationLocale } from "@/lib/server-translation";
 import { getLocalizedList } from "@/lib/content-translation-server";
+import {
+  normalizeEventGradientForDisplay,
+  normalizeEventHrefForDisplay,
+} from "@/lib/event-policy";
 import { PublishStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +17,7 @@ type HomeItem = {
   summary: string;
   priceText?: string | null;
   images?: string[];
+  href?: string;
 };
 
 type HomeProgramItem = HomeItem & {
@@ -42,6 +47,7 @@ function toHomeProgramItem(program: HomeProgramItem): HomeProgramItem {
   return {
     id: program.id,
     slug: program.slug,
+    href: `/programs/${program.slug}`,
     title: program.title,
     summary: program.summary,
     priceText: program.priceText,
@@ -55,9 +61,14 @@ function isFoodProgram(program: HomeProgramItem) {
     program.slug === "salt-farm-tour" ||
     program.slug === "village-dining" ||
     program.slug === "local-table-experience" ||
+    program.slug === "shrimp-grill-experience" ||
+    program.slug === "fishing-village-dining-class" ||
+    program.slug === "shrimp-seafood-bbq" ||
     program.category === "식생활" ||
     program.slug.includes("dining") ||
-    program.slug.includes("table")
+    program.slug.includes("table") ||
+    program.slug.includes("shrimp") ||
+    program.slug.includes("bbq")
   );
 }
 
@@ -82,6 +93,7 @@ async function getHomeData() {
       return {
         stays: [] as HomeItem[],
         experiences: [] as HomeItem[],
+        experiencePrograms: [] as HomeProgramItem[],
         programs: [] as HomeProgramItem[],
         courses: [] as HomeItem[],
         events: [] as HomeEventItem[],
@@ -127,16 +139,22 @@ async function getHomeData() {
 
     return {
       stays,
-      experiences: [...experiences, ...experiencePrograms],
+      experiences,
+      experiencePrograms,
       programs: foodPrograms,
       courses,
-      events,
+      events: events.map((event) => ({
+        ...event,
+        href: normalizeEventHrefForDisplay(event.href),
+        gradient: normalizeEventGradientForDisplay(event.gradient),
+      })),
     };
   } catch (error) {
     console.error("🚨 ERROR IN GET_HOME_DATA:", error);
     return {
       stays: [] as HomeItem[],
       experiences: [] as HomeItem[],
+      experiencePrograms: [] as HomeProgramItem[],
       programs: [] as HomeProgramItem[],
       courses: [] as HomeItem[],
       events: [] as HomeEventItem[],
@@ -145,7 +163,7 @@ async function getHomeData() {
 }
 
 export default async function Home() {
-  const { stays, experiences, programs, courses, events } = await getHomeData();
+  const { stays, experiences, experiencePrograms, programs, courses, events } = await getHomeData();
   const currentLocale = await getServerTranslationLocale();
 
   const eventItemsForTranslation = events.map((e) => ({
@@ -156,12 +174,14 @@ export default async function Home() {
   const [
     localizedStays,
     localizedExperiences,
+    localizedExperiencePrograms,
     localizedPrograms,
     localizedCourses,
     localizedEventsRaw,
   ] = await Promise.all([
     getLocalizedList(stays, "accommodation", currentLocale),
     getLocalizedList(experiences, "experience", currentLocale),
+    getLocalizedList(experiencePrograms, "local_income_program", currentLocale),
     getLocalizedList(programs, "local_income_program", currentLocale),
     getLocalizedList(courses, "course", currentLocale),
     getLocalizedList(eventItemsForTranslation, "event", currentLocale),
@@ -175,7 +195,7 @@ export default async function Home() {
   return (
     <HomeClient
       stays={localizedStays}
-      experiences={localizedExperiences}
+      experiences={[...localizedExperiences, ...localizedExperiencePrograms]}
       programs={localizedPrograms}
       courses={localizedCourses}
       events={localizedEvents}

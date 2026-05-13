@@ -7,6 +7,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@/lib/fontawesome";
 import { usePersonaThemeStore } from "@/store/persona-theme-store";
 import { getStaticLabels } from "@/lib/static-translations";
+import {
+  normalizeEventGradientForDisplay,
+  normalizeEventHrefForDisplay,
+} from "@/lib/event-policy";
 
 interface EventItem {
   id: string;
@@ -38,7 +42,8 @@ function getEventImage(href: string) {
 
 export function EventSlider({ events = [] }: EventSliderProps) {
   const currentLang = usePersonaThemeStore((state) => state.currentLang);
-  const labels = getStaticLabels(currentLang);
+  const currentTheme = usePersonaThemeStore((state) => state.currentTheme);
+  const labels = getStaticLabels(currentLang, currentTheme);
   const [activeIndex, setActiveIndex] = useState(0);
   const [failedImageIds, setFailedImageIds] = useState<Record<string, boolean>>({});
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,10 +52,15 @@ export function EventSlider({ events = [] }: EventSliderProps) {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  const displayEvents = events.map((event) => ({
-    ...event,
-    bgImage: event.bgImage || getEventImage(event.href),
-  }));
+  const displayEvents = events.map((event) => {
+    const href = normalizeEventHrefForDisplay(event.href);
+    return {
+      ...event,
+      href,
+      gradient: normalizeEventGradientForDisplay(event.gradient),
+      bgImage: event.bgImage || getEventImage(href),
+    };
+  });
 
   useEffect(() => {
     if (isDragging || displayEvents.length <= 1) return;
@@ -192,7 +202,7 @@ export function EventSlider({ events = [] }: EventSliderProps) {
             {labels.eventTitle}
           </h2>
           <span className="rounded-full bg-red-50 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#ae2f34]">
-            Sowon News
+            Sowon Offers
           </span>
         </div>
         <Link

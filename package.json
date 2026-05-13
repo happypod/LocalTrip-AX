@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "events:seed": "tsx prisma/seed-events.ts",
+    "translations:seed": "tsx prisma/seed-content-translations.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

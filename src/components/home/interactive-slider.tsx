@@ -11,6 +11,7 @@ type HomeItem = {
   summary: string;
   priceText?: string | null;
   images?: string[];
+  href?: string;
 };
 
 interface InteractiveSliderProps {
@@ -154,7 +155,7 @@ export function InteractiveSlider({
               title={item.title}
               summary={item.summary}
               imageUrl={item.images?.[0]}
-              href={`${hrefPrefix}/${item.slug}`}
+              href={item.href ?? `${hrefPrefix}/${item.slug}`}
               priceText={showPrice ? item.priceText ?? undefined : undefined}
               badge={badge}
               badgeVariant={badgeVariant}

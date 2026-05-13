@@ -135,7 +135,7 @@ Operational rule:
 | `/map` | Placeholder map is clear; no real transport booking promise |
 | `/partner/apply` | Privacy agreement is required |
 | `/customer-center` | Inquiry form is available and privacy-gated |
-| `/events` | Static/fallback event layout is stable |
+| `/events` | DB-backed event layout is stable and empty state is available |
 
 Public data policy:
 
@@ -159,7 +159,7 @@ Public data policy:
 | Experience CRUD | Implemented |
 | LocalIncomeProgram CRUD | Implemented |
 | Course CRUD | Implemented |
-| Event CRUD | Implemented, but Event regionId is Post-MVP follow-up |
+| Event CRUD | Implemented with `sowon` region scope and published-only public policy |
 | Inquiry/PartnerApplication management | Implemented with masking/preview policy |
 | Training/Certification management | Implemented |
 | AI assistant placeholder | Implemented |
@@ -237,7 +237,7 @@ Policy:
 
 - Add `NEXT_PUBLIC_SITE_URL` to Vercel Production and redeploy.
 - Run real iOS/Android/PC device checks before public promotion.
-- If events become real operating content, complete T-069 to T-071 so Event follows `regionId + status=published` policy.
+- Event operating content now follows T-069 to T-071: `regionId + status=published` public policy and safe href/gradient fallback.
 - Decide whether to connect a custom domain before QR/printed/public materials.
 
 ### P3: Post-Launch Improvements

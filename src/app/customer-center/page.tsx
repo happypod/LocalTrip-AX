@@ -31,7 +31,7 @@ interface ChatCategory {
   subTags: string[];
 }
 
-interface ChatCategoryTranslation extends Omit<ChatCategory, "icon"> {}
+type ChatCategoryTranslation = Omit<ChatCategory, "icon">;
 
 interface CustomerCenterTranslation {
   heroTitle: string;
