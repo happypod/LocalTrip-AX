@@ -1,6 +1,6 @@
 import { PublishStatus } from "@prisma/client";
 import { getPrisma } from "@/lib/prisma";
-import { FALLBACK_MAP_ITEMS, MapItem, MapItemType } from "@/lib/map-data";
+import { MapItem, MapItemType } from "@/lib/map-data";
 import { PublicMapClient } from "@/components/map/public-map-client";
 import { ChevronRight, Info } from "lucide-react";
 import Link from "next/link";
@@ -18,7 +18,7 @@ async function getMapItems(): Promise<MapItem[]> {
     });
 
     if (!sowonRegion) {
-      return FALLBACK_MAP_ITEMS;
+      return [];
     }
 
     // Fetch all items from DB in parallel
@@ -94,14 +94,10 @@ async function getMapItems(): Promise<MapItem[]> {
       }))
     ];
 
-    if (mapItems.length === 0) {
-      return FALLBACK_MAP_ITEMS;
-    }
-
     return mapItems;
   } catch (error) {
-    console.warn("Failed to fetch map items from DB, using fallback:", error);
-    return FALLBACK_MAP_ITEMS;
+    console.warn("Failed to fetch map items from DB:", error);
+    return [];
   }
 }
 

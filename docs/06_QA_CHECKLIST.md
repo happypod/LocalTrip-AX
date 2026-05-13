@@ -1,5 +1,15 @@
 # QA Checklist
 
+## DB Source of Truth QA
+
+- [x] 공개 `/`, `/stays`, `/experiences`, `/programs`, `/courses`, `/map` 화면에서 runtime fallback 데이터 병합 제거
+- [x] 공개 목록/상세 조회는 `sowon` region 및 `status = published` 기준으로 통일
+- [x] Neon DB schema push 완료
+- [x] `prisma/seed.ts` 실행 완료: 숙소 4, 체험 4, 주민소득상품 11, 코스 7
+- [x] 관리자 코스 등록 개수와 공개 코스 개수가 DB 기준으로 일치하도록 seed 보강
+- [x] `npm run lint` 통과
+- [x] `npm run build` 통과
+
 - [ ] T-001 Project Setup Build Check
 - [x] Responsive Layout Check
 - [ ] Accessibility Check
@@ -48,7 +58,26 @@
 - [x] 문의/입점신청 API는 개인정보 동의가 없으면 저장하지 않는다
 - [x] 문의/입점신청 API는 저장 실패를 성공으로 응답하지 않는다
 - [x] LeadEvent 저장 실패는 사용자 흐름을 막지 않는다
+
+## T-059 Operational Monitoring QA
+
+- [x] API 실패 시 사용자 메시지가 안전하게 노출되는가 (DB 스키마, 스택 트레이스 노출 방지)
+- [x] 운영 로그(Vercel Logs)에 이름, 이메일, 연락처 등 개인정보가 원문으로 남지 않는가
+- [x] LeadEvent 실패 시 CTA 이동이 막히지 않는가 (200 OK Best-effort)
+- [x] 문의 저장 실패 시 내부 로그가 에러로 남고, 사용자는 실패 응답(500/503 등)을 받는가
+- [x] 입점신청 저장 실패 시 내부 로그가 에러로 남고, 사용자는 실패 응답을 받는가
+- [x] Vercel Production Logs 확인 절차가 문서화되어 있는가 (`17_OPERATION_MONITORING.md`)
 - [x] 최소 보안 헤더가 `next.config.ts`에 적용되어 있다
+
+## T-060 AI Integration Planning QA
+
+- [x] AI 실제 호출은 기본 비활성 상태로 문서화되어 있는가 (`AI_FEATURES_ENABLED=false`)
+- [x] AI API key가 브라우저에 노출되지 않는 server-only secret으로 정의되어 있는가
+- [x] provider, model, 비용 상한, 호출 제한, 입력/출력 길이 제한 기준이 문서화되어 있는가
+- [x] 관리자 승인 전 AI 결과를 자동 저장·자동 공개하지 않는 workflow가 문서화되어 있는가
+- [x] 문의자명, 연락처, 이메일, 입점신청 원문 등 개인정보를 AI provider로 전송하지 않는 기준이 문서화되어 있는가
+- [x] AI 요청 로그에서 full prompt, full completion, secret, 개인정보를 남기지 않는 기준이 문서화되어 있는가
+- [x] T-060에서는 신규 AI SDK 설치 및 실제 API 호출 코드가 추가되지 않았는가
 
 ## T-027 Deployment QA
 
@@ -160,3 +189,11 @@
 - [x] 문의 다이얼로그(`inquiry-dialog.tsx`)의 모든 Form Controls(Input, Textarea, Checkbox)가 `htmlFor`/`id` 및 Radix `Label`로 올바르게 연결됨을 보장
 - [x] 입점 신청 폼(`partner-apply-form.tsx`)의 신청자 유형 선택용 div 요소를 시맨틱 `<button>`으로 리팩토링하여 키보드 Focus 접근성 및 선택 상태(`aria-pressed`) 식별력 개선 완료
 - [x] 관리자 로그인 페이지 Input ID/Label 매칭 무결성 확인
+
+## T-057 Persona Theme / i18n QA
+
+- [x] 페르소나 테마 전환 시 UI 정상 반영 확인 (Local Storage 유지, Hydration 이상 없음)
+- [x] 4개 언어(ko, en, zh-cn, ja-jp) Dictionary 정상 교체 및 에러(Missing Key) 없음 확인
+- [x] 공개 상세 화면 접속 시 `ltax_lang` 쿠키 기반 SSR 번역 Fallback (선택 언어 -> 영어 -> 원문) 정상 확인
+- [x] 관리자 다국어 번역 UI의 "AI 번역 초안 준비" 버튼 Placeholder 정상 노출 (API 실제 호출 없음)
+- [x] 모바일 네비게이션과 테마/언어 UI 간 레이아웃 충돌 없음 확인

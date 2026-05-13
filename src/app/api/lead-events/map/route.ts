@@ -6,6 +6,7 @@ import {
   readJsonRecord,
   readStringField,
 } from "@/lib/public-api-validation";
+import { logOperationError, logOperationInfo } from "@/lib/operation-log";
 
 const REGION_REF_PATTERN = /^[a-zA-Z0-9_-]+$/;
 const MAP_ACTION_TYPES = ["marker_click", "detail_click", "directions_click"] as const;
@@ -50,7 +51,10 @@ export async function POST(req: Request) {
     });
 
     if (!region) {
-      console.warn(`[MapLeadEvent] Region not found: ${regionRef}`);
+      logOperationError("map_lead_event_save_failed", new Error("Region not found"), {
+        route: "/api/lead-events/map",
+        regionId: regionRef,
+      });
       return NextResponse.json({ ok: true }); // Fail gracefully
     }
 
@@ -82,13 +86,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (isPublicApiValidationError(error)) {
+      logOperationInfo("map_lead_event_validation_failed", {
+        route: "/api/lead-events/map",
+        errorCode: error.code,
+        statusCode: error.status,
+      });
       return NextResponse.json(
         { ok: false, error: error.code },
         { status: error.status },
       );
     }
 
-    console.error("[MapLeadEvent] Failed to save map lead event:", error);
+    logOperationError("map_lead_event_save_failed", error, {
+      route: "/api/lead-events/map",
+      operation: "create_lead_event",
+    });
     // Best effort: fail silently for user
     return NextResponse.json({ ok: true });
   }

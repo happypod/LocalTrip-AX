@@ -42,7 +42,10 @@ export function ProgramForm({ initialData, regions, businesses }: ProgramFormPro
       linkedLifeService: formData.get("linkedLifeService") as string,
       residentRole: formData.get("residentRole") as string,
       revenueUse: formData.get("revenueUse") as string,
+      category: formData.get("category") as string,
       location: formData.get("location") as string,
+      durationText: formData.get("durationText") as string,
+      capacityText: formData.get("capacityText") as string,
       phone: formData.get("phone") as string,
       kakaoUrl: formData.get("kakaoUrl") as string,
       naverBookingUrl: formData.get("naverBookingUrl") as string,
@@ -160,6 +163,16 @@ export function ProgramForm({ initialData, regions, businesses }: ProgramFormPro
           </div>
 
           <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-gray-700">카테고리</label>
+            <input
+              name="category"
+              defaultValue={initialData?.category || ""}
+              placeholder="예: 식생활, 가족체류, 주민일자리, 생활인구"
+              className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
             <label className="text-sm font-semibold text-gray-700">상세 설명</label>
             <textarea
               name="description"
@@ -242,6 +255,24 @@ export function ProgramForm({ initialData, regions, businesses }: ProgramFormPro
                 name="priceText"
                 defaultValue={initialData?.priceText || ""}
                 placeholder="예: 1인 20,000원 (수익금 50% 마을 기부)"
+                className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-gray-700">소요 시간</label>
+              <input
+                name="durationText"
+                defaultValue={initialData?.durationText || ""}
+                placeholder="예: 1시간 30분"
+                className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-gray-700">인원 안내</label>
+              <input
+                name="capacityText"
+                defaultValue={initialData?.capacityText || ""}
+                placeholder="예: 최소 2인 / 최대 10인"
                 className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
             </div>

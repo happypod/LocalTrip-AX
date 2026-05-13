@@ -26,6 +26,8 @@ npm run dev
 
 운영 환경에서는 `ADMIN_PASSWORD`를 강한 비밀번호로 바꾸고, `ADMIN_SESSION_SECRET`은 32바이트 이상 난수 기반 secret을 사용해야 합니다.
 
+Post-MVP AI 연동은 기본 비활성 상태입니다. 실제 AI API를 연결하려면 `docs/18_AI_INTEGRATION_PLAN.md`의 비용 상한, 개인정보 제외, 관리자 승인 workflow를 먼저 승인한 뒤 `AI_FEATURES_ENABLED`, `AI_PROVIDER`, `AI_MODEL`, `AI_API_KEY`를 운영 환경에 설정합니다.
+
 ### 빌드 및 실행
 ```bash
 npx prisma validate

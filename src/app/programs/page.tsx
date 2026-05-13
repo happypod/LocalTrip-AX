@@ -1,7 +1,7 @@
 import { PublishStatus } from "@prisma/client";
 import { getPrisma } from "@/lib/prisma";
 import { ProgramGridClient, type ProgramGridItem } from "@/components/programs/program-grid-client";
-import { FALLBACK_PROGRAMS, LocalIncomeProgramUI } from "@/lib/program-data";
+import type { LocalIncomeProgramUI } from "@/lib/program-data";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -19,49 +19,36 @@ async function getPrograms(): Promise<LocalIncomeProgramUI[]> {
     });
 
     if (!sowonRegion) {
-      return FALLBACK_PROGRAMS.filter(p => p.status === PublishStatus.published);
+      return [];
     }
 
-    const programs = await prisma.localIncomeProgram.findMany({
+    return await prisma.localIncomeProgram.findMany({
       where: {
         status: PublishStatus.published,
         regionId: sowonRegion.id,
       },
       orderBy: { createdAt: "desc" },
-    });
-
-    const merged = new Map<string, LocalIncomeProgramUI>();
-    // 1. Add DB items (with fallback enrichment)
-    for (const item of programs) {
-      const fb = FALLBACK_PROGRAMS.find(f => f.slug === item.slug);
-      merged.set(item.slug, {
-        ...(fb || {}),
-        ...item,
-        category: fb?.category, // DB model lacks category, explicitly copy from fallback
-      } as LocalIncomeProgramUI);
-    }
-    // 2. Add Fallbacks (Published only)
-    const publishedFallbacks = FALLBACK_PROGRAMS.filter(p => p.status === PublishStatus.published);
-    for (const item of publishedFallbacks) {
-      if (!merged.has(item.slug)) {
-        merged.set(item.slug, item);
-      }
-    }
-
-    return Array.from(merged.values());
+    }) as LocalIncomeProgramUI[];
   } catch (error) {
-    console.warn("Failed to fetch programs from DB, using fallback:", error);
-    return FALLBACK_PROGRAMS.filter(p => p.status === PublishStatus.published);
+    console.warn("Failed to fetch programs from DB:", error);
+    return [];
   }
 }
+
+const FOOD_PROGRAM_SLUGS = new Set([
+  "salt-farm-tour",
+  "village-dining",
+  "local-table-experience",
+  "shrimp-grill-experience",
+  "fishing-village-dining-class",
+  "shrimp-seafood-bbq",
+]);
 
 function isFoodProgram(program: LocalIncomeProgramUI) {
   const slug = program.slug || "";
   return (
     program.category === "식생활" ||
-    slug === "salt-farm-tour" ||
-    slug === "village-dining" ||
-    slug === "local-table-experience" ||
+    FOOD_PROGRAM_SLUGS.has(slug) ||
     slug.includes("dining") ||
     slug.includes("table")
   );

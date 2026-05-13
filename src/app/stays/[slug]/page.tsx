@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getPrisma } from "@/lib/prisma";
-import { FALLBACK_STAYS } from "@/lib/stay-data";
+import { getLocalizedContent } from "@/lib/content-translation";
+import { getServerTranslationLocale } from "@/lib/server-translation";
 import { StayImage } from "@/components/stays/stay-image";
 import { StayCTA } from "@/components/stays/stay-cta";
 import { MapPin, Users, Info, ChevronLeft } from "lucide-react";
@@ -21,7 +22,7 @@ async function getStayBySlug(slug: string) {
     });
 
     if (!sowonRegion) {
-      return FALLBACK_STAYS.find((s) => s.slug === slug && s.status === "published");
+      return undefined;
     }
 
     const stay = await prisma.accommodation.findFirst({
@@ -32,13 +33,27 @@ async function getStayBySlug(slug: string) {
       },
     });
 
-    if (stay) return stay;
-    
-    // Check fallback if not found in DB
-    return FALLBACK_STAYS.find((s) => s.slug === slug && s.status === "published");
+    if (stay) {
+      const currentLocale = await getServerTranslationLocale();
+
+      if (currentLocale !== "ko") {
+        const translations = await prisma.contentTranslation.findMany({
+          where: {
+            targetType: "accommodation",
+            targetId: stay.id,
+            locale: { in: [currentLocale, "en"] }
+          }
+        });
+
+        return getLocalizedContent(stay, translations, currentLocale);
+      }
+
+      return stay;
+    }
+    return undefined;
   } catch (error) {
-    console.warn(`Failed to fetch stay ${slug} from DB, using fallback:`, error);
-    return FALLBACK_STAYS.find((s) => s.slug === slug && s.status === "published");
+    console.warn(`Failed to fetch stay ${slug} from DB:`, error);
+    return undefined;
   }
 }
 
@@ -132,11 +147,11 @@ export default async function StayDetailPage({ params }: { params: Promise<{ slu
             <div className="flex flex-col gap-4 mb-6">
               <h3 className="text-lg font-bold">문의 및 연결</h3>
               <p className="text-xs text-muted-foreground">
-                이 숙소는 로컬트립 파트너가 직접 운영합니다. 
+                이 숙소는 로컬트립 파트너가 직접 운영합니다.
                 예약 문의나 궁금한 점은 아래 채널로 직접 연락해 주세요.
               </p>
             </div>
-            <StayCTA 
+            <StayCTA
               itemId={stay.id}
               itemSlug={stay.slug}
               phone={stay.phone}

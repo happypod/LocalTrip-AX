@@ -15,7 +15,10 @@ interface ProgramData {
   linkedLifeService: string;
   residentRole: string;
   revenueUse: string;
+  category?: string;
   location?: string;
+  durationText?: string;
+  capacityText?: string;
   priceText?: string;
   images?: string[];
   phone?: string;
@@ -97,7 +100,10 @@ export async function createProgram(data: ProgramData) {
       linkedLifeService,
       residentRole,
       revenueUse,
+      category: data.category || null,
       location: data.location || null,
+      durationText: data.durationText || null,
+      capacityText: data.capacityText || null,
       priceText: data.priceText || null,
       images: data.images || [],
       phone: data.phone || null,
@@ -180,7 +186,10 @@ export async function updateProgram(id: string, data: Partial<ProgramData>) {
       ...(data.linkedLifeService !== undefined && { linkedLifeService: data.linkedLifeService }),
       ...(data.residentRole !== undefined && { residentRole: data.residentRole }),
       ...(data.revenueUse !== undefined && { revenueUse: data.revenueUse }),
+      ...(data.category !== undefined && { category: data.category || null }),
       ...(data.location !== undefined && { location: data.location || null }),
+      ...(data.durationText !== undefined && { durationText: data.durationText || null }),
+      ...(data.capacityText !== undefined && { capacityText: data.capacityText || null }),
       ...(data.priceText !== undefined && { priceText: data.priceText || null }),
       ...(data.images !== undefined && { images: data.images || [] }),
       ...(data.phone !== undefined && { phone: data.phone || null }),

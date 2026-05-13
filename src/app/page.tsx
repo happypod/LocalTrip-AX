@@ -1,15 +1,7 @@
 import { getPrisma } from "@/lib/prisma";
 import { HomeClient } from "@/components/home/home-client";
-import {
-  FALLBACK_STAYS,
-  FALLBACK_EXPERIENCES,
-  FALLBACK_PROGRAMS,
-  FALLBACK_COURSES,
-} from "@/lib/home-data";
 
 export const dynamic = "force-dynamic";
-
-const HOME_PREVIEW_LIMIT = 4;
 
 type HomeItem = {
   id: string;
@@ -40,38 +32,6 @@ type HomeEventDelegate = {
     orderBy: { createdAt: "desc" };
   }): Promise<HomeEventItem[]>;
 };
-
-function fillHomePreview(items: HomeItem[], fallbacks: HomeItem[]) {
-  const merged = new Map<string, HomeItem>();
-
-  for (const item of items) {
-    merged.set(item.slug, item);
-  }
-
-  for (const item of fallbacks) {
-    if (!merged.has(item.slug)) {
-      merged.set(item.slug, item);
-    }
-  }
-
-  return Array.from(merged.values()).slice(0, HOME_PREVIEW_LIMIT);
-}
-
-function fillAllHomeItems(items: HomeItem[], fallbacks: HomeItem[]) {
-  const merged = new Map<string, HomeItem>();
-
-  for (const item of items) {
-    merged.set(item.slug, item);
-  }
-
-  for (const item of fallbacks) {
-    if (!merged.has(item.slug)) {
-      merged.set(item.slug, item);
-    }
-  }
-
-  return Array.from(merged.values());
-}
 
 function toHomeProgramItem(program: HomeProgramItem): HomeProgramItem {
   let images = program.images;
@@ -123,12 +83,11 @@ async function getHomeData() {
     });
 
     if (!sowonRegion) {
-      const { foodPrograms, experiencePrograms } = splitHomePrograms(FALLBACK_PROGRAMS.map(toHomeProgramItem));
       return {
-        stays: FALLBACK_STAYS,
-        experiences: [...FALLBACK_EXPERIENCES, ...experiencePrograms].slice(0, HOME_PREVIEW_LIMIT),
-        programs: foodPrograms,
-        courses: FALLBACK_COURSES,
+        stays: [] as HomeItem[],
+        experiences: [] as HomeItem[],
+        programs: [] as HomeProgramItem[],
+        courses: [] as HomeItem[],
         events: [] as HomeEventItem[],
       };
     }
@@ -159,8 +118,6 @@ async function getHomeData() {
       }),
     ]);
 
-    const staysFilled = fillHomePreview(stays, FALLBACK_STAYS);
-    const experiencesFilled = fillHomePreview(experiences, FALLBACK_EXPERIENCES);
     const programItems = programs.map((program: HomeProgramItem) => toHomeProgramItem({
       id: program.id,
       slug: program.slug,
@@ -168,26 +125,24 @@ async function getHomeData() {
       summary: program.summary,
       priceText: program.priceText,
       images: program.images,
+      category: program.category,
     }));
-    const programsFilled = fillAllHomeItems(programItems, FALLBACK_PROGRAMS.map(toHomeProgramItem));
-    const coursesFilled = fillAllHomeItems(courses, FALLBACK_COURSES);
 
-    const { foodPrograms, experiencePrograms } = splitHomePrograms(programsFilled);
+    const { foodPrograms, experiencePrograms } = splitHomePrograms(programItems);
 
     return {
-      stays: staysFilled,
-      experiences: [...experiencesFilled, ...experiencePrograms],
+      stays,
+      experiences: [...experiences, ...experiencePrograms],
       programs: foodPrograms,
-      courses: coursesFilled,
+      courses,
       events,
     };
   } catch {
-    const { foodPrograms, experiencePrograms } = splitHomePrograms(FALLBACK_PROGRAMS.map(toHomeProgramItem));
     return {
-      stays: FALLBACK_STAYS,
-      experiences: [...FALLBACK_EXPERIENCES, ...experiencePrograms],
-      programs: foodPrograms,
-      courses: FALLBACK_COURSES,
+      stays: [] as HomeItem[],
+      experiences: [] as HomeItem[],
+      programs: [] as HomeProgramItem[],
+      courses: [] as HomeItem[],
       events: [] as HomeEventItem[],
     };
   }

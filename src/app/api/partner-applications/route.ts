@@ -8,6 +8,7 @@ import {
   readJsonRecord,
   readStringField,
 } from "@/lib/public-api-validation";
+import { logOperationError, logOperationInfo } from "@/lib/operation-log";
 
 export const runtime = "nodejs";
 
@@ -92,7 +93,11 @@ export async function POST(req: Request) {
     });
 
     if (!region) {
-      console.warn(`[PartnerApply] Default region 'sowon' not found.`);
+      logOperationError("partner_apply_save_failed", new Error("Region not found"), {
+        route: "/api/partner-applications",
+        regionId: "sowon",
+        statusCode: 503,
+      });
       return NextResponse.json({ ok: false, error: "REGION_NOT_FOUND" }, { status: 503 });
     }
 
@@ -131,19 +136,33 @@ export async function POST(req: Request) {
         },
       });
     } catch (eventError) {
-      console.error("[PartnerApply] Failed to save LeadEvent:", eventError);
+      logOperationError("lead_event_save_failed", eventError, {
+        route: "/api/partner-applications",
+        operation: "create_lead_event",
+        targetType: "general",
+        targetId: "partner_apply",
+      });
     }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (isPublicApiValidationError(error)) {
+      logOperationInfo("partner_apply_validation_failed", {
+        route: "/api/partner-applications",
+        errorCode: error.code,
+        statusCode: error.status,
+      });
       return NextResponse.json(
         { ok: false, error: error.code },
         { status: error.status },
       );
     }
 
-    console.error("[PartnerApply] Failed to submit application:", error);
+    logOperationError("partner_apply_save_failed", error, {
+      route: "/api/partner-applications",
+      operation: "create_partner_application",
+      statusCode: 500,
+    });
     return NextResponse.json({ ok: false, error: "INTERNAL_SERVER_ERROR" }, { status: 500 });
   }
 }

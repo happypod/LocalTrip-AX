@@ -133,6 +133,9 @@ export function CourseForm({ initialData, regions, accommodations, experiences, 
       slug: slug,
       summary: formData.get("summary") as string,
       description: formData.get("description") as string,
+      targetType: formData.get("targetType") as string,
+      durationType: formData.get("durationType") as string,
+      season: formData.get("season") as string,
       status: formData.get("status") as string,
       images: imagesInput.split(/[\n,]+/).map(url => url.trim()).filter(Boolean),
       courseItems: courseItems,
@@ -219,6 +222,36 @@ export function CourseForm({ initialData, regions, accommodations, experiences, 
                 placeholder="파도리 해변의 절경과 로컬 워크숍을 즐기는 코스"
                 className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-700">대상</label>
+                <input
+                  name="targetType"
+                  defaultValue={initialData?.targetType || ""}
+                  placeholder="예: 가족/커플"
+                  className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-700">기간</label>
+                <input
+                  name="durationType"
+                  defaultValue={initialData?.durationType || ""}
+                  placeholder="예: 당일"
+                  className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-gray-700">계절</label>
+                <input
+                  name="season"
+                  defaultValue={initialData?.season || ""}
+                  placeholder="예: 여름/가을"
+                  className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                />
+              </div>
             </div>
 
             <div className="flex flex-col gap-2">

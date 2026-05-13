@@ -6,6 +6,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { TrainingCourseForm } from "@/components/admin/training/training-course-form";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { TranslationForm } from "@/components/admin/translations/translation-form";
 
 export const metadata: Metadata = {
   title: "교육과정 수정 | LocalTrip AX",
@@ -24,13 +25,16 @@ export default async function EditTrainingCoursePage({ params }: EditTrainingCou
   const prisma = getPrisma();
   await prisma.$connect();
 
-  const [course, regions] = await Promise.all([
+  const [course, regions, translations] = await Promise.all([
     prisma.trainingCourse.findUnique({
       where: { id },
     }),
     prisma.region.findMany({
       orderBy: { name: "asc" },
     }),
+    prisma.contentTranslation.findMany({
+      where: { targetType: "training_course", targetId: id }
+    })
   ]);
 
   if (!course) {
@@ -63,6 +67,20 @@ export default async function EditTrainingCoursePage({ params }: EditTrainingCou
         </div>
 
         <TrainingCourseForm initialData={initialData} regions={regions} />
+
+        <TranslationForm
+          targetType="training_course"
+          targetId={course.id}
+          originalData={{
+            title: course.title,
+            summary: course.summary,
+            description: null,
+          }}
+          existingTranslations={translations.reduce((acc, t) => {
+            acc[t.locale] = { title: t.title, summary: t.summary, description: t.description };
+            return acc;
+          }, {} as Record<string, { title: string | null; summary: string | null; description: string | null }>)}
+        />
       </div>
     </AdminShell>
   );

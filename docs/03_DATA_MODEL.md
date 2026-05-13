@@ -1,5 +1,13 @@
 # Data Model (Draft)
 
+## DB Source of Truth 정리
+
+- 공개 페이지의 숙소, 체험, 소원 별미(주민소득상품), 코스 노출 기준은 DB의 `sowon` region 및 `status = published` 데이터로 통일한다.
+- 기존 `src/lib/*-data.ts` fallback 배열은 공개 화면 런타임 fallback으로 쓰지 않고, 초기 seed 입력원과 타입 참고용으로만 유지한다.
+- DB 이전을 위해 `Experience.category`, `LocalIncomeProgram.category`, `LocalIncomeProgram.durationText`, `LocalIncomeProgram.capacityText`, `Course.targetType`, `Course.durationType`, `Course.season`을 선택 필드로 추가했다.
+- 관리자 생성/수정 화면도 위 선택 필드를 저장하도록 연결했으므로, 이후 운영 콘텐츠는 관리자 페이지 또는 `prisma/seed.ts`를 통해 DB에 적재한다.
+- 2026-05-13 기준 `sowon` seed 결과: 숙소 4개, 체험 4개, 주민소득상품 11개(공개 10개), 코스 7개(공개 7개).
+
 - Region
 - BusinessProfile
 - Accommodation

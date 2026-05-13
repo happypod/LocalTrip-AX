@@ -1,26 +1,9 @@
 import { getPrisma } from "@/lib/prisma";
 import { StayGridClient } from "@/components/stays/stay-grid-client";
-import { FALLBACK_STAYS } from "@/lib/stay-data";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
-
-function mergeStaysWithFallback<T extends { slug: string }>(items: T[]) {
-  const merged = new Map<string, T | (typeof FALLBACK_STAYS)[number]>();
-
-  for (const item of items) {
-    merged.set(item.slug, item);
-  }
-
-  for (const item of FALLBACK_STAYS) {
-    if (!merged.has(item.slug)) {
-      merged.set(item.slug, item);
-    }
-  }
-
-  return Array.from(merged.values());
-}
 
 async function getStays() {
   try {
@@ -33,21 +16,19 @@ async function getStays() {
     });
 
     if (!sowonRegion) {
-      return FALLBACK_STAYS;
+      return [];
     }
 
-    const stays = await prisma.accommodation.findMany({
+    return await prisma.accommodation.findMany({
       where: {
         status: "published",
         regionId: sowonRegion.id,
       },
       orderBy: { createdAt: "desc" },
     });
-
-    return stays.length > 0 ? mergeStaysWithFallback(stays) : FALLBACK_STAYS;
   } catch (error) {
-    console.warn("Failed to fetch stays from DB, using fallback:", error);
-    return FALLBACK_STAYS;
+    console.warn("Failed to fetch stays from DB:", error);
+    return [];
   }
 }
 

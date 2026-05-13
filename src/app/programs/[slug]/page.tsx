@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { getPrisma } from "@/lib/prisma";
+import { getLocalizedContent } from "@/lib/content-translation";
+import { getServerTranslationLocale } from "@/lib/server-translation";
 import { PublishStatus } from "@prisma/client";
-import { FALLBACK_PROGRAMS, LocalIncomeProgramUI } from "@/lib/program-data";
+import type { LocalIncomeProgramUI } from "@/lib/program-data";
 import { ProgramImage } from "@/components/programs/program-image";
 import { ProgramCTA } from "@/components/programs/program-cta";
 import { MapPin, Clock, Users, ChevronLeft, AlertCircle, HeartHandshake, Sprout, HandCoins } from "lucide-react";
@@ -20,7 +22,7 @@ async function getProgramBySlug(slug: string): Promise<LocalIncomeProgramUI | un
     });
 
     if (!sowonRegion) {
-      return FALLBACK_PROGRAMS.find((p) => p.slug === slug && p.status === PublishStatus.published);
+      return undefined;
     }
 
     const program = await prisma.localIncomeProgram.findFirst({
@@ -31,12 +33,27 @@ async function getProgramBySlug(slug: string): Promise<LocalIncomeProgramUI | un
       },
     });
 
-    if (program) return program as LocalIncomeProgramUI;
-    
-    return FALLBACK_PROGRAMS.find((p) => p.slug === slug && p.status === PublishStatus.published);
+    if (program) {
+      const currentLocale = await getServerTranslationLocale();
+
+      if (currentLocale !== "ko") {
+        const translations = await prisma.contentTranslation.findMany({
+          where: {
+            targetType: "local_income_program",
+            targetId: program.id,
+            locale: { in: [currentLocale, "en"] }
+          }
+        });
+
+        return getLocalizedContent(program as LocalIncomeProgramUI, translations, currentLocale);
+      }
+      return program as LocalIncomeProgramUI;
+    }
+
+    return undefined;
   } catch (error) {
-    console.warn(`Failed to fetch program ${slug} from DB, using fallback:`, error);
-    return FALLBACK_PROGRAMS.find((p) => p.slug === slug && p.status === PublishStatus.published);
+    console.warn(`Failed to fetch program ${slug} from DB:`, error);
+    return undefined;
   }
 }
 
@@ -87,7 +104,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
           {/* Special Core Focus Blocks */}
           <div className="flex flex-col gap-4">
             <h2 className="text-lg font-bold text-foreground mb-1">이 프로그램의 특별한 점</h2>
-            
+
             {/* 1. Life Service Connection */}
             <div className="bg-category-program/5 border border-category-program/20 rounded-xl p-5 flex gap-4 items-start shadow-sm">
               <div className="bg-category-program/10 p-2.5 rounded-full shrink-0">
@@ -152,7 +169,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
                 <span className="text-sm font-medium text-foreground">{prog.location}</span>
               </div>
             )}
-            
+
             {(prog.durationText || prog.capacityText) && (
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
@@ -164,7 +181,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
                 </span>
               </div>
             )}
-            
+
             {prog.meetingPoint && (
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
@@ -196,7 +213,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
                 <span className="text-sm text-foreground">{prog.includes}</span>
               </div>
             )}
-            
+
             {prog.excludes && (
               <div className="flex flex-col gap-1 sm:col-span-2 mt-2">
                 <span className="text-xs font-semibold text-muted-foreground">불포함 사항</span>
@@ -218,7 +235,7 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
 
           {/* CTA */}
           <div className="mt-4">
-            <ProgramCTA 
+            <ProgramCTA
               itemId={prog.id}
               itemSlug={prog.slug}
               phone={prog.phone}

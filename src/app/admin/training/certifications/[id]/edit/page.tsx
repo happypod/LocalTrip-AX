@@ -6,6 +6,7 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { CertificationForm } from "@/components/admin/training/certification-form";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { TranslationForm } from "@/components/admin/translations/translation-form";
 
 export const metadata: Metadata = {
   title: "인증항목 수정 | LocalTrip AX",
@@ -24,13 +25,16 @@ export default async function EditCertificationPage({ params }: EditCertificatio
   const prisma = getPrisma();
   await prisma.$connect();
 
-  const [cert, regions] = await Promise.all([
+  const [cert, regions, translations] = await Promise.all([
     prisma.certification.findUnique({
       where: { id },
     }),
     prisma.region.findMany({
       orderBy: { name: "asc" },
     }),
+    prisma.contentTranslation.findMany({
+      where: { targetType: "certification", targetId: id }
+    })
   ]);
 
   if (!cert) {
@@ -63,6 +67,20 @@ export default async function EditCertificationPage({ params }: EditCertificatio
         </div>
 
         <CertificationForm initialData={initialData} regions={regions} />
+
+        <TranslationForm
+          targetType="certification"
+          targetId={cert.id}
+          originalData={{
+            title: cert.title,
+            summary: cert.summary,
+            description: null,
+          }}
+          existingTranslations={translations.reduce((acc, t) => {
+            acc[t.locale] = { title: t.title, summary: t.summary, description: t.description };
+            return acc;
+          }, {} as Record<string, { title: string | null; summary: string | null; description: string | null }>)}
+        />
       </div>
     </AdminShell>
   );

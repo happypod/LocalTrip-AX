@@ -58,6 +58,7 @@ MVP는 T-001~T-028 기준으로 완료된 상태다. 이후 작업은 MVP 범위
 
 ## Phase 5: AX 인공지능 기반 고도화
 
+- 기준 문서: [18_AI_INTEGRATION_PLAN.md](./18_AI_INTEGRATION_PLAN.md)
 - 실제 AI API 연동: OpenAI / Gemini API 연동을 통한 콘텐츠 보강 및 가공 지원
 - AI 홍보 카피라이팅: 인스타그램 피드, 카카오 채널, 블로그 최적화 카피 자동 생성
 - AI 지능형 운영 진단: `LeadEvent` 수집 추이를 분석해 클릭 대비 이탈률 개선 가이드 제안

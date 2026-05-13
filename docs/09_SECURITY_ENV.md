@@ -31,6 +31,33 @@ NEXT_PUBLIC_SITE_URL="http://localhost:3000"
 
 지도 API와 AI API는 MVP에서 실제 호출하지 않는다. 키가 필요해지는 시점은 Post-MVP 또는 별도 확장 티켓에서 다시 정의한다.
 
+## T-060 AI 환경변수 기준
+
+AI 실제 연동은 Post-MVP 별도 구현 티켓에서만 활성화한다. T-060 기준으로는 아래 값이 문서화 기준이며, 기본값은 비활성 상태다.
+
+```env
+AI_FEATURES_ENABLED="false"
+AI_PROVIDER="disabled"
+AI_MODEL=""
+AI_API_KEY=""
+AI_DAILY_BUDGET_KRW="10000"
+AI_MAX_REQUESTS_PER_HOUR="30"
+AI_MAX_INPUT_CHARS="6000"
+AI_MAX_OUTPUT_CHARS="3000"
+AI_REQUIRE_ADMIN_APPROVAL="true"
+```
+
+- `AI_FEATURES_ENABLED`: 전체 AI 기능 kill switch다. 운영 승인 전에는 `false`를 유지한다.
+- `AI_PROVIDER`: `disabled`, `openai`, `gemini` 등 provider adapter의 식별자다.
+- `AI_MODEL`: 운영자가 비용과 품질을 승인한 모델 id다.
+- `AI_API_KEY`: 서버 전용 secret이다. `NEXT_PUBLIC_` 접두사를 붙이면 안 된다.
+- `AI_DAILY_BUDGET_KRW`: 일일 예상 비용 상한이다.
+- `AI_MAX_REQUESTS_PER_HOUR`: 관리자 기준 또는 전체 서비스 기준 시간당 호출 제한이다.
+- `AI_MAX_INPUT_CHARS`, `AI_MAX_OUTPUT_CHARS`: 과도한 토큰 사용을 막기 위한 문자 수 제한이다.
+- `AI_REQUIRE_ADMIN_APPROVAL`: AI 결과를 운영자가 승인하기 전 저장·공개하지 않기 위한 안전장치다.
+
+AI 호출에는 문의자명, 연락처, 이메일, 입점신청자 정보, 관리자 secret, 세션 쿠키, DB URL을 포함하지 않는다. 상세 기준은 `docs/18_AI_INTEGRATION_PLAN.md`를 따른다.
+
 ## Git 관리 원칙
 
 - `.env.example`만 커밋한다.

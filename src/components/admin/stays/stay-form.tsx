@@ -135,7 +135,7 @@ export function StayForm({ initialData, regions, businesses }: StayFormProps) {
               name="title"
               defaultValue={initialData?.title}
               required
-              placeholder="예: 파도리 어촌 민박"
+              placeholder="예: 천리포 어촌 민박"
               className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
           </div>

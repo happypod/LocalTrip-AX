@@ -1,9 +1,15 @@
-import { getPrisma } from "@/lib/prisma";
-import { ProgramForm } from "@/components/admin/programs/program-form";
-import { AdminShell } from "@/components/admin/admin-shell";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { notFound } from "next/navigation";
+import { getPrisma } from "@/lib/prisma";
+import { requireAdminSession } from "@/lib/admin-auth";
+import {
+  ContentTranslationMetadata,
+  isContentTranslationMetadata,
+} from "@/lib/content-translation";
+import { AdminShell } from "@/components/admin/admin-shell";
+import { ProgramForm } from "@/components/admin/programs/program-form";
+import { TranslationForm } from "@/components/admin/translations/translation-form";
 
 export const dynamic = "force-dynamic";
 
@@ -13,47 +19,108 @@ interface EditProgramPageProps {
   }>;
 }
 
+interface ProgramTranslationData {
+  title: string | null;
+  summary: string | null;
+  description: string | null;
+  linkedLifeService?: string | null;
+  residentRole?: string | null;
+  revenueUse?: string | null;
+}
+
+function getMetadataField(
+  metadata: unknown,
+  field: keyof ContentTranslationMetadata
+) {
+  if (!isContentTranslationMetadata(metadata)) {
+    return null;
+  }
+
+  const value = metadata[field];
+  return typeof value === "string" ? value : null;
+}
+
 export default async function EditProgramPage({ params }: EditProgramPageProps) {
+  await requireAdminSession();
   const { id } = await params;
   const prisma = getPrisma();
-  
-  const program = await prisma.localIncomeProgram.findUnique({
-    where: { id }
-  });
+
+  const [program, regions, businesses, translations] = await Promise.all([
+    prisma.localIncomeProgram.findUnique({
+      where: { id },
+    }),
+    prisma.region.findMany({
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.businessProfile.findMany({
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.contentTranslation.findMany({
+      where: { targetType: "local_income_program", targetId: id },
+    }),
+  ]);
 
   if (!program) {
     notFound();
   }
 
-  const regions = await prisma.region.findMany({
-    orderBy: { createdAt: "asc" }
-  });
-
-  const businesses = await prisma.businessProfile.findMany({
-    orderBy: { createdAt: "asc" }
-  });
+  const existingTranslations = translations.reduce(
+    (acc, translation) => {
+      acc[translation.locale] = {
+        title: translation.title,
+        summary: translation.summary,
+        description: translation.description,
+        linkedLifeService: getMetadataField(
+          translation.metadata,
+          "linkedLifeService"
+        ),
+        residentRole: getMetadataField(translation.metadata, "residentRole"),
+        revenueUse: getMetadataField(translation.metadata, "revenueUse"),
+      };
+      return acc;
+    },
+    {} as Record<string, ProgramTranslationData>
+  );
 
   return (
     <AdminShell title="주민소득상품 수정">
-      <div className="flex flex-col gap-6 py-6 max-w-7xl mx-auto">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 py-6">
         <div className="flex flex-col gap-4">
-          <Link 
+          <Link
             href="/admin/programs"
-            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 transition-colors w-fit"
+            className="flex w-fit items-center gap-2 text-sm text-gray-500 transition-colors hover:text-gray-900"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="h-4 w-4" />
             <span>목록으로 돌아가기</span>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">주민소득상품 수정</h1>
-            <p className="text-gray-500 mt-1">등록된 주민소득상품 정보를 수정합니다.</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              주민소득상품 수정
+            </h1>
+            <p className="mt-1 text-gray-500">
+              등록된 주민소득상품 정보와 다국어 번역을 수정합니다.
+            </p>
           </div>
         </div>
 
-        <ProgramForm 
+        <ProgramForm
           initialData={program}
           regions={regions}
           businesses={businesses}
+        />
+
+        <TranslationForm
+          targetType="local_income_program"
+          targetId={program.id}
+          originalData={{
+            title: program.title,
+            summary: program.summary,
+            description: program.description,
+            linkedLifeService: program.linkedLifeService,
+            residentRole: program.residentRole,
+            revenueUse: program.revenueUse,
+          }}
+          existingTranslations={existingTranslations}
         />
       </div>
     </AdminShell>

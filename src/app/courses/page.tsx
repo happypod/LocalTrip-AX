@@ -1,7 +1,7 @@
 import { PublishStatus } from "@prisma/client";
 import { getPrisma } from "@/lib/prisma";
 import { CourseFilterGrid, CourseFilterItem } from "@/components/courses/course-filter-grid";
-import { FALLBACK_COURSES, CourseUI } from "@/lib/course-data";
+import type { CourseUI } from "@/lib/course-data";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
@@ -18,7 +18,7 @@ async function getCourses(): Promise<CourseUI[]> {
     });
 
     if (!sowonRegion) {
-      return FALLBACK_COURSES.filter(c => c.status === PublishStatus.published);
+      return [];
     }
 
     const courses = await prisma.course.findMany({
@@ -32,36 +32,16 @@ async function getCourses(): Promise<CourseUI[]> {
       orderBy: { createdAt: "desc" },
     });
 
-    const formattedCourses = courses.map(c => {
-      const fallback = FALLBACK_COURSES.find(f => f.slug === c.slug);
-      return {
-        ...c,
-        targetType: fallback?.targetType || "전체",
-        durationType: fallback?.durationType || "기본",
-        linkedStayCount: c.courseItems.filter(i => i.itemType === "accommodation").length,
-        linkedExpCount: c.courseItems.filter(i => i.itemType === "experience").length,
-        linkedProgCount: c.courseItems.filter(i => i.itemType === "local_income_program").length,
-        routeItems: [],
-      };
-    }) as CourseUI[];
-
-    const merged = new Map<string, CourseUI>();
-    // 1. Add DB items
-    for (const item of formattedCourses) {
-      merged.set(item.slug, item);
-    }
-    // 2. Add Fallbacks
-    const publishedFallbacks = FALLBACK_COURSES.filter(c => c.status === PublishStatus.published);
-    for (const item of publishedFallbacks) {
-      if (!merged.has(item.slug)) {
-        merged.set(item.slug, item);
-      }
-    }
-
-    return Array.from(merged.values());
+    return courses.map(c => ({
+      ...c,
+      linkedStayCount: c.courseItems.filter(i => i.itemType === "accommodation").length,
+      linkedExpCount: c.courseItems.filter(i => i.itemType === "experience").length,
+      linkedProgCount: c.courseItems.filter(i => i.itemType === "local_income_program").length,
+      routeItems: [],
+    })) as CourseUI[];
   } catch (error) {
-    console.warn("Failed to fetch courses from DB, using fallback:", error);
-    return FALLBACK_COURSES.filter(c => c.status === PublishStatus.published);
+    console.warn("Failed to fetch courses from DB:", error);
+    return [];
   }
 }
 

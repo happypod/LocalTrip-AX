@@ -4,19 +4,23 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { notFound } from "next/navigation";
+import { TranslationForm } from "@/components/admin/translations/translation-form";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditExperiencePage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdminSession();
   const { id } = await params;
   const prisma = getPrisma();
   
-  const [experience, regions, businesses] = await Promise.all([
+  const [experience, regions, businesses, translations] = await Promise.all([
     prisma.experience.findUnique({
       where: { id }
     }),
     prisma.region.findMany({ orderBy: { name: "asc" } }),
-    prisma.businessProfile.findMany({ orderBy: { name: "asc" } })
+    prisma.businessProfile.findMany({ orderBy: { name: "asc" } }),
+    prisma.contentTranslation.findMany({ where: { targetType: "experience", targetId: id } })
   ]);
 
   if (!experience) {
@@ -44,6 +48,20 @@ export default async function EditExperiencePage({ params }: { params: Promise<{
           initialData={experience}
           regions={regions} 
           businesses={businesses} 
+        />
+
+        <TranslationForm
+          targetType="experience"
+          targetId={experience.id}
+          originalData={{
+            title: experience.title,
+            summary: experience.summary,
+            description: experience.description,
+          }}
+          existingTranslations={translations.reduce((acc, t) => {
+            acc[t.locale] = { title: t.title, summary: t.summary, description: t.description };
+            return acc;
+          }, {} as Record<string, { title: string | null; summary: string | null; description: string | null }>)}
         />
       </div>
     </AdminShell>

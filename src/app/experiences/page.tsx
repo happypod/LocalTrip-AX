@@ -1,8 +1,7 @@
 import { PublishStatus } from "@prisma/client";
 import { getPrisma } from "@/lib/prisma";
 import { ExperienceGridClient, type ExperienceGridItem } from "@/components/experiences/experience-grid-client";
-import { FALLBACK_EXPERIENCES, ExperienceUI } from "@/lib/experience-data";
-import { FALLBACK_PROGRAMS } from "@/lib/program-data";
+import type { ExperienceUI } from "@/lib/experience-data";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -28,12 +27,22 @@ type ProgramExperienceSource = Omit<ProgramExperienceItem, "href"> & {
   status?: PublishStatus | string;
 };
 
+const FOOD_PROGRAM_SLUGS = new Set([
+  "salt-farm-tour",
+  "village-dining",
+  "local-table-experience",
+  "shrimp-grill-experience",
+  "fishing-village-dining-class",
+  "shrimp-seafood-bbq",
+]);
+
 function isFoodProgram(program: ProgramExperienceSource) {
+  const slug = program.slug || "";
   return (
     program.category === "식생활" ||
-    program.slug === "salt-farm-tour" ||
-    program.slug === "village-dining" ||
-    program.slug === "local-table-experience"
+    FOOD_PROGRAM_SLUGS.has(slug) ||
+    slug.includes("dining") ||
+    slug.includes("table")
   );
 }
 
@@ -64,36 +73,19 @@ async function getExperiences(): Promise<ExperienceUI[]> {
     });
 
     if (!sowonRegion) {
-      return FALLBACK_EXPERIENCES;
+      return [];
     }
 
-    const experiences = await prisma.experience.findMany({
+    return await prisma.experience.findMany({
       where: {
         status: PublishStatus.published,
         regionId: sowonRegion.id,
       },
       orderBy: { createdAt: "desc" },
-    });
-
-    const merged = new Map<string, ExperienceUI>();
-    for (const item of experiences) {
-      const fb = FALLBACK_EXPERIENCES.find(f => f.slug === item.slug);
-      merged.set(item.slug, {
-        ...(fb || {}),
-        ...item,
-        category: fb?.category,
-      } as ExperienceUI);
-    }
-    for (const item of FALLBACK_EXPERIENCES) {
-      if (!merged.has(item.slug)) {
-        merged.set(item.slug, item);
-      }
-    }
-
-    return Array.from(merged.values());
+    }) as ExperienceUI[];
   } catch (error) {
-    console.warn("Failed to fetch experiences from DB, using fallback:", error);
-    return FALLBACK_EXPERIENCES;
+    console.warn("Failed to fetch experiences from DB:", error);
+    return [];
   }
 }
 
@@ -107,51 +99,24 @@ async function getProgramsAsExperiences(): Promise<ProgramExperienceItem[]> {
       select: { id: true },
     });
 
-    let dbPrograms: ProgramExperienceSource[] = [];
-    if (sowonRegion) {
-      const programs = await prisma.localIncomeProgram.findMany({
-        where: {
-          status: PublishStatus.published,
-          regionId: sowonRegion.id,
-        },
-      });
-      dbPrograms = programs.map((program) => ({
-        id: program.id,
-        slug: program.slug,
-        title: program.title,
-        summary: program.summary,
-        location: program.location,
-        priceText: program.priceText,
-        images: program.images,
-      }));
+    if (!sowonRegion) {
+      return [];
     }
 
-    const merged = new Map<string, ProgramExperienceSource>();
-    // 1. DB Items (with fallback enrichment)
-    for (const item of dbPrograms) {
-      const fb = FALLBACK_PROGRAMS.find(f => f.slug === item.slug);
-      merged.set(item.slug, {
-        ...(fb || {}),
-        ...item,
-        category: item.category || fb?.category,
-      } as ProgramExperienceSource);
-    }
-    // 2. Fallbacks
-    const publishedFallbacks = FALLBACK_PROGRAMS.filter(p => p.status === PublishStatus.published);
-    for (const item of publishedFallbacks) {
-      if (!merged.has(item.slug)) {
-        merged.set(item.slug, item as ProgramExperienceSource);
-      }
-    }
+    const programs = await prisma.localIncomeProgram.findMany({
+      where: {
+        status: PublishStatus.published,
+        regionId: sowonRegion.id,
+      },
+      orderBy: { createdAt: "desc" },
+    });
 
-    const rawPrograms = Array.from(merged.values());
-    return rawPrograms.filter((program) => !isFoodProgram(program)).map(toProgramExperience);
-  } catch {
-    const nonFoodPrograms = FALLBACK_PROGRAMS.filter(
-      p => p.status === PublishStatus.published && !isFoodProgram(p)
-    );
-
-    return nonFoodPrograms.map(toProgramExperience);
+    return programs
+      .filter((program) => !isFoodProgram(program))
+      .map(toProgramExperience);
+  } catch (error) {
+    console.warn("Failed to fetch resident programs for experiences from DB:", error);
+    return [];
   }
 }
 

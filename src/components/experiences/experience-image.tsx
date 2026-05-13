@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ContentImage } from "@/components/common/content-image";
 import { cn } from "@/lib/utils";
 
 interface ExperienceImageProps {
@@ -11,8 +11,6 @@ interface ExperienceImageProps {
 }
 
 export function ExperienceImage({ src, alt, className, aspectRatio = "4/3" }: ExperienceImageProps) {
-  const [imgError, setImgError] = useState(false);
-
   const aspectStyles = {
     square: "aspect-square",
     video: "aspect-video",
@@ -20,26 +18,27 @@ export function ExperienceImage({ src, alt, className, aspectRatio = "4/3" }: Ex
     auto: "",
   };
 
-  return (
+  const fallback = (
     <div
       className={cn(
-        "relative bg-muted flex items-center justify-center overflow-hidden",
+        "bg-muted flex items-center justify-center overflow-hidden",
         aspectStyles[aspectRatio],
         className
       )}
     >
-      {src && !imgError ? (
-        <img
-          src={src}
-          alt={alt}
-          className="w-full h-full object-cover"
-          onError={() => setImgError(true)}
-        />
-      ) : (
-        <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground p-4 text-center">
-          <div className="text-sm font-medium">이미지 준비 중</div>
-        </div>
-      )}
+      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground p-4 text-center">
+        <div className="text-sm font-medium">이미지 준비 중</div>
+      </div>
     </div>
+  );
+
+  return (
+    <ContentImage
+      src={src}
+      alt={alt}
+      containerClassName={cn("bg-muted", aspectStyles[aspectRatio], className)}
+      className="transition-transform duration-500 ease-out group-hover:scale-105"
+      fallback={fallback}
+    />
   );
 }

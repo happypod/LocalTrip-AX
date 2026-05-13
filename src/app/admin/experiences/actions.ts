@@ -12,6 +12,7 @@ interface ExperienceData {
   slug?: string;
   summary?: string;
   description?: string;
+  category?: string;
   location?: string;
   phone?: string;
   kakaoUrl?: string;
@@ -87,6 +88,7 @@ function getExperienceInput(data: ExperienceData) {
     slug: getExperienceSlug(data.slug),
     summary: getRequiredString(data.summary, "요약"),
     description: getOptionalString(data.description),
+    category: getOptionalString(data.category),
     location: getOptionalString(data.location),
     phone: getOptionalString(data.phone),
     kakaoUrl: getOptionalString(data.kakaoUrl),

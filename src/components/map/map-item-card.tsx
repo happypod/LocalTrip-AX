@@ -1,18 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { MapItem } from "@/lib/map-data";
 import { Bed, Leaf, HeartHandshake, Compass, MapPin, ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackMapLeadEvent } from "@/lib/track-map-lead-event";
+import { ContentImage } from "@/components/common/content-image";
 
 interface MapItemCardProps {
   item: MapItem;
 }
 
 export function MapItemCard({ item }: MapItemCardProps) {
-  const [imgError, setImgError] = useState(false);
 
   const handleTrack = () => {
     trackMapLeadEvent({
@@ -66,21 +65,18 @@ export function MapItemCard({ item }: MapItemCardProps) {
     >
       {/* Image Area */}
       <div className="w-full sm:w-32 h-32 sm:h-full relative shrink-0 bg-muted border-b sm:border-b-0 sm:border-r flex items-center justify-center">
-        {item.image && !imgError ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img 
-            src={item.image} 
-            alt={item.title} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" 
-            loading="lazy"
-            onError={() => setImgError(true)}
-          />
-        ) : (
-          <div className="flex flex-col items-center opacity-40">
-            <ImageOff className="w-6 h-6 mb-1" />
-            <span className="text-[10px] font-medium">이미지 준비 중</span>
-          </div>
-        )}
+        <ContentImage
+          src={item.image}
+          alt={item.title}
+          containerClassName="absolute inset-0 w-full h-full"
+          className="transition-transform duration-500 ease-out group-hover:scale-105"
+          fallback={
+            <div className="flex flex-col items-center justify-center w-full h-full opacity-40">
+              <ImageOff className="w-6 h-6 mb-1" />
+              <span className="text-[10px] font-medium">이미지 준비 중</span>
+            </div>
+          }
+        />
         
         {/* Type Badge */}
         <div className={cn(

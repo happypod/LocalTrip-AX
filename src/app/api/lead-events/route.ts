@@ -7,6 +7,7 @@ import {
   readJsonRecord,
   readStringField,
 } from "@/lib/public-api-validation";
+import { logOperationError, logOperationInfo } from "@/lib/operation-log";
 
 const REGION_SLUG_PATTERN = /^[a-z0-9-]+$/;
 const LEAD_ITEM_TYPES = [
@@ -66,6 +67,11 @@ export async function POST(req: Request) {
     const eventType = actionToEnumMap[actionType];
     
     if (!eventType) {
+      logOperationInfo("lead_event_invalid_action", {
+        route: "/api/lead-events",
+        actionType,
+        statusCode: 400,
+      });
       return NextResponse.json({ ok: false, error: "INVALID_ACTION_TYPE" }, { status: 400 });
     }
 
@@ -77,7 +83,10 @@ export async function POST(req: Request) {
     });
 
     if (!region) {
-      console.warn(`[LeadEvent] Region not found: ${regionSlug}`);
+      logOperationError("lead_event_save_failed", new Error("Region not found"), {
+        route: "/api/lead-events",
+        regionId: regionSlug,
+      });
       return NextResponse.json({ ok: true });
     }
 
@@ -104,13 +113,21 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (isPublicApiValidationError(error)) {
+      logOperationInfo("lead_event_validation_failed", {
+        route: "/api/lead-events",
+        errorCode: error.code,
+        statusCode: error.status,
+      });
       return NextResponse.json(
         { ok: false, error: error.code },
         { status: error.status },
       );
     }
 
-    console.error("[LeadEvent] Failed to save lead event:", error);
+    logOperationError("lead_event_save_failed", error, {
+      route: "/api/lead-events",
+      operation: "create_lead_event",
+    });
     return NextResponse.json({ ok: true });
   }
 }

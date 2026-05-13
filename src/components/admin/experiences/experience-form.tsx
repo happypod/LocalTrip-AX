@@ -39,6 +39,7 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
       slug: slug,
       summary: formData.get("summary") as string,
       description: formData.get("description") as string,
+      category: formData.get("category") as string,
       location: formData.get("location") as string,
       phone: formData.get("phone") as string,
       kakaoUrl: formData.get("kakaoUrl") as string,
@@ -90,10 +91,8 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
         </div>
       )}
 
-      {/* Warning Banner */}
       <div className="p-4 text-sm text-blue-600 bg-blue-50 rounded-xl">
-        <strong>안내:</strong> 현재 체험 카테고리, 안전안내, 위/경도, 준비물, 태그 등의 필드는 DB 스키마 제약으로 폼에서 제외되었습니다. <strong>상세 설명</strong>에 포함하여 작성해 주세요. <br />
-        <span className="text-blue-500 font-semibold text-xs mt-1 block">주민소득과 생활서비스 환류 구조를 명확히 관리해야 하는 상품은 &apos;주민소득상품 관리&apos;에서 등록하는 것을 권장합니다.</span>
+        <strong>안내:</strong> 주민소득과 생활서비스 환류 구조를 명확히 관리해야 하는 상품은 &apos;주민소득상품 관리&apos;에서 등록하는 것을 권장합니다.
       </div>
 
       {businesses.length === 0 && (
@@ -169,6 +168,16 @@ export function ExperienceForm({ initialData, regions, businesses }: ExperienceF
               defaultValue={initialData?.summary}
               required
               placeholder="해 질 녘 만리포 해변을 따라 걷는 낭만적인 산책"
+              className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-gray-700">카테고리</label>
+            <input
+              name="category"
+              defaultValue={initialData?.category || ""}
+              placeholder="예: 해변, 음식, 어촌, ESG"
               className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
           </div>

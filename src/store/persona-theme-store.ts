@@ -20,7 +20,12 @@ export const usePersonaThemeStore = create<PersonaThemeState>()(
       currentLang: "ko", // Default language
       hasCompletedOnboarding: false,
       setTheme: (theme) => set({ currentTheme: theme }),
-      setLang: (lang) => set({ currentLang: lang }),
+      setLang: (lang) => {
+        if (typeof document !== "undefined") {
+          document.cookie = `ltax_lang=${lang}; path=/; max-age=31536000`;
+        }
+        set({ currentLang: lang });
+      },
       resetTheme: () => set({ currentTheme: defaultPersonaTheme }),
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
       resetOnboarding: () => set({ hasCompletedOnboarding: false }),

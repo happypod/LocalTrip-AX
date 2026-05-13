@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 import { getPrisma } from "@/lib/prisma";
+import { getLocalizedContent } from "@/lib/content-translation";
+import { getServerTranslationLocale } from "@/lib/server-translation";
 import { PublishStatus, CourseItemType } from "@prisma/client";
-import { FALLBACK_COURSES, CourseUI, CourseItemUI } from "@/lib/course-data";
+import type { Prisma } from "@prisma/client";
+import type { CourseUI, CourseItemUI } from "@/lib/course-data";
 import { CourseImage } from "@/components/courses/course-image";
 import { CourseRoute } from "@/components/courses/course-route";
 import { CourseLinkedItems } from "@/components/courses/course-linked-items";
@@ -22,7 +25,7 @@ async function getCourseBySlug(slug: string): Promise<CourseUI | undefined> {
     });
 
     if (!sowonRegion) {
-      return FALLBACK_COURSES.find((c) => c.slug === slug && c.status === PublishStatus.published);
+      return undefined;
     }
 
     const course = await prisma.course.findFirst({
@@ -33,82 +36,145 @@ async function getCourseBySlug(slug: string): Promise<CourseUI | undefined> {
       },
       include: {
         courseItems: {
-          orderBy: { sortOrder: 'asc' },
+          orderBy: { sortOrder: "asc" },
           include: {
             accommodation: { select: { slug: true, title: true, status: true } },
             experience: { select: { slug: true, title: true, status: true } },
-            localIncomeProgram: { select: { slug: true, title: true, status: true } }
-          }
-        }
-      }
+            localIncomeProgram: { select: { slug: true, title: true, status: true } },
+          },
+        },
+      },
     });
 
-    if (course) {
-      const routeItems: CourseItemUI[] = course.courseItems
-        .map((item): CourseItemUI | null => {
-          if (item.itemType === CourseItemType.accommodation) {
-            if (!item.accommodation || item.accommodation.status !== PublishStatus.published) {
-              return null;
-            }
-            return {
-              id: item.id,
-              itemType: item.itemType,
-              sortOrder: item.sortOrder,
-              note: item.note,
-              title: item.accommodation.title,
-              slug: item.accommodation.slug,
-            };
-          }
-
-          if (item.itemType === CourseItemType.experience) {
-            if (!item.experience || item.experience.status !== PublishStatus.published) {
-              return null;
-            }
-            return {
-              id: item.id,
-              itemType: item.itemType,
-              sortOrder: item.sortOrder,
-              note: item.note,
-              title: item.experience.title,
-              slug: item.experience.slug,
-            };
-          }
-
-          if (item.itemType === CourseItemType.local_income_program) {
-            if (!item.localIncomeProgram || item.localIncomeProgram.status !== PublishStatus.published) {
-              return null;
-            }
-            return {
-              id: item.id,
-              itemType: item.itemType,
-              sortOrder: item.sortOrder,
-              note: item.note,
-              title: item.localIncomeProgram.title,
-              slug: item.localIncomeProgram.slug,
-            };
-          }
-
-          return null;
-        })
-        .filter((item): item is CourseItemUI => item !== null);
-
-      const fallback = FALLBACK_COURSES.find(f => f.slug === course.slug);
-      return {
-        ...course,
-        targetType: fallback?.targetType || "전체",
-        durationType: fallback?.durationType || "기본",
-        season: fallback?.season,
-        routeItems,
-        linkedStayCount: routeItems.filter(i => i.itemType === "accommodation").length,
-        linkedExpCount: routeItems.filter(i => i.itemType === "experience").length,
-        linkedProgCount: routeItems.filter(i => i.itemType === "local_income_program").length,
-      } as CourseUI;
+    if (!course) {
+      return undefined;
     }
-    
-    return FALLBACK_COURSES.find((c) => c.slug === slug && c.status === PublishStatus.published);
+
+    const routeItems: CourseItemUI[] = course.courseItems
+      .map((item): CourseItemUI | null => {
+        if (item.itemType === CourseItemType.accommodation) {
+          if (!item.accommodation || item.accommodation.status !== PublishStatus.published) return null;
+          return {
+            id: item.id,
+            itemType: item.itemType,
+            sortOrder: item.sortOrder,
+            note: item.note,
+            title: item.accommodation.title,
+            slug: item.accommodation.slug,
+          };
+        }
+
+        if (item.itemType === CourseItemType.experience) {
+          if (!item.experience || item.experience.status !== PublishStatus.published) return null;
+          return {
+            id: item.id,
+            itemType: item.itemType,
+            sortOrder: item.sortOrder,
+            note: item.note,
+            title: item.experience.title,
+            slug: item.experience.slug,
+          };
+        }
+
+        if (item.itemType === CourseItemType.local_income_program) {
+          if (!item.localIncomeProgram || item.localIncomeProgram.status !== PublishStatus.published) return null;
+          return {
+            id: item.id,
+            itemType: item.itemType,
+            sortOrder: item.sortOrder,
+            note: item.note,
+            title: item.localIncomeProgram.title,
+            slug: item.localIncomeProgram.slug,
+          };
+        }
+
+        return null;
+      })
+      .filter((item): item is CourseItemUI => item !== null);
+
+    const currentLocale = await getServerTranslationLocale();
+    let localizedCourse = course as unknown as CourseUI;
+
+    if (currentLocale !== "ko") {
+      const translations = await prisma.contentTranslation.findMany({
+        where: {
+          targetType: "course",
+          targetId: course.id,
+          locale: { in: [currentLocale, "en"] },
+        },
+      });
+      localizedCourse = getLocalizedContent(course as unknown as CourseUI, translations, currentLocale);
+
+      const itemTranslationFilters: Prisma.ContentTranslationWhereInput[] = [];
+      const accommodationIds = course.courseItems
+        .map((item) => item.accommodationId)
+        .filter((id): id is string => Boolean(id));
+      const experienceIds = course.courseItems
+        .map((item) => item.experienceId)
+        .filter((id): id is string => Boolean(id));
+      const programIds = course.courseItems
+        .map((item) => item.localIncomeProgramId)
+        .filter((id): id is string => Boolean(id));
+
+      if (accommodationIds.length > 0) {
+        itemTranslationFilters.push({
+          targetType: "accommodation",
+          targetId: { in: accommodationIds },
+        });
+      }
+      if (experienceIds.length > 0) {
+        itemTranslationFilters.push({
+          targetType: "experience",
+          targetId: { in: experienceIds },
+        });
+      }
+      if (programIds.length > 0) {
+        itemTranslationFilters.push({
+          targetType: "local_income_program",
+          targetId: { in: programIds },
+        });
+      }
+
+      if (itemTranslationFilters.length > 0) {
+        const itemTranslations = await prisma.contentTranslation.findMany({
+          where: {
+            OR: itemTranslationFilters,
+            locale: { in: [currentLocale, "en"] },
+          }
+        });
+        
+        routeItems.forEach(item => {
+          const dbItem = course.courseItems.find(ci => ci.id === item.id);
+          const targetId = dbItem?.accommodationId || dbItem?.experienceId || dbItem?.localIncomeProgramId;
+          const targetType =
+            dbItem?.accommodationId
+              ? "accommodation"
+              : dbItem?.experienceId
+                ? "experience"
+                : dbItem?.localIncomeProgramId
+                  ? "local_income_program"
+                  : null;
+          if (targetId) {
+            const translationsForItem = itemTranslations.filter(
+              (t) => t.targetId === targetId && t.targetType === targetType
+            );
+            const loc = getLocalizedContent({ title: item.title, summary: null }, translationsForItem, currentLocale);
+            item.title = loc.title;
+          }
+        });
+      }
+    }
+
+    return {
+      ...localizedCourse,
+      routeItems,
+      linkedStayCount: routeItems.filter((i) => i.itemType === "accommodation").length,
+      linkedExpCount: routeItems.filter((i) => i.itemType === "experience").length,
+      linkedProgCount: routeItems.filter((i) => i.itemType === "local_income_program").length,
+    } as CourseUI;
   } catch (error) {
-    console.warn(`Failed to fetch course ${slug} from DB, using fallback:`, error);
-    return FALLBACK_COURSES.find((c) => c.slug === slug && c.status === PublishStatus.published);
+    console.warn(`Failed to fetch course ${slug} from DB:`, error);
+    return undefined;
   }
 }
 
@@ -121,95 +187,76 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-24 bg-muted/10">
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b">
-        <div className="max-w-screen-md mx-auto px-4 h-14 flex items-center justify-between">
-          <Link href="/courses" className="flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-            <ChevronLeft className="w-5 h-5 mr-1" />
+    <div className="flex min-h-screen flex-col bg-muted/10 pb-24">
+      <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex h-14 max-w-screen-md items-center justify-between px-4">
+          <Link href="/courses" className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+            <ChevronLeft className="mr-1 h-5 w-5" />
             추천 코스 목록
           </Link>
           <Link href="/" className="text-xs text-muted-foreground hover:underline">홈</Link>
         </div>
       </header>
 
-      <main className="max-w-screen-md mx-auto w-full">
-        {/* Main Image */}
+      <main className="mx-auto w-full max-w-screen-md">
         <div className="relative">
           <CourseImage src={course.images?.[0]} alt={course.title} />
-          <div className="absolute top-4 left-4 flex gap-2">
+          <div className="absolute left-4 top-4 flex gap-2">
             {course.targetType && (
-              <div className="px-3 py-1.5 bg-category-course text-white text-[11px] font-bold rounded-lg shadow-lg">
+              <div className="rounded-lg bg-category-course px-3 py-1.5 text-[11px] font-bold text-white shadow-lg">
                 {course.targetType}
               </div>
             )}
             {course.durationType && (
-              <div className="px-3 py-1.5 bg-background text-foreground text-[11px] font-bold rounded-lg shadow-lg">
+              <div className="rounded-lg bg-background/90 px-3 py-1.5 text-[11px] font-bold text-foreground shadow-lg backdrop-blur-sm">
                 {course.durationType}
               </div>
             )}
           </div>
         </div>
 
-        <div className="p-6 flex flex-col gap-10 bg-background">
-          {/* Header Info */}
-          <div className="flex flex-col gap-3">
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight text-foreground flex items-center gap-2">
-              <Compass className="w-7 h-7 text-category-course shrink-0" />
+        <div className="flex flex-col gap-8 bg-background p-6">
+          <section className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 text-sm font-bold text-category-course">
+              <Compass className="h-4 w-4" />
+              소원권역 추천 코스
+            </div>
+            <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-foreground md:text-3xl">
               {course.title}
             </h1>
-            <p className="text-muted-foreground leading-relaxed text-[15px]">
+            <p className="text-[15px] leading-relaxed text-muted-foreground">
               {course.summary}
             </p>
-          </div>
+          </section>
 
-          <hr className="border-muted" />
-
-          {/* Description */}
           {course.description && (
-            <div>
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+            <section className="rounded-2xl border bg-muted/20 p-5">
+              <h2 className="mb-2 flex items-center gap-2 text-lg font-bold text-foreground">
+                <Info className="h-5 w-5 text-category-course" />
+                코스 소개
+              </h2>
+              <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                 {course.description}
               </p>
-            </div>
+            </section>
           )}
 
-          {/* 3. Movement minimizing message */}
-          <div className="bg-category-course/5 border border-category-course/20 rounded-xl p-4 flex gap-3 items-start">
-            <Info className="w-5 h-5 text-category-course shrink-0 mt-0.5" />
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-bold text-foreground">이동 안내</span>
-              <span className="text-sm text-muted-foreground leading-relaxed">
-                이 코스는 숙소 주변 또는 현장 집결형 프로그램을 중심으로 구성되어 있습니다. <br/>
-                일부 이동은 자가용, 도보, 지역 교통수단 이용이 필요할 수 있습니다. (차량 배차, 셔틀 기능은 제공하지 않습니다)
-              </span>
-            </div>
-          </div>
-
-          {/* 1. Course Schedule (Route) */}
-          <section className="flex flex-col gap-5">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Route className="w-5 h-5 text-category-course" />
+          <section className="rounded-2xl border bg-card p-5 shadow-sm">
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
+              <Route className="h-5 w-5 text-category-course" />
               추천 일정표
             </h2>
             <CourseRoute items={course.routeItems} />
           </section>
 
-          <hr className="border-muted" />
+          {course.routeItems.length > 0 && (
+            <section className="rounded-2xl border bg-card p-5 shadow-sm">
+              <h2 className="mb-4 text-lg font-bold text-foreground">연결된 콘텐츠</h2>
+              <CourseLinkedItems courseId={course.id} courseSlug={course.slug} items={course.routeItems} />
+            </section>
+          )}
 
-          {/* 2. Linked Items */}
-          <section className="flex flex-col gap-5">
-            <h2 className="text-xl font-bold">코스 관련 콘텐츠</h2>
-            <CourseLinkedItems 
-              courseId={course.id}
-              courseSlug={course.slug}
-              items={course.routeItems} 
-            />
-          </section>
-
-          {/* CTA */}
-          <section className="mt-4">
-            <CourseCTA itemId={course.id} itemSlug={course.slug} />
-          </section>
+          <CourseCTA itemId={course.id} itemSlug={course.slug} />
         </div>
       </main>
     </div>

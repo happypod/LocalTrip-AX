@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { getPrisma } from "@/lib/prisma";
+import { getLocalizedContent } from "@/lib/content-translation";
+import { getServerTranslationLocale } from "@/lib/server-translation";
 import { PublishStatus } from "@prisma/client";
-import { FALLBACK_EXPERIENCES, ExperienceUI } from "@/lib/experience-data";
+import type { ExperienceUI } from "@/lib/experience-data";
 import { ExperienceImage } from "@/components/experiences/experience-image";
 import { ExperienceCTA } from "@/components/experiences/experience-cta";
 import { MapPin, Clock, Users, Info, ChevronLeft, AlertCircle, CheckCircle2, ShoppingBag } from "lucide-react";
@@ -22,7 +24,7 @@ async function getExperienceBySlug(slug: string): Promise<ExperienceUI | undefin
     });
 
     if (!sowonRegion) {
-      return FALLBACK_EXPERIENCES.find((e) => e.slug === slug && e.status === PublishStatus.published);
+      return undefined;
     }
 
     const experience = await prisma.experience.findFirst({
@@ -33,12 +35,27 @@ async function getExperienceBySlug(slug: string): Promise<ExperienceUI | undefin
       },
     });
 
-    if (experience) return experience as ExperienceUI;
-    
-    return FALLBACK_EXPERIENCES.find((e) => e.slug === slug && e.status === PublishStatus.published);
+    if (experience) {
+      const currentLocale = await getServerTranslationLocale();
+
+      if (currentLocale !== "ko") {
+        const translations = await prisma.contentTranslation.findMany({
+          where: {
+            targetType: "experience",
+            targetId: experience.id,
+            locale: { in: [currentLocale, "en"] }
+          }
+        });
+
+        return getLocalizedContent(experience as ExperienceUI, translations, currentLocale);
+      }
+      return experience as ExperienceUI;
+    }
+
+    return undefined;
   } catch (error) {
-    console.warn(`Failed to fetch experience ${slug} from DB, using fallback:`, error);
-    return FALLBACK_EXPERIENCES.find((e) => e.slug === slug && e.status === PublishStatus.published);
+    console.warn(`Failed to fetch experience ${slug} from DB:`, error);
+    return undefined;
   }
 }
 
@@ -193,7 +210,7 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
             <div className="flex flex-col gap-4 mb-6">
               <h3 className="text-lg font-bold">문의 및 연결</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                이 체험은 예약 확정 상품이 아닙니다. 운영 일시, 정확한 가격, 인원은 
+                이 체험은 예약 확정 상품이 아닙니다. 운영 일시, 정확한 가격, 인원은
                 운영자 사정에 따라 변동될 수 있으므로 아래 채널로 먼저 문의해 주세요.
               </p>
             </div>

@@ -2,17 +2,21 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { StayForm } from "@/components/admin/stays/stay-form";
 import { getPrisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { TranslationForm } from "@/components/admin/translations/translation-form";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditStayPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdminSession();
   const { id } = await params;
   const prisma = getPrisma();
   
-  const [stay, regions, businesses] = await Promise.all([
+  const [stay, regions, businesses, translations] = await Promise.all([
     prisma.accommodation.findUnique({ where: { id } }),
     prisma.region.findMany({ orderBy: { name: "asc" } }),
-    prisma.businessProfile.findMany({ orderBy: { name: "asc" } })
+    prisma.businessProfile.findMany({ orderBy: { name: "asc" } }),
+    prisma.contentTranslation.findMany({ where: { targetType: "accommodation", targetId: id } })
   ]);
 
   if (!stay) {
@@ -30,6 +34,20 @@ export default async function EditStayPage({ params }: { params: Promise<{ id: s
         </div>
         
         <StayForm initialData={stay} regions={regions} businesses={businesses} />
+
+        <TranslationForm
+          targetType="accommodation"
+          targetId={stay.id}
+          originalData={{
+            title: stay.title,
+            summary: stay.summary,
+            description: stay.description,
+          }}
+          existingTranslations={translations.reduce((acc, t) => {
+            acc[t.locale] = { title: t.title, summary: t.summary, description: t.description };
+            return acc;
+          }, {} as Record<string, { title: string | null; summary: string | null; description: string | null }>)}
+        />
       </div>
     </AdminShell>
   );

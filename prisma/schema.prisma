@@ -132,6 +132,7 @@ model Experience {
   slug                String
   summary             String
   description         String?
+  category            String?
   location            String?
   durationText        String?
   priceText           String?
@@ -170,7 +171,10 @@ model LocalIncomeProgram {
   linkedLifeService   String
   residentRole        String
   revenueUse          String
+  category            String?
   location            String?
+  durationText        String?
+  capacityText        String?
   priceText           String?
   images              String[]               @default([])
   phone               String?
@@ -201,6 +205,9 @@ model Course {
   slug                String
   summary             String
   description         String?
+  targetType          String?
+  durationType        String?
+  season              String?
   images              String[]               @default([])
   status              PublishStatus          @default(draft)
   createdAt           DateTime               @default(now())

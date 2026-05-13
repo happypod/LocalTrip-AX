@@ -531,22 +531,36 @@
 
 - 목적: 관리자가 숙소, 체험, 코스 등의 콘텐츠에 대해 다국어 번역을 직접 입력할 수 있는 화면을 구성한다.
 - 작업 범위:
-  - 관리자 폼 상단에 언어별(KR, EN, CN, JP) 탭 추가
-  - 외국어 탭 활성화 시 번역본 필드 편집 허용
+  - 관리자 폼 하단에 다국어 번역(EN, CN, JP) 탭 추가 및 별도 저장 로직 구현
+  - 기존 폼의 저장 로직에 간섭하지 않고 독립적으로 동작하도록 분리
+- **실행 결과 (2026-05-13 완료)**:
+  - `src/lib/content-translation.ts`에 번역 대상 및 로캘 상수, 공통 유틸리티 작성.
+  - `saveContentTranslation` 서버 액션 구현(`src/app/admin/translations/actions.ts`).
+  - `TranslationForm` 공통 UI 컴포넌트 작성(`src/components/admin/translations/translation-form.tsx`).
+  - 숙소, 체험, 주민소득상품, 코스, 교육과정, 인증항목 편집 폼 화면 하단에 번역 UI 통합 완료.
+  - 데이터 모델 원칙에 맞추어 `Event` 모델은 제외.
 
 ### T-055 공개 상세 화면 콘텐츠 번역 Fallback 적용
 
 - 목적: 사용자가 선택한 언어에 맞춰 번역된 운영 콘텐츠를 렌더링하고, 미존재 시 Fallback 로직을 수행한다.
 - 작업 범위:
-  - SSR 페이지 단에서 DB 조회 시 `include: { translations: true }` 적용
+  - 언어 상태의 쿠키(`ltax_lang`) 동기화 및 SSR 지원 로직 추가
   - 선택 언어 -> 영어 -> 한국어 원문 순서로 노출 로직 추가
+- **실행 결과 (2026-05-13 완료)**:
+  - `usePersonaThemeStore`에 쿠키 동기화 로직 추가.
+  - `src/lib/content-translation.ts`에 서버 쿠키 조회 및 Fallback 병합 유틸 구현.
+  - 공개 상세 화면 4종(`/stays`, `/experiences`, `/programs`, `/courses`)에 번역 Fallback 렌더링 통합 완료.
 
 ### T-056 AI 번역 초안 생성 Placeholder
 
 - 목적: 관리자가 다국어 탭에서 손쉽게 기본 번역을 생성할 수 있도록 AI 프롬프트 연동 기반을 마련한다.
 - 작업 범위:
-  - "한국어 기반 AI 초안 생성" 버튼 UI 배치
-  - API Mock 구현
+  - "AI 초안 준비" 버튼 UI 배치 및 조건부 비활성화 (원문 부족 시)
+  - 실제 API 연동이 아닌 향후 전달될 프롬프트 뷰어 모달(Placeholder) 구현
+- **실행 결과 (2026-05-13 완료)**:
+  - `src/components/admin/translations/translation-form.tsx`에 AI Placeholder 버튼 및 안내 모달 구현.
+  - 실제 API 호출 및 외부 패키지 설치 일체 없음.
+  - AI에 전달될 컨텍스트 및 금지어/관광 특성 룰을 담은 프롬프트 생성 헬퍼 추가.
 
 ### T-057 Persona Theme / i18n QA
 
@@ -560,6 +574,12 @@
   - localStorage reset 후 기본값 확인
 - 완료 기준:
   - 테마별 주요 화면 QA 결과 문서화
+- **실행 결과 (2026-05-13 완료)**:
+  - 페르소나 테마(4종) 및 언어(4종) 전환 시 UI 상태 정상 유지(localStorage/Cookie 동기화) 확인.
+  - 공개 상세 화면(숙소, 체험, 주민소득상품, 코스)에서 `ltax_lang` 쿠키 기반 SSR 번역 Fallback 작동 검증.
+  - 관리자 다국어 번역 UI의 AI Placeholder 렌더링 검증 및 실제 API 미호출 확인.
+  - 모바일 네비게이션바와 테마/언어 선택기 UI 간 충돌 없음 확인.
+  - Hydration Mismatch 등 치명적 콘솔 에러 없음 확인.
 
 ## 10순위: 운영 기능 고도화
 
@@ -568,18 +588,35 @@
 - 목적: 남아 있는 `<img>` LCP warning을 `next/image` 또는 로컬 최적화 전략으로 해소한다.
 - 완료 기준:
   - `npm run lint`에서 이미지 LCP warning 0건
+- **실행 결과 (2026-05-13 완료)**:
+  - 공통 `ContentImage` 컴포넌트 생성 및 `next/image` 적용.
+  - `StayImage`, `ExperienceImage`, `ProgramImage`, `CourseImage`, `MapItemCard` 컴포넌트를 `ContentImage` 기반으로 리팩토링.
+  - 미설정 외부 도메인 로드 실패 시 `onError`를 통한 안전한 도메인별 Fallback UI 유지 구조 확립.
+  - `npm run lint` 시 `@next/next/no-img-element` Warning 0건 달성.
 
 ### T-059 운영 로그/모니터링
 
 - 목적: 운영 중 API 오류, 문의 저장 실패, LeadEvent 실패를 추적한다.
 - 완료 기준:
   - 모니터링 도구와 alert 기준 문서화
+- **실행 결과 (2026-05-13 완료)**:
+  - `src/lib/operation-log.ts` 공통 로깅 헬퍼 작성 (PII 마스킹 및 Vercel Logs 친화적 JSON 포맷 지원).
+  - 문의/입점/LeadEvent API에 `logOperationError`, `logOperationInfo` 적용 완료 (에러 발생 시 사용자 응답 분기 처리 적용).
+  - Vercel Logs 모니터링 가이드 및 알림 기준을 담은 `docs/17_OPERATION_MONITORING.md` 신규 문서화.
+  - QA 체크리스트(`docs/06_QA_CHECKLIST.md`) 운영 모니터링 항목 신규 반영.
 
 ### T-060 AI 실제 연동 기획
 
 - 목적: AX 도우미 placeholder를 실제 AI API 기능으로 전환하기 위한 비용/승인/로그 기준을 정의한다.
 - 완료 기준:
   - API provider, 비용 상한, 운영자 승인 workflow, 개인정보 처리 기준 문서화
+- **실행 결과 (2026-05-13 완료)**:
+  - `docs/18_AI_INTEGRATION_PLAN.md`를 신규 작성해 provider adapter 전략, 비활성 기본값, 비용 상한, 관리자 승인 workflow, 개인정보 제외 기준, 운영 로그 기준을 정리했다.
+  - AI 실제 호출은 계속 비활성 상태로 유지한다. `AI_FEATURES_ENABLED=false`가 기본값이며, 별도 구현 티켓과 운영 승인 없이 API key를 등록하거나 호출하지 않는다.
+  - 우선 적용 후보는 다국어 번역 초안, 상품 문안 초안, 홍보 카피 초안, 운영 인사이트 초안으로 제한한다.
+  - 모든 AI 결과는 draft-only이며 운영자가 검토·수정·저장해야 한다. 자동 저장, 자동 공개, 공개 사용자 실시간 AI 추천은 제외한다.
+  - `.env.example` 및 `docs/09_SECURITY_ENV.md`에 T-060 AI 환경변수 기준을 반영했다.
+  - 후속 구현 티켓 후보를 T-072~T-077로 분리했다.
 
 ## 11순위: B2B Premium PR / 콘텐츠 제작대행 BM
 
@@ -787,3 +824,22 @@
   - `/events` 빈 상태 확인
 - 완료 기준:
   - Event 공개 노출 QA 결과가 문서화되고 P1/P2 이슈가 없다.
+# 완료 기록: Public DB Source of Truth 전환
+
+- 적용일: 2026-05-13
+- 목적: 공개 페이지가 fallback/mock 데이터와 DB 데이터를 섞어 보여주지 않도록 하고, 관리자 페이지에 등록된 실제 DB 데이터를 단일 기준으로 사용한다.
+- 적용 범위: 홈, 숙소, 체험, 소원 별미(주민소득상품), 코스, 지도
+- 결과:
+  - `prisma/seed.ts`가 기존 공개 fallback 콘텐츠를 DB seed 입력원으로 사용하도록 정리됨.
+  - 공개 페이지 runtime에서는 fallback 병합을 제거하고 `sowon` region + `published` 데이터만 조회함.
+  - 관리자 입력 폼에 공개 화면 필터/카테고리용 선택 필드 저장을 보강함.
+  - Neon DB에 schema push 및 seed 실행 완료.
+- DB 확인 결과:
+  - 숙소: 4개 / 공개 4개
+  - 체험: 4개 / 공개 4개
+  - 주민소득상품: 11개 / 공개 10개
+  - 코스: 7개 / 공개 7개
+- 검증:
+  - `npx prisma validate` 통과
+  - `npm run lint` 통과
+  - `npm run build` 통과

@@ -10,6 +10,7 @@ import {
   readJsonRecord,
   readStringField,
 } from "@/lib/public-api-validation";
+import { logOperationError, logOperationInfo } from "@/lib/operation-log";
 
 const REGION_SLUG_PATTERN = /^[a-z0-9-]+$/;
 const PHONE_PATTERN = /^[0-9+\-\s().]{7,30}$/;
@@ -79,7 +80,11 @@ export async function POST(req: Request) {
     });
 
     if (!region) {
-      console.warn(`[Inquiry] Region not found: ${regionSlug}`);
+      logOperationError("inquiry_save_failed", new Error("Region not found"), {
+        route: "/api/inquiries",
+        regionId: regionSlug,
+        statusCode: 503,
+      });
       return NextResponse.json({ ok: false, error: "REGION_NOT_FOUND" }, { status: 503 });
     }
 
@@ -114,19 +119,33 @@ export async function POST(req: Request) {
         },
       });
     } catch (eventError) {
-      console.error("[Inquiry] Failed to save inquiry_submit LeadEvent:", eventError);
+      logOperationError("lead_event_save_failed", eventError, {
+        route: "/api/inquiries",
+        operation: "create_lead_event",
+        targetType: itemType,
+        targetId: itemId,
+      });
     }
 
     return NextResponse.json({ ok: true });
   } catch (error) {
     if (isPublicApiValidationError(error)) {
+      logOperationInfo("inquiry_validation_failed", {
+        route: "/api/inquiries",
+        errorCode: error.code,
+        statusCode: error.status,
+      });
       return NextResponse.json(
         { ok: false, error: error.code },
         { status: error.status },
       );
     }
 
-    console.error("[Inquiry] Failed to submit inquiry:", error);
+    logOperationError("inquiry_save_failed", error, {
+      route: "/api/inquiries",
+      operation: "create_inquiry",
+      statusCode: 500,
+    });
     return NextResponse.json({ ok: false, error: "INTERNAL_SERVER_ERROR" }, { status: 500 });
   }
 }

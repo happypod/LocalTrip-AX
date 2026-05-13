@@ -20,6 +20,9 @@ export interface CourseData {
   slug: string;
   summary: string;
   description?: string;
+  targetType?: string;
+  durationType?: string;
+  season?: string;
   images?: string[];
   status: string;
   courseItems: CourseItemData[];
@@ -134,6 +137,9 @@ export async function createCourse(data: CourseData) {
         slug,
         summary,
         description: data.description || null,
+        targetType: data.targetType || null,
+        durationType: data.durationType || null,
+        season: data.season || null,
         images: data.images || [],
         status: data.status as PublishStatus,
       }
@@ -218,6 +224,9 @@ export async function updateCourse(id: string, data: Partial<CourseData>) {
         ...(slug !== undefined && { slug: slug }),
         ...(data.summary !== undefined && { summary: data.summary }),
         ...(data.description !== undefined && { description: data.description || null }),
+        ...(data.targetType !== undefined && { targetType: data.targetType || null }),
+        ...(data.durationType !== undefined && { durationType: data.durationType || null }),
+        ...(data.season !== undefined && { season: data.season || null }),
         ...(data.images !== undefined && { images: data.images || [] }),
         ...(data.status !== undefined && { status: data.status as PublishStatus }),
       }

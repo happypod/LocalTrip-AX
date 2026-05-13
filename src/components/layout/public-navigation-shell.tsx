@@ -2,7 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useWishlist } from "@/context/wishlist-context";
@@ -722,6 +722,7 @@ function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
 export function PublicNavigationShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const copy = usePersonaCopy();
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
@@ -749,6 +750,7 @@ export function PublicNavigationShell({ children }: { children: ReactNode }) {
     const mappedStoreCode = lang.code === "zh" ? "zh-cn" : lang.code === "ja" ? "ja-jp" : (lang.code as PersonaLanguageCode);
     setLang(mappedStoreCode);
     setIsSwitcherOpen(false);
+    router.refresh(); // Refresh server components to re-read locale cookie
   };
 
   return (
