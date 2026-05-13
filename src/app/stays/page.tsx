@@ -3,7 +3,17 @@ import { StayGridClient } from "@/components/stays/stay-grid-client";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
+import { cn } from "@/lib/utils";
+
 export const dynamic = "force-dynamic";
+
+function inferStayCategory(title: string): string {
+  if (title.includes("한옥")) return "한옥";
+  if (title.includes("민박")) return "민박";
+  if (title.includes("글램핑")) return "글램핑";
+  if (title.includes("펜션")) return "펜션";
+  return "기타";
+}
 
 async function getStays() {
   try {
@@ -32,8 +42,29 @@ async function getStays() {
   }
 }
 
-export default async function StaysPage() {
-  const stays = await getStays();
+export default async function StaysPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category: queryCategory } = await searchParams;
+  const activeCategory = queryCategory || "전체";
+
+  const rawStays = await getStays();
+  
+  // Augment stays with inferred category
+  const allStays = rawStays.map(stay => ({
+    ...stay,
+    category: inferStayCategory(stay.title),
+  }));
+
+  // Dynamically extract categories present in the DB
+  const categories = ["전체", ...new Set(allStays.map(s => s.category))];
+
+  // Filter active stays
+  const filteredStays = activeCategory === "전체"
+    ? allStays
+    : allStays.filter(s => s.category === activeCategory);
 
   return (
     <div className="flex flex-col min-h-screen pb-20">
@@ -52,12 +83,33 @@ export default async function StaysPage() {
         </div>
       </header>
 
-      <main className="px-6 py-12 max-w-screen-xl mx-auto w-full">
-        {stays.length > 0 ? (
-          <StayGridClient stays={stays} />
+      <main className="px-6 py-8 max-w-screen-xl mx-auto w-full flex flex-col gap-8">
+        
+        {/* URL Driven Filter UI */}
+        <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          {categories.map((cat) => (
+            <Link
+              key={cat}
+              href={cat === "전체" ? "/stays" : `/stays?category=${encodeURIComponent(cat)}`}
+              className={cn(
+                "px-4 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap",
+                activeCategory === cat 
+                  ? "bg-category-stay text-white" 
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              )}
+            >
+              {cat}
+            </Link>
+          ))}
+        </div>
+
+        {filteredStays.length > 0 ? (
+          <StayGridClient stays={filteredStays} />
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-muted-foreground">현재 등록된 머묾 공간이 없습니다.</p>
+          <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed rounded-xl">
+            <p className="text-muted-foreground">
+              {activeCategory} 카테고리에 해당하는 머묾 공간이 없습니다.
+            </p>
           </div>
         )}
       </main>

@@ -57,7 +57,7 @@ function toProgramExperience(program: ProgramExperienceSource): ProgramExperienc
     priceText: program.priceText,
     durationText: program.durationText || "1시간",
     capacityText: program.capacityText || "제한없음",
-    category: "체험",
+    category: program.category || "체험",
     images: program.images || [],
   };
 }
