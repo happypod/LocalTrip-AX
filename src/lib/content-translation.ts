@@ -42,12 +42,18 @@ export interface ContentTranslationFormData {
   title?: string;
   summary?: string;
   description?: string;
+  address?: string;
+  capacityText?: string;
+  priceText?: string;
   linkedLifeService?: string;
   residentRole?: string;
   revenueUse?: string;
 }
 
 export interface ContentTranslationMetadata {
+  address?: string | null;
+  capacityText?: string | null;
+  priceText?: string | null;
   linkedLifeService?: string | null;
   residentRole?: string | null;
   revenueUse?: string | null;
@@ -84,6 +90,9 @@ export function getLocalizedContent<
     title: string;
     summary: string | null;
     description?: string | null;
+    address?: string | null;
+    capacityText?: string | null;
+    priceText?: string | null;
     linkedLifeService?: string | null;
     residentRole?: string | null;
     revenueUse?: string | null;
@@ -113,6 +122,27 @@ export function getLocalizedContent<
             selectedTranslation?.description ||
             englishTranslation?.description ||
             original.description,
+        }
+      : {}),
+    ...(original.address !== undefined
+      ? {
+          address:
+            getMetadataField("address") ||
+            original.address,
+        }
+      : {}),
+    ...(original.capacityText !== undefined
+      ? {
+          capacityText:
+            getMetadataField("capacityText") ||
+            original.capacityText,
+        }
+      : {}),
+    ...(original.priceText !== undefined
+      ? {
+          priceText:
+            getMetadataField("priceText") ||
+            original.priceText,
         }
       : {}),
     ...(original.linkedLifeService !== undefined
@@ -176,3 +206,4 @@ export function generateAITranslationPrompt(
 
   return prompt;
 }
+

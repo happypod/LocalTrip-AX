@@ -86,6 +86,9 @@ export async function saveContentTranslation(
   const safeTrim = (str?: string) => str?.trim() || null;
 
   const metadata = {
+    address: safeTrim(data.address),
+    capacityText: safeTrim(data.capacityText),
+    priceText: safeTrim(data.priceText),
     linkedLifeService: safeTrim(data.linkedLifeService),
     residentRole: safeTrim(data.residentRole),
     revenueUse: safeTrim(data.revenueUse),

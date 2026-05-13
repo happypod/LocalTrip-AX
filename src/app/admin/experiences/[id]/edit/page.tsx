@@ -57,11 +57,22 @@ export default async function EditExperiencePage({ params }: { params: Promise<{
             title: experience.title,
             summary: experience.summary,
             description: experience.description,
+            address: experience.location,
+            capacityText: experience.capacityText,
+            priceText: experience.priceText,
           }}
           existingTranslations={translations.reduce((acc, t) => {
-            acc[t.locale] = { title: t.title, summary: t.summary, description: t.description };
+            const meta = (t.metadata || {}) as Record<string, string | null>;
+            acc[t.locale] = {
+              title: t.title,
+              summary: t.summary,
+              description: t.description,
+              address: meta.address,
+              capacityText: meta.capacityText,
+              priceText: meta.priceText,
+            };
             return acc;
-          }, {} as Record<string, { title: string | null; summary: string | null; description: string | null }>)}
+          }, {} as Record<string, any>)}
         />
       </div>
     </AdminShell>

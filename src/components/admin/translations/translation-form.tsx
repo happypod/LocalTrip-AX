@@ -14,6 +14,9 @@ interface TranslationData {
   title: string | null;
   summary: string | null;
   description: string | null;
+  address?: string | null;
+  capacityText?: string | null;
+  priceText?: string | null;
   linkedLifeService?: string | null;
   residentRole?: string | null;
   revenueUse?: string | null;
@@ -37,6 +40,9 @@ function emptyTranslationData(): TranslationData {
     title: "",
     summary: "",
     description: "",
+    address: "",
+    capacityText: "",
+    priceText: "",
     linkedLifeService: "",
     residentRole: "",
     revenueUse: "",
@@ -96,6 +102,9 @@ export function TranslationForm({
         title: toSaveValue(formData[locale].title),
         summary: toSaveValue(formData[locale].summary),
         description: toSaveValue(formData[locale].description),
+        address: toSaveValue(formData[locale].address),
+        capacityText: toSaveValue(formData[locale].capacityText),
+        priceText: toSaveValue(formData[locale].priceText),
         linkedLifeService: toSaveValue(formData[locale].linkedLifeService),
         residentRole: toSaveValue(formData[locale].residentRole),
         revenueUse: toSaveValue(formData[locale].revenueUse),
@@ -135,6 +144,16 @@ export function TranslationForm({
               value={originalData.description}
               multiline
             />
+
+            {originalData.address !== undefined && (
+              <OriginalField label="주소 (Address)" value={originalData.address} />
+            )}
+            {originalData.capacityText !== undefined && (
+              <OriginalField label="인원 (Capacity)" value={originalData.capacityText} />
+            )}
+            {originalData.priceText !== undefined && (
+              <OriginalField label="가격 (Price)" value={originalData.priceText} />
+            )}
 
             {isLocalIncomeProgram && (
               <>
@@ -234,6 +253,31 @@ export function TranslationForm({
               placeholder="해당 언어로 번역한 상세 설명"
               onChange={(value) => handleInputChange("description", value)}
             />
+
+            {originalData.address !== undefined && (
+              <TranslationInput
+                label="번역 주소"
+                value={activeData.address}
+                placeholder="해당 언어로 번역한 주소"
+                onChange={(value) => handleInputChange("address", value)}
+              />
+            )}
+            {originalData.capacityText !== undefined && (
+              <TranslationInput
+                label="번역 인원 안내"
+                value={activeData.capacityText}
+                placeholder="해당 언어로 번역한 인원 정보"
+                onChange={(value) => handleInputChange("capacityText", value)}
+              />
+            )}
+            {originalData.priceText !== undefined && (
+              <TranslationInput
+                label="번역 가격 안내"
+                value={activeData.priceText}
+                placeholder="해당 언어로 번역한 가격 정보"
+                onChange={(value) => handleInputChange("priceText", value)}
+              />
+            )}
 
             {isLocalIncomeProgram && (
               <>

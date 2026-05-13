@@ -4,6 +4,8 @@ import { ExperienceGridClient, type ExperienceGridItem } from "@/components/expe
 import type { ExperienceUI } from "@/lib/experience-data";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { getServerTranslationLocale } from "@/lib/server-translation";
+import { getLocalizedList } from "@/lib/content-translation-server";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -89,7 +91,7 @@ async function getExperiences(): Promise<ExperienceUI[]> {
   }
 }
 
-async function getProgramsAsExperiences(): Promise<ProgramExperienceItem[]> {
+async function getProgramsAsExperiences(locale: string = "ko"): Promise<ProgramExperienceItem[]> {
   try {
     const prisma = getPrisma();
     await prisma.$connect();
@@ -111,7 +113,9 @@ async function getProgramsAsExperiences(): Promise<ProgramExperienceItem[]> {
       orderBy: { createdAt: "desc" },
     });
 
-    return programs
+    const localizedPrograms = await getLocalizedList(programs, "local_income_program", locale);
+
+    return localizedPrograms
       .filter((program) => !isFoodProgram(program))
       .map(toProgramExperience);
   } catch (error) {
@@ -128,8 +132,10 @@ export default async function ExperiencesPage({
   const { category: queryCategory } = await searchParams;
   const activeCategory = queryCategory || "전체";
 
-  const experiencesOnly = await getExperiences();
-  const programExperiences = await getProgramsAsExperiences();
+  const currentLocale = await getServerTranslationLocale();
+  const rawExperiences = await getExperiences();
+  const experiencesOnly = await getLocalizedList(rawExperiences, "experience", currentLocale);
+  const programExperiences = await getProgramsAsExperiences(currentLocale);
   const allExperiences: ExperienceGridItem[] = [...experiencesOnly, ...programExperiences];
   
   // Simple categories from data for the filter UI

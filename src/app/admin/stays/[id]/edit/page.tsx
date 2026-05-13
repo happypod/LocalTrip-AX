@@ -42,11 +42,22 @@ export default async function EditStayPage({ params }: { params: Promise<{ id: s
             title: stay.title,
             summary: stay.summary,
             description: stay.description,
+            address: stay.address,
+            capacityText: stay.capacityText,
+            priceText: stay.priceText,
           }}
           existingTranslations={translations.reduce((acc, t) => {
-            acc[t.locale] = { title: t.title, summary: t.summary, description: t.description };
+            const meta = (t.metadata || {}) as Record<string, string | null>;
+            acc[t.locale] = {
+              title: t.title,
+              summary: t.summary,
+              description: t.description,
+              address: meta.address,
+              capacityText: meta.capacityText,
+              priceText: meta.priceText,
+            };
             return acc;
-          }, {} as Record<string, { title: string | null; summary: string | null; description: string | null }>)}
+          }, {} as Record<string, any>)}
         />
       </div>
     </AdminShell>

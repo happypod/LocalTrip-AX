@@ -23,6 +23,9 @@ interface ProgramTranslationData {
   title: string | null;
   summary: string | null;
   description: string | null;
+  address?: string | null;
+  capacityText?: string | null;
+  priceText?: string | null;
   linkedLifeService?: string | null;
   residentRole?: string | null;
   revenueUse?: string | null;
@@ -70,6 +73,9 @@ export default async function EditProgramPage({ params }: EditProgramPageProps) 
         title: translation.title,
         summary: translation.summary,
         description: translation.description,
+        address: getMetadataField(translation.metadata, "address"),
+        capacityText: getMetadataField(translation.metadata, "capacityText"),
+        priceText: getMetadataField(translation.metadata, "priceText"),
         linkedLifeService: getMetadataField(
           translation.metadata,
           "linkedLifeService"
@@ -116,6 +122,9 @@ export default async function EditProgramPage({ params }: EditProgramPageProps) 
             title: program.title,
             summary: program.summary,
             description: program.description,
+            address: program.location,
+            capacityText: program.capacityText,
+            priceText: program.priceText,
             linkedLifeService: program.linkedLifeService,
             residentRole: program.residentRole,
             revenueUse: program.revenueUse,

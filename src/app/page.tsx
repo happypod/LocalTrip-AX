@@ -1,5 +1,7 @@
 import { getPrisma } from "@/lib/prisma";
 import { HomeClient } from "@/components/home/home-client";
+import { getServerTranslationLocale } from "@/lib/server-translation";
+import { getLocalizedList } from "@/lib/content-translation-server";
 
 export const dynamic = "force-dynamic";
 
@@ -150,13 +152,21 @@ async function getHomeData() {
 
 export default async function Home() {
   const { stays, experiences, programs, courses, events } = await getHomeData();
+  const currentLocale = await getServerTranslationLocale();
+
+  const [localizedStays, localizedExperiences, localizedPrograms, localizedCourses] = await Promise.all([
+    getLocalizedList(stays, "accommodation", currentLocale),
+    getLocalizedList(experiences, "experience", currentLocale),
+    getLocalizedList(programs, "local_income_program", currentLocale),
+    getLocalizedList(courses, "course", currentLocale),
+  ]);
 
   return (
     <HomeClient
-      stays={stays}
-      experiences={experiences}
-      programs={programs}
-      courses={courses}
+      stays={localizedStays}
+      experiences={localizedExperiences}
+      programs={localizedPrograms}
+      courses={localizedCourses}
       events={events}
     />
   );

@@ -2,6 +2,8 @@ import { getPrisma } from "@/lib/prisma";
 import { StayGridClient } from "@/components/stays/stay-grid-client";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { getServerTranslationLocale } from "@/lib/server-translation";
+import { getLocalizedList } from "@/lib/content-translation-server";
 
 import { cn } from "@/lib/utils";
 
@@ -51,9 +53,11 @@ export default async function StaysPage({
   const activeCategory = queryCategory || "전체";
 
   const rawStays = await getStays();
+  const currentLocale = await getServerTranslationLocale();
+  const localizedStays = await getLocalizedList(rawStays, "accommodation", currentLocale);
   
   // Augment stays with explicit or inferred category
-  const allStays = rawStays.map(stay => ({
+  const allStays = localizedStays.map(stay => ({
     ...stay,
     category: stay.category || inferStayCategory(stay.title),
   }));

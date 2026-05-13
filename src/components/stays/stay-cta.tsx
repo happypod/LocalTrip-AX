@@ -5,6 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Phone, MessageCircle, Globe, CalendarCheck, MessageSquare } from "lucide-react";
 import { trackLeadEvent, LeadActionType } from "@/lib/lead-event";
 import { InquiryDialog } from "@/components/inquiry/inquiry-dialog";
+import { getStaticLabels } from "@/lib/static-translations";
 
 interface StayCTAProps {
   itemId: string;
@@ -13,9 +14,11 @@ interface StayCTAProps {
   kakaoUrl?: string | null;
   naverBookingUrl?: string | null;
   websiteUrl?: string | null;
+  locale?: string;
 }
 
-export function StayCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl, websiteUrl }: StayCTAProps) {
+export function StayCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl, websiteUrl, locale }: StayCTAProps) {
+  const labels = getStaticLabels(locale);
   const handleTrack = (actionType: LeadActionType, targetUrl?: string) => {
     trackLeadEvent({
       itemType: "accommodation",
@@ -35,7 +38,7 @@ export function StayCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl, we
             className={cn(buttonVariants({ size: "xl" }), "w-full rounded-xl flex items-center justify-center gap-2")}
           >
             <Phone className="w-5 h-5" />
-            전화 문의
+            {labels.phoneCall}
           </a>
         )}
         {kakaoUrl && (
@@ -50,7 +53,7 @@ export function StayCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl, we
             )}
           >
             <MessageCircle className="w-5 h-5" />
-            카카오 문의
+            {labels.kakaoInquiry}
           </a>
         )}
         {naverBookingUrl && (
@@ -65,7 +68,7 @@ export function StayCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl, we
             )}
           >
             <CalendarCheck className="w-5 h-5" />
-            네이버 예약
+            {labels.naverBooking}
           </a>
         )}
         {websiteUrl && (
@@ -77,7 +80,7 @@ export function StayCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl, we
             className={cn(buttonVariants({ variant: "outline", size: "xl" }), "w-full rounded-xl flex items-center justify-center gap-2")}
           >
             <Globe className="w-5 h-5" />
-            홈페이지 방문
+            {labels.websiteVisit}
           </a>
         )}
       </div>
@@ -85,10 +88,10 @@ export function StayCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl, we
       <div className="mt-4 p-4 border border-dashed rounded-xl flex flex-col items-center gap-2 bg-muted/20">
         <div className="flex items-center gap-2 text-muted-foreground">
           <MessageSquare className="w-4 h-4" />
-          <span className="text-sm font-medium">플랫폼 통합 문의</span>
+          <span className="text-sm font-medium">{labels.platformInquiry}</span>
         </div>
         <p className="text-xs text-muted-foreground text-center">
-          숙박 가능 여부와 상세 조건은 문의를 통해 확인해 주세요.
+          {labels.platformDesc}
         </p>
         <InquiryDialog 
           itemType="accommodation"

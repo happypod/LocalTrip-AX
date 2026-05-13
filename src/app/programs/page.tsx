@@ -4,6 +4,8 @@ import { ProgramGridClient, type ProgramGridItem } from "@/components/programs/p
 import type { LocalIncomeProgramUI } from "@/lib/program-data";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { getServerTranslationLocale } from "@/lib/server-translation";
+import { getLocalizedList } from "@/lib/content-translation-server";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -62,7 +64,9 @@ export default async function ProgramsPage({
   const { category: queryCategory } = await searchParams;
   const activeCategory = queryCategory || "전체";
 
-  const allPrograms = await getPrograms();
+  const currentLocale = await getServerTranslationLocale();
+  const rawPrograms = await getPrograms();
+  const allPrograms = await getLocalizedList(rawPrograms, "local_income_program", currentLocale);
   const programs: ProgramGridItem[] = allPrograms.filter(isFoodProgram);
   
   // Simple categories from data for the filter UI
