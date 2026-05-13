@@ -16,6 +16,7 @@ import {
   faUsers,
 } from "@/lib/fontawesome";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { getStaticLabels } from "@/lib/static-translations";
 
 type HomeItem = {
   id: string;
@@ -62,6 +63,8 @@ function SectionHeader({ title, href, viewAllText }: { title: string; href: stri
 export function HomeClient({ stays, experiences, programs, courses, events }: HomeClientProps) {
   const copy = usePersonaCopy();
   const currentTheme = usePersonaThemeStore((state) => state.currentTheme);
+  const currentLang = usePersonaThemeStore((state) => state.currentLang);
+  const labels = getStaticLabels(currentLang);
   const isClient = useIsClient();
 
   const sortedStays = isClient
@@ -140,7 +143,7 @@ export function HomeClient({ stays, experiences, programs, courses, events }: Ho
         {isClient && (
           <div className="mt-6 mb-2 inline-flex items-center gap-1.5 rounded-full bg-persona-primary/10 border border-persona-primary/10 px-3 py-1 text-xs font-extrabold text-persona-primary select-none transition-all hover:bg-persona-primary/15">
             <span className="text-xs">✨</span>
-            <span>선택하신 여행 취향에 맞춰 먼저 보여드릴게요!</span>
+            <span>{labels.personaDesc}</span>
           </div>
         )}
 
@@ -152,8 +155,8 @@ export function HomeClient({ stays, experiences, programs, courses, events }: Ho
         <section className="grid gap-5 py-8 md:grid-cols-2">
           <Link href="/partner/apply" className="group flex items-center justify-between rounded-persona bg-persona-surface/80 p-7 shadow-[0_16px_50px_-32px_rgba(0,0,0,0.4)] ring-1 ring-[#dde4e6] backdrop-blur-xl transition hover:-translate-y-1">
             <div>
-              <h3 className="text-xl font-black font-persona-display">파트너 입점 신청</h3>
-              <p className="mt-2 text-sm font-medium text-[#584140]">파트너 입점 설명하고 신청합니다.</p>
+              <h3 className="text-xl font-black font-persona-display">{labels.partnerTitle}</h3>
+              <p className="mt-2 text-sm font-medium text-[#584140]">{labels.partnerDesc}</p>
               <span className="mt-5 inline-flex rounded-full bg-[#161d1f] px-5 py-2 text-sm font-black text-white group-hover:bg-persona-primary">
                 {copy.button.apply}
               </span>
@@ -163,8 +166,8 @@ export function HomeClient({ stays, experiences, programs, courses, events }: Ho
 
           <Link href="/map" className="group flex items-center justify-between rounded-persona bg-persona-surface/80 p-7 shadow-[0_16px_50px_-32px_rgba(0,0,0,0.4)] ring-1 ring-[#dde4e6] backdrop-blur-xl transition hover:-translate-y-1">
             <div>
-              <h3 className="text-xl font-black font-persona-display">로컬 지도 보기</h3>
-              <p className="mt-2 text-sm font-medium text-[#584140]">지역의 숙소와 체험 위치를 모아봅니다.</p>
+              <h3 className="text-xl font-black font-persona-display">{labels.mapTitle}</h3>
+              <p className="mt-2 text-sm font-medium text-[#584140]">{labels.mapDesc}</p>
               <span className="mt-5 inline-flex rounded-full bg-[#161d1f] px-5 py-2 text-sm font-black text-white group-hover:bg-[#006a65]">
                 {copy.button.openMap}
               </span>
@@ -176,7 +179,7 @@ export function HomeClient({ stays, experiences, programs, courses, events }: Ho
         <footer className="mt-7 flex flex-col gap-4 border-t border-[#dde4e6] py-7 text-sm text-persona-muted md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap items-center gap-5">
             <span className="text-base font-black text-persona-text font-persona-display">{copy.hero.title}</span>
-            <span>관광문의</span>
+            <span>{labels.touristInquiry}</span>
             <span>010-0233-4548</span>
             <span>www.sowontrip.com</span>
           </div>

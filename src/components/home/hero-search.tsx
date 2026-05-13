@@ -12,14 +12,19 @@ import {
   faUserGroup,
 } from "@/lib/fontawesome";
 
+import { usePersonaThemeStore } from "@/store/persona-theme-store";
+import { getStaticLabels } from "@/lib/static-translations";
+
 export function HeroSearch() {
   const [activeTab, setActiveTab] = useState<"stay" | "experience" | "program" | "course">("stay");
+  const currentLang = usePersonaThemeStore((state) => state.currentLang);
+  const labels = getStaticLabels(currentLang);
 
   const tabs = [
-    { id: "stay", label: "머묾", icon: faHouseChimney },
-    { id: "experience", label: "노님", icon: faPersonHiking },
-    { id: "program", label: "소원 별미", icon: faStore },
-    { id: "course", label: "여정의 기록", icon: faRoute },
+    { id: "stay", label: labels.tabStay, icon: faHouseChimney },
+    { id: "experience", label: labels.tabExperience, icon: faPersonHiking },
+    { id: "program", label: labels.tabProgram, icon: faStore },
+    { id: "course", label: labels.tabCourse, icon: faRoute },
   ] as const;
 
   return (
@@ -59,24 +64,24 @@ export function HeroSearch() {
           <div className="flex flex-col items-start w-full">
             <span className="hidden md:inline text-[9px] font-black text-gray-500 uppercase tracking-wider">
               {activeTab === "stay"
-                ? "머무는 공간 또는 키워드"
+                ? labels.searchStayLabel
                 : activeTab === "experience"
-                ? "노님 테마 또는 키워드"
+                ? labels.searchExpLabel
                 : activeTab === "program"
-                ? "소원 별미 검색어"
-                : "여정의 기록 및 키워드"}
+                ? labels.searchProgLabel
+                : labels.searchCourseLabel}
             </span>
             <input
               name="q"
-              aria-label="검색어"
+              aria-label={labels.searchBtn}
               placeholder={
                 activeTab === "stay"
-                  ? "당신이 머물고 싶은 고요한 공간을 검색해보세요"
+                  ? labels.searchStayPlaceholder
                   : activeTab === "experience"
-                  ? "태안 바다에서 즐길 특별한 놀이(노님) 키워드 입력"
+                  ? labels.searchExpPlaceholder
                   : activeTab === "program"
-                  ? "정성 가득한 소원 별미를 검색해보세요"
-                  : "마음이 편안해지는 나만의 여정의 기록 검색어 입력"
+                  ? labels.searchProgPlaceholder
+                  : labels.searchCoursePlaceholder
               }
               className="w-full bg-transparent text-sm font-semibold text-[#161d1f] outline-none placeholder:text-gray-400"
             />
@@ -90,11 +95,11 @@ export function HeroSearch() {
         <div className="flex-1 md:flex-initial md:w-[250px] flex items-center gap-3 px-4 py-2 md:py-0 text-left border-t border-b border-gray-100 md:border-none">
           <FontAwesomeIcon icon={faCalendarDays} className="h-4 w-4 text-[#161d1f]/60 shrink-0" />
           <div className="flex flex-col items-start w-full">
-            <span className="hidden md:inline text-[9px] font-black text-gray-500 uppercase tracking-wider">여행 가능 일정</span>
+            <span className="hidden md:inline text-[9px] font-black text-gray-500 uppercase tracking-wider">{labels.dateLabel}</span>
             <input
               name="date"
               type="date"
-              aria-label="여행 가능 일정"
+              aria-label={labels.dateLabel}
               className="w-full bg-transparent text-sm font-semibold text-[#161d1f] outline-none"
             />
           </div>
@@ -107,13 +112,13 @@ export function HeroSearch() {
         <div className="flex-1 md:flex-initial md:w-[180px] flex items-center gap-3 px-4 py-2 md:py-0 text-left">
           <FontAwesomeIcon icon={faUserGroup} className="h-4 w-4 text-[#161d1f]/60 shrink-0" />
           <div className="flex flex-col items-start w-full">
-            <span className="hidden md:inline text-[9px] font-black text-gray-500 uppercase tracking-wider">인원수</span>
+            <span className="hidden md:inline text-[9px] font-black text-gray-500 uppercase tracking-wider">{labels.guestsLabel}</span>
             <input
               name="guests"
               type="number"
               min="1"
-              placeholder="인원수 (명)"
-              aria-label="인원수"
+              placeholder={labels.guestsPlaceholder}
+              aria-label={labels.guestsLabel}
               className="w-full bg-transparent text-sm font-semibold text-[#161d1f] outline-none placeholder:text-gray-400"
             />
           </div>
@@ -125,7 +130,7 @@ export function HeroSearch() {
           className="rounded-2xl md:rounded-full bg-[#161d1f] px-8 py-3.5 md:py-3.5 text-sm font-black text-white shadow-md hover:bg-[#ae2f34] transition-all shrink-0 flex items-center justify-center gap-2"
         >
           <FontAwesomeIcon icon={faMagnifyingGlass} className="h-3.5 w-3.5" />
-          <span>검색</span>
+          <span>{labels.searchBtn}</span>
         </button>
       </form>
     </div>
