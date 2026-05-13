@@ -13,6 +13,7 @@ import { useIsClient } from "@/hooks/use-is-client";
 import { usePersonaThemeStore } from "@/store/persona-theme-store";
 import { PersonaLanguageCode } from "@/lib/persona-theme";
 import { cn } from "@/lib/utils";
+import { getStaticLabels } from "@/lib/static-translations";
 import {
   faClock,
   faHeart,
@@ -114,6 +115,8 @@ function DesktopTopNav({
   onOpenWishlist: () => void;
 }) {
   const { wishlist } = useWishlist();
+  const currentLang = usePersonaThemeStore((state) => state.currentLang);
+  const labels = getStaticLabels(currentLang);
 
   return (
     <header className="hidden md:block sticky top-0 z-50 border-b border-gray-100 bg-white/95 backdrop-blur-xl">
@@ -127,7 +130,7 @@ function DesktopTopNav({
             href="/customer-center"
             className={`transition hover:text-[#111827] ${pathname.startsWith("/customer-center") ? "text-[#111827]" : ""}`}
           >
-            고객센터
+            {labels.navCustomerCenter}
           </Link>
           
           <button 
@@ -143,16 +146,16 @@ function DesktopTopNav({
                 </span>
               )}
             </div>
-            <span>찜</span>
+            <span>{labels.navWishlist}</span>
           </button>
 
           <button type="button" className="flex items-center gap-2 transition hover:text-[#111827]">
             <FontAwesomeIcon icon={faShoppingCart} className="h-4 w-4 text-[#566170]" />
-            <span>장바구니</span>
+            <span>{labels.navCart}</span>
           </button>
           <button type="button" className="flex items-center gap-2 transition hover:text-[#111827]">
             <FontAwesomeIcon icon={faClock} className="h-4 w-4 text-[#566170]" />
-            <span>최근 본 상품</span>
+            <span>{labels.navRecent}</span>
           </button>
           <LocaleCurrencyButton
             selectedLang={selectedLang}
@@ -165,7 +168,7 @@ function DesktopTopNav({
             className="flex h-12 items-center gap-2 rounded-full bg-white px-6 text-[15px] font-black text-[#2f3744] shadow-[0_3px_14px_rgba(15,23,42,0.12)] ring-1 ring-gray-100 transition hover:text-[#111827]"
           >
             <FontAwesomeIcon icon={faUser} className="h-4 w-4" />
-            마이
+            {labels.navMy}
           </Link>
         </nav>
       </div>
@@ -211,6 +214,9 @@ function LocaleCurrencyModal({
   onCurrencySelect: (currency: CurrencyItem) => void;
   onClose: () => void;
 }) {
+  const currentLang = usePersonaThemeStore((state) => state.currentLang);
+  const labels = getStaticLabels(currentLang);
+
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm">
       <div className="flex h-[min(550px,calc(100dvh-32px))] w-full max-w-[680px] flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl">
@@ -223,7 +229,7 @@ function LocaleCurrencyModal({
                 modalTab === "lang" ? "border-b-2 border-gray-900 text-gray-900" : "text-gray-400 hover:text-gray-600"
               }`}
             >
-              언어
+              {labels.modalLang}
             </button>
             <button
               type="button"
@@ -232,7 +238,7 @@ function LocaleCurrencyModal({
                 modalTab === "currency" ? "border-b-2 border-gray-900 text-gray-900" : "text-gray-400 hover:text-gray-600"
               }`}
             >
-              통화
+              {labels.modalCurrency}
             </button>
             <button
               type="button"
@@ -241,7 +247,7 @@ function LocaleCurrencyModal({
                 modalTab === "theme" ? "border-b-2 border-gray-900 text-gray-900" : "text-gray-400 hover:text-gray-600"
               }`}
             >
-              테마
+              {labels.modalTheme}
             </button>
           </div>
 
@@ -249,7 +255,7 @@ function LocaleCurrencyModal({
             type="button"
             onClick={onClose}
             className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
-            aria-label="닫기"
+            aria-label={labels.modalClose}
           >
             <FontAwesomeIcon icon={faXmark} className="h-5 w-5" />
           </button>
@@ -258,14 +264,14 @@ function LocaleCurrencyModal({
         <div className="flex-1 overflow-y-auto p-6">
           {modalTab === "theme" ? (
             <div>
-              <h4 className="mb-4 text-xs font-black uppercase tracking-wider text-gray-400">페르소나 테마 설정</h4>
+              <h4 className="mb-4 text-xs font-black uppercase tracking-wider text-gray-400">{labels.modalPersonaTitle}</h4>
               <div className="py-2">
                 <PersonaThemeSwitcher />
               </div>
             </div>
           ) : modalTab === "lang" ? (
             <div>
-              <h4 className="mb-4 text-xs font-black uppercase tracking-wider text-gray-400">모든 언어</h4>
+              <h4 className="mb-4 text-xs font-black uppercase tracking-wider text-gray-400">{labels.modalAllLang}</h4>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {languages.map((lang) => {
                   const isSelected = selectedLang.code === lang.code;
@@ -289,7 +295,7 @@ function LocaleCurrencyModal({
           ) : (
             <div className="space-y-6">
               <div>
-                <h4 className="mb-3 text-xs font-black uppercase tracking-wider text-gray-400">주요 통화</h4>
+                <h4 className="mb-3 text-xs font-black uppercase tracking-wider text-gray-400">{labels.modalPopularCurrency}</h4>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {currencies
                     .filter((currency) => currency.isPopular)
@@ -317,7 +323,7 @@ function LocaleCurrencyModal({
               </div>
 
               <div>
-                <h4 className="mb-3 text-xs font-black uppercase tracking-wider text-gray-400">모든 통화</h4>
+                <h4 className="mb-3 text-xs font-black uppercase tracking-wider text-gray-400">{labels.modalAllCurrency}</h4>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {currencies.map((currency) => {
                     const isSelected = selectedCurrency.code === currency.code;
@@ -482,6 +488,8 @@ function CategoryOverlay({
   onClose: () => void;
 }) {
   const copy = usePersonaCopy();
+  const currentLang = usePersonaThemeStore((state) => state.currentLang);
+  const labels = getStaticLabels(currentLang);
 
   if (!isOpen) return null;
 
@@ -495,8 +503,8 @@ function CategoryOverlay({
           </span>
           <input
             type="text"
-            aria-label="검색어 입력"
-            placeholder="검색어를 입력하세요"
+            aria-label={labels.searchMenuPlaceholder}
+            placeholder={labels.searchMenuPlaceholder}
             className="w-full rounded-full border border-gray-200 bg-white py-3 pl-11 pr-4 text-sm font-medium text-gray-700 shadow-sm focus:border-[#ae2f34] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ae2f34]"
           />
         </div>
@@ -505,7 +513,7 @@ function CategoryOverlay({
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <span className="text-sm">🏨</span>
-            <span className="text-sm font-black text-gray-800 font-persona-display">{copy.nav.stay} (숙박)</span>
+            <span className="text-sm font-black text-gray-800 font-persona-display">{copy.nav.stay} ({labels.navStayTag})</span>
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
@@ -528,7 +536,7 @@ function CategoryOverlay({
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <span className="text-sm">🏄</span>
-            <span className="text-sm font-black text-gray-800 font-persona-display">{copy.nav.experience} (체험)</span>
+            <span className="text-sm font-black text-gray-800 font-persona-display">{copy.nav.experience} ({labels.navExpTag})</span>
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
@@ -551,7 +559,7 @@ function CategoryOverlay({
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <span className="text-sm">🍤</span>
-            <span className="text-sm font-black text-gray-800 font-persona-display">{copy.nav.localProduct} (미식/프로그램)</span>
+            <span className="text-sm font-black text-gray-800 font-persona-display">{copy.nav.localProduct} ({labels.navProgTag})</span>
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
@@ -574,7 +582,7 @@ function CategoryOverlay({
         <div className="mb-6">
           <div className="mb-2 flex items-center gap-1.5 px-1">
             <span className="text-sm">🗺️</span>
-            <span className="text-sm font-black text-gray-800 font-persona-display">{copy.nav.course} (코스)</span>
+            <span className="text-sm font-black text-gray-800 font-persona-display">{copy.nav.course} ({labels.navCourseTag})</span>
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
@@ -598,6 +606,8 @@ function CategoryOverlay({
 
 function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { wishlist, removeItem } = useWishlist();
+  const currentLang = usePersonaThemeStore((state) => state.currentLang);
+  const labels = getStaticLabels(currentLang);
 
   if (!isOpen) return null;
 
@@ -616,7 +626,7 @@ function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
           <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 bg-white">
             <div className="flex items-center gap-2 font-black text-lg text-gray-900">
               <FontAwesomeIcon icon={faHeart} className="text-[#ff4b4b] h-4 w-4" />
-              <span>찜한 여행 ({wishlist.length})</span>
+              <span>{labels.wishlistTitle} ({wishlist.length})</span>
             </div>
             <button 
               type="button"
@@ -634,17 +644,16 @@ function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                 <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-white text-[#dde4e6] shadow-inner text-3xl">
                    <FontAwesomeIcon icon={faHeart} />
                 </div>
-                <p className="text-lg font-extrabold text-[#2f3744]">찜한 목록이 없습니다</p>
+                <p className="text-lg font-extrabold text-[#2f3744]">{labels.wishlistEmpty}</p>
                 <p className="mt-2 text-sm leading-relaxed text-gray-500 font-medium">
-                  마음에 드는 로컬 숙소나 체험을 발견하면<br />
-                  하트를 꾹 눌러 담아보세요!
+                  {labels.wishlistEmptyDesc}
                 </p>
                 <button 
                   type="button"
                   onClick={onClose} 
                   className="mt-8 rounded-full bg-[#2f3744] px-6 py-3 text-sm font-bold text-white shadow-lg active:scale-95 transition"
                 >
-                  여행지 구경가기
+                  {labels.wishlistExplore}
                 </button>
               </div>
             ) : (
@@ -683,7 +692,7 @@ function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                        {item.priceText ? (
                          <p className="mt-1 text-[13px] font-black text-[#ae2f34]">{item.priceText}</p>
                        ) : (
-                         <p className="mt-1 text-[13px] font-medium text-gray-400">정보 확인 중</p>
+                         <p className="mt-1 text-[13px] font-medium text-gray-400">{labels.infoLoading}</p>
                        )}
                     </div>
 
@@ -692,7 +701,7 @@ function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                       type="button"
                       onClick={() => removeItem(item.href)} 
                       className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 shadow-sm opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-200"
-                      title="찜 삭제"
+                      title={labels.wishlistDelete}
                     >
                        <FontAwesomeIcon icon={faXmark} className="h-3 w-3" />
                     </button>
@@ -710,7 +719,7 @@ function WishlistDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                 onClick={onClose} 
                 className="w-full rounded-xl bg-[#ae2f34] py-4 text-sm font-extrabold text-white shadow-md active:scale-[0.98] transition-transform"
               >
-                계속 둘러보기
+                {labels.wishlistContinue}
               </button>
             </div>
           )}
@@ -732,6 +741,7 @@ export function PublicNavigationShell({ children }: { children: ReactNode }) {
 
   const currentLang = usePersonaThemeStore((state) => state.currentLang);
   const setLang = usePersonaThemeStore((state) => state.setLang);
+  const labels = getStaticLabels(currentLang);
   const isClient = useIsClient();
   const effectiveLang = isClient ? currentLang : "ko";
   const mappedCode = effectiveLang === "zh-cn" ? "zh" : effectiveLang === "ja-jp" ? "ja" : effectiveLang;
@@ -787,8 +797,8 @@ export function PublicNavigationShell({ children }: { children: ReactNode }) {
           category: `${copy.nav.stay}/${copy.nav.experience}/${copy.nav.localProduct}/${copy.nav.course}`,
           nearby: copy.button.openMap,
           home: copy.hero.title,
-          wishlist: "찜",
-          my: "마이",
+          wishlist: labels.navWishlist,
+          my: labels.navMy,
         }}
         isCategoryOpen={isCategoryOpen}
         setIsCategoryOpen={setIsCategoryOpen}

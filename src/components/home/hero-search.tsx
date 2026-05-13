@@ -98,9 +98,16 @@ export function HeroSearch() {
             <span className="hidden md:inline text-[9px] font-black text-gray-500 uppercase tracking-wider">{labels.dateLabel}</span>
             <input
               name="date"
-              type="date"
+              type="text"
+              placeholder={labels.datePlaceholder}
+              onFocus={(e) => (e.target.type = "date")}
+              onBlur={(e) => {
+                if (!e.target.value) {
+                  e.target.type = "text";
+                }
+              }}
               aria-label={labels.dateLabel}
-              className="w-full bg-transparent text-sm font-semibold text-[#161d1f] outline-none"
+              className="w-full bg-transparent text-sm font-semibold text-[#161d1f] outline-none placeholder:text-gray-400"
             />
           </div>
         </div>
