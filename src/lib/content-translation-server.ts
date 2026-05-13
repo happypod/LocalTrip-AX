@@ -15,6 +15,7 @@ export async function getLocalizedList<
     linkedLifeService?: string | null;
     residentRole?: string | null;
     revenueUse?: string | null;
+    tag?: string | null;
   },
 >(originalList: T[], targetType: ContentTranslationTargetType, locale: string): Promise<T[]> {
   if (locale === "ko" || originalList.length === 0) {

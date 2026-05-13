@@ -128,10 +128,12 @@
 
 ## Event Operating Content Follow-up
 
-- [ ] Event 모델에 `regionId` 추가 필요 여부 확정
-- [ ] `/events` 페이지가 fallback이 아니라 실제 Event 데이터를 조회하도록 전환
-- [ ] Home 이벤트 조회에 `regionId + status=published` 필터 적용
-- [ ] draft/inactive 및 다른 region 이벤트 비노출 QA
+- [x] Event 모델에 `regionId` 및 `Region` relation 추가
+- [x] Event 모델에 `@@index([regionId, status])` 추가
+- [x] `/events` 페이지가 fallback이 아니라 실제 Event 데이터를 조회하도록 전환
+- [x] Home 이벤트 조회에 `regionId + status=published` 필터 적용
+- [x] draft/inactive 및 다른 region 이벤트 비노출 정책 반영
+- [x] 이벤트 없음 상태 UI 확인
 
 ## T-035 개인정보/문의/입점신청 QA
 

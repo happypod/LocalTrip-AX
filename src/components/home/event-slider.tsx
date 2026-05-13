@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@/lib/fontawesome";
+import { usePersonaThemeStore } from "@/store/persona-theme-store";
+import { getStaticLabels } from "@/lib/static-translations";
 
 interface EventItem {
   id: string;
@@ -21,7 +23,22 @@ interface EventSliderProps {
   events?: EventItem[];
 }
 
-export function EventSlider({ events: dbEvents }: EventSliderProps) {
+function getEventImage(href: string) {
+  if (href.startsWith("/experiences")) {
+    return "/images/experiences/exp-01.jpg";
+  }
+  if (href.startsWith("/programs")) {
+    return "/images/programs/prog-01.jpg";
+  }
+  if (href.startsWith("/courses")) {
+    return "/images/courses/course-01.jpg";
+  }
+  return "/images/stays/stay-01.jpg";
+}
+
+export function EventSlider({ events = [] }: EventSliderProps) {
+  const currentLang = usePersonaThemeStore((state) => state.currentLang);
+  const labels = getStaticLabels(currentLang);
   const [activeIndex, setActiveIndex] = useState(0);
   const [failedImageIds, setFailedImageIds] = useState<Record<string, boolean>>({});
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,63 +47,11 @@ export function EventSlider({ events: dbEvents }: EventSliderProps) {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  const fallbackEvents = [
-    {
-      id: "fallback-1",
-      tag: "매주 화·수·금 오전 10시 오픈!",
-      title: "놀라운 소원 특가 등장",
-      subTitle: "주중 힐링 스테이 오픈런",
-      description: "인기 숙소 초특가 선착순 한정수량 할인",
-      gradient: "from-blue-50 to-indigo-100/40",
-      bgImage: "/images/stays/stay-01.jpg",
-      href: "/stays",
-    },
-    {
-      id: "fallback-2",
-      tag: "매월 단 10일만 열리는 특가!",
-      title: "더블쿠폰 핫세일",
-      subTitle: "전체 체험 최대 50% 할인",
-      description: "소원면 인기 서핑/체험 전용 쿠폰 패키지",
-      gradient: "from-rose-50 to-pink-100/40",
-      bgImage: "/images/experiences/exp-01.jpg",
-      href: "/experiences",
-    },
-    {
-      id: "fallback-3",
-      tag: "소원트립 단독 혜택!",
-      title: "매달 도전! 로컬 트립",
-      subTitle: "5월 소원 리뷰왕 이벤트",
-      description: "주민소득상품 우수 리뷰어 상품권 및 무료 숙박권 증정",
-      gradient: "from-amber-50 to-yellow-100/40",
-      bgImage: "/images/programs/prog-01.jpg",
-      href: "/programs",
-    },
-    {
-      id: "fallback-4",
-      tag: "신규 수산 미식 상품 론칭!",
-      title: "대하·해산물 미식 기행",
-      subTitle: "직접 굽고 나누는 바비큐 파티",
-      description: "대하 손질·구이 및 바비큐 프로그램 특별 할인 혜택",
-      gradient: "from-emerald-50 to-teal-100/40",
-      bgImage: "/images/programs/shrimp-grill.png",
-      href: "/programs",
-    },
-  ];
+  const displayEvents = events.map((event) => ({
+    ...event,
+    bgImage: event.bgImage || getEventImage(event.href),
+  }));
 
-  const displayEvents = dbEvents && dbEvents.length > 0 ? dbEvents.map((ev) => {
-    let bgImage = "/images/stays/stay-01.jpg";
-    if (ev.href.includes("experience")) {
-      bgImage = "/images/experiences/exp-01.jpg";
-    } else if (ev.href.includes("program") || ev.href.includes("course")) {
-      bgImage = "/images/programs/prog-01.jpg";
-    }
-    return {
-      ...ev,
-      bgImage,
-    };
-  }) : fallbackEvents;
-
-  // Auto-scrolling interval logic
   useEffect(() => {
     if (isDragging || displayEvents.length <= 1) return;
 
@@ -96,34 +61,36 @@ export function EventSlider({ events: dbEvents }: EventSliderProps) {
         scrollToIndex(next);
         return next;
       });
-    }, 4500); // Looping cycle of 4.5 seconds
+    }, 4500);
 
     return () => clearInterval(interval);
   }, [isDragging, displayEvents.length]);
 
   useEffect(() => {
     const container = containerRef.current;
-    if (container) {
-      // Prevent browser's native dragstart behavior
-      const handleDragStart = (e: DragEvent) => {
-        e.preventDefault();
-      };
-      container.addEventListener("dragstart", handleDragStart);
+    if (!container) return;
 
-      return () => {
-        container.removeEventListener("dragstart", handleDragStart);
-      };
-    }
+    const handleDragStart = (event: DragEvent) => {
+      event.preventDefault();
+    };
+    container.addEventListener("dragstart", handleDragStart);
+
+    return () => {
+      container.removeEventListener("dragstart", handleDragStart);
+    };
   }, []);
 
   const scrollToIndex = (index: number) => {
     const container = containerRef.current;
     if (!container) return;
     const cards = container.children;
-    if (cards && cards[index]) {
+    if (cards[index]) {
       const card = cards[index] as HTMLElement;
       container.scrollTo({
-        left: card.offsetLeft - container.offsetLeft - (container.clientWidth - card.clientWidth) / 2,
+        left:
+          card.offsetLeft -
+          container.offsetLeft -
+          (container.clientWidth - card.clientWidth) / 2,
         behavior: "smooth",
       });
     }
@@ -132,35 +99,37 @@ export function EventSlider({ events: dbEvents }: EventSliderProps) {
   const handleScroll = () => {
     if (isDragging || !containerRef.current) return;
     const container = containerRef.current;
-    const { scrollLeft } = container;
     const cards = container.children;
     let closestIndex = 0;
     let minDiff = Infinity;
 
-    for (let i = 0; i < cards.length; i++) {
-      const card = cards[i] as HTMLElement;
-      const targetLeft = card.offsetLeft - container.offsetLeft - (container.clientWidth - card.clientWidth) / 2;
-      const diff = Math.abs(targetLeft - scrollLeft);
+    for (let index = 0; index < cards.length; index += 1) {
+      const card = cards[index] as HTMLElement;
+      const targetLeft =
+        card.offsetLeft -
+        container.offsetLeft -
+        (container.clientWidth - card.clientWidth) / 2;
+      const diff = Math.abs(targetLeft - container.scrollLeft);
       if (diff < minDiff) {
         minDiff = diff;
-        closestIndex = i;
+        closestIndex = index;
       }
     }
     setActiveIndex(closestIndex);
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (event: React.MouseEvent) => {
     if (!containerRef.current) return;
     setIsDragging(true);
     setHasMoved(false);
-    setStartX(e.pageX - containerRef.current.offsetLeft);
+    setStartX(event.pageX - containerRef.current.offsetLeft);
     setScrollLeft(containerRef.current.scrollLeft);
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (event: React.MouseEvent) => {
     if (!isDragging || !containerRef.current) return;
-    e.preventDefault();
-    const x = e.pageX - containerRef.current.offsetLeft;
+    event.preventDefault();
+    const x = event.pageX - containerRef.current.offsetLeft;
     const walk = (x - startX) * 1.5;
     if (Math.abs(walk) > 5) {
       setHasMoved(true);
@@ -169,150 +138,170 @@ export function EventSlider({ events: dbEvents }: EventSliderProps) {
   };
 
   const handleMouseUpOrLeave = () => {
-    if (isDragging) {
-      setIsDragging(false);
-      // Snap to closest card on mouse up
-      setTimeout(() => {
-        if (!containerRef.current) return;
-        const container = containerRef.current;
-        const { scrollLeft } = container;
-        const cards = container.children;
-        let closestIndex = 0;
-        let minDiff = Infinity;
+    if (!isDragging) return;
+    setIsDragging(false);
 
-        for (let i = 0; i < cards.length; i++) {
-          const card = cards[i] as HTMLElement;
-          const targetLeft = card.offsetLeft - container.offsetLeft - (container.clientWidth - card.clientWidth) / 2;
-          const diff = Math.abs(targetLeft - scrollLeft);
-          if (diff < minDiff) {
-            minDiff = diff;
-            closestIndex = i;
-          }
+    setTimeout(() => {
+      if (!containerRef.current) return;
+      const container = containerRef.current;
+      const cards = container.children;
+      let closestIndex = 0;
+      let minDiff = Infinity;
+
+      for (let index = 0; index < cards.length; index += 1) {
+        const card = cards[index] as HTMLElement;
+        const targetLeft =
+          card.offsetLeft -
+          container.offsetLeft -
+          (container.clientWidth - card.clientWidth) / 2;
+        const diff = Math.abs(targetLeft - container.scrollLeft);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestIndex = index;
         }
-        setActiveIndex(closestIndex);
-        scrollToIndex(closestIndex);
-      }, 50);
-    }
+      }
+      setActiveIndex(closestIndex);
+      scrollToIndex(closestIndex);
+    }, 50);
   };
 
-  const handleClickCapture = (e: React.MouseEvent) => {
+  const handleClickCapture = (event: React.MouseEvent) => {
     if (hasMoved) {
-      e.preventDefault();
-      e.stopPropagation();
+      event.preventDefault();
+      event.stopPropagation();
     }
   };
 
   return (
     <section className="py-8 md:py-12">
-      <style dangerouslySetInnerHTML={{__html: `
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none !important;
-        }
-        .hide-scrollbar {
-          -ms-overflow-style: none !important;
-          scrollbar-width: none !important;
-        }
-      `}} />
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+            .hide-scrollbar::-webkit-scrollbar { display: none !important; }
+            .hide-scrollbar {
+              -ms-overflow-style: none !important;
+              scrollbar-width: none !important;
+            }
+          `,
+        }}
+      />
 
-      {/* Header */}
       <div className="mb-6 flex items-center justify-between px-1">
         <div className="flex items-center gap-2">
-          <h2 className="text-2xl font-black tracking-tight text-[#161d1f]">이벤트</h2>
-          <span className="rounded-full bg-red-50 px-2.5 py-0.5 text-[10px] font-black text-[#ae2f34] uppercase tracking-wider animate-pulse">
-            Hot Promotion
+          <h2 className="text-2xl font-black tracking-tight text-[#161d1f]">
+            {labels.eventTitle}
+          </h2>
+          <span className="rounded-full bg-red-50 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#ae2f34]">
+            Sowon News
           </span>
         </div>
-        <Link 
-          href="/events" 
-          className="flex items-center gap-0.5 text-sm font-bold text-gray-500 hover:text-[#ae2f34] transition-colors"
+        <Link
+          href="/events"
+          className="flex items-center gap-0.5 text-sm font-bold text-gray-500 transition-colors hover:text-[#ae2f34]"
         >
-          <span>더보기</span>
+          <span>{labels.viewMore}</span>
           <FontAwesomeIcon icon={faChevronRight} className="h-3 w-3" />
         </Link>
       </div>
 
-      {/* Slider / Cards Row */}
-      <div
-        ref={containerRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUpOrLeave}
-        onMouseLeave={handleMouseUpOrLeave}
-        onScroll={handleScroll}
-        onClickCapture={handleClickCapture}
-        className={`flex gap-6 overflow-x-auto pb-4 cursor-grab select-none hide-scrollbar w-full ${
-          isDragging ? "cursor-grabbing" : ""
-        }`}
-        style={{ scrollBehavior: isDragging ? "auto" : "smooth" }}
-      >
-        {displayEvents.map((event) => {
-          return (
-            <div key={event.id} className="min-w-[290px] w-[85%] md:w-[382px] flex-shrink-0">
-              <Link
-                href={event.href}
-                className={`group relative flex justify-between items-center h-full overflow-hidden rounded-3xl border border-gray-100 bg-gradient-to-br ${event.gradient} p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md`}
-              >
-                <div className="flex flex-col text-left max-w-[65%]">
-                  <span className="text-[10px] sm:text-xs font-bold text-gray-500 mb-1.5">{event.tag}</span>
-                  <h3 className="text-lg font-black text-gray-900 leading-snug group-hover:text-[#ae2f34] transition-colors">
-                    {event.title}
-                  </h3>
-                  <h4 className="text-sm font-extrabold text-gray-700 mt-0.5 leading-snug">
-                    {event.subTitle}
-                  </h4>
-                  <p className="text-xs text-gray-500 mt-2 font-medium leading-relaxed">
-                    {event.description}
-                  </p>
-                </div>
-
-                {/* Graphic element with local scenic image and safe fallback */}
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl shadow-sm ring-4 ring-white transition-transform duration-500 group-hover:scale-110 group-hover:rotate-2">
-                  {event.bgImage && !failedImageIds[event.id] ? (
-                    <>
-                      <Image
-                        src={event.bgImage}
-                        alt={event.title}
-                        fill
-                        sizes="80px"
-                        className="object-cover select-none"
-                        draggable={false}
-                        onError={() =>
-                          setFailedImageIds((prev) => ({ ...prev, [event.id]: true }))
-                        }
-                      />
-                      <div className="absolute inset-0 bg-black/5" />
-                    </>
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-white/70 text-[10px] font-black text-[#584140]">
-                      이벤트
-                    </div>
-                  )}
-                  <div className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-[#161d1f] text-[10px] font-bold text-white shadow-sm">
-                    Go
-                  </div>
-                </div>
-              </Link>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Dot Pagination matching the reference image */}
-      <div className="mt-4 flex justify-center gap-2">
-        {displayEvents.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => {
-              setActiveIndex(index);
-              scrollToIndex(index);
-            }}
-            aria-label={`슬라이드 ${index + 1}`}
-            className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-              activeIndex === index ? "w-6 bg-[#161d1f]" : "w-2 bg-gray-300"
+      {displayEvents.length === 0 ? (
+        <div className="rounded-3xl border border-dashed border-gray-200 bg-white px-6 py-12 text-center">
+          <p className="text-sm font-black text-gray-600">
+            {labels.eventEmpty}
+          </p>
+          <p className="mt-1 text-xs text-gray-400">
+            {labels.eventEmptyDesc}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div
+            ref={containerRef}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUpOrLeave}
+            onMouseLeave={handleMouseUpOrLeave}
+            onScroll={handleScroll}
+            onClickCapture={handleClickCapture}
+            className={`hide-scrollbar flex w-full select-none gap-6 overflow-x-auto pb-4 ${
+              isDragging ? "cursor-grabbing" : "cursor-grab"
             }`}
-          />
-        ))}
-      </div>
+            style={{ scrollBehavior: isDragging ? "auto" : "smooth" }}
+          >
+            {displayEvents.map((event) => (
+              <div
+                key={event.id}
+                className="w-[85%] min-w-[290px] flex-shrink-0 md:w-[382px]"
+              >
+                <Link
+                  href={event.href}
+                  className={`group relative flex h-full items-center justify-between overflow-hidden rounded-3xl border border-gray-100 bg-gradient-to-br ${event.gradient} p-6 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-md`}
+                >
+                  <div className="flex max-w-[65%] flex-col text-left">
+                    <span className="mb-1.5 text-[10px] font-bold text-gray-500 sm:text-xs">
+                      {event.tag}
+                    </span>
+                    <h3 className="text-lg font-black leading-snug text-gray-900 transition-colors group-hover:text-[#ae2f34]">
+                      {event.title}
+                    </h3>
+                    <h4 className="mt-0.5 text-sm font-extrabold leading-snug text-gray-700">
+                      {event.subTitle}
+                    </h4>
+                    <p className="mt-2 text-xs font-medium leading-relaxed text-gray-500">
+                      {event.description}
+                    </p>
+                  </div>
+
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl shadow-sm ring-4 ring-white transition-transform duration-500 group-hover:scale-110 group-hover:rotate-2">
+                    {event.bgImage && !failedImageIds[event.id] ? (
+                      <>
+                        <Image
+                          src={event.bgImage}
+                          alt={event.title}
+                          fill
+                          sizes="80px"
+                          className="select-none object-cover"
+                          draggable={false}
+                          onError={() =>
+                            setFailedImageIds((prev) => ({
+                              ...prev,
+                              [event.id]: true,
+                            }))
+                          }
+                        />
+                        <div className="absolute inset-0 bg-black/5" />
+                      </>
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-white/70 text-[10px] font-black text-[#584140]">
+                        {labels.eventTitle}
+                      </div>
+                    )}
+                    <div className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-[#161d1f] text-[10px] font-bold text-white shadow-sm">
+                      Go
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 flex justify-center gap-2">
+            {displayEvents.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setActiveIndex(index);
+                  scrollToIndex(index);
+                }}
+                aria-label={`${labels.slideLabel} ${index + 1}`}
+                className={`h-2 cursor-pointer rounded-full transition-all duration-300 ${
+                  activeIndex === index ? "w-6 bg-[#161d1f]" : "w-2 bg-gray-300"
+                }`}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </section>
   );
 }

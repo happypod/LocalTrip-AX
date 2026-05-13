@@ -21,6 +21,9 @@
   - `docs/16_MAP_API_STRATEGY.md` 기준에 따라 Naver Maps 실제 SDK 마운트 고도화 완료.
   - 좌표(`latitude`, `longitude`) 유무에 따라 지도 마커와 '위치 준비 중' 목록 분리 표출.
   - 숙소, 체험, 주민소득상품, 코스, 이벤트를 카테고리별 필터링.
+- `/events`: [x] 소원권역 이벤트/운영 소식 목록 (T-069 완료)
+  - `Event` 모델 기준 `regionId=sowon` & `status=published` 조회
+  - fallback/mock 병합 없이 DB 이벤트만 노출하며, 데이터가 없으면 빈 상태 UI 표시
 - `/partner/apply`
 
 ### T-005 홈 화면 구성
@@ -38,6 +41,7 @@
 - `/admin/experiences`
 - `/admin/programs`
 - `/admin/courses`
+- `/admin/events`: [x] 소원권역 이벤트 관리 (T-069 기준 기본 `sowon` region 연결)
 - `/admin/inquiries`
 - `/admin/partner-applications`
 - `/admin/training`: [x] 교육·인증 최소 관리 화면 (교육과정 및 인증항목 목록, 신규 등록, 수정 및 상태 관리)

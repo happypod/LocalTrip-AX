@@ -50,6 +50,7 @@ async function main() {
   console.log(`Cleaning up existing data for region: ${sowonRegion.name}...`);
   await prisma.leadEvent.deleteMany({ where: { regionId } });
   await prisma.contentTranslation.deleteMany({ where: { regionId } });
+  await prisma.event.deleteMany({ where: { regionId } });
   await prisma.certification.deleteMany({ where: { regionId } });
   await prisma.trainingCourse.deleteMany({ where: { regionId } });
   await prisma.partnerApplication.deleteMany({ where: { regionId } });
@@ -333,6 +334,51 @@ async function main() {
       summary: "서비스 품질 및 지역 환원 기여도 검증 완료",
       status: PublishStatus.published,
     },
+  });
+
+  await prisma.event.createMany({
+    data: [
+      {
+        regionId,
+        tag: "소원권역 주말 기획",
+        title: "바다마을 체험 주간",
+        subTitle: "숙소와 체험을 함께 둘러보는 연결형 소식",
+        description: "소원권역의 숙소, 체험, 주민소득상품을 한 번에 살펴볼 수 있는 운영 소식입니다.",
+        gradient: "from-blue-50 to-indigo-100/40",
+        href: "/experiences",
+        status: PublishStatus.published,
+      },
+      {
+        regionId,
+        tag: "주민소득상품 안내",
+        title: "마을 밥상과 로컬 별미",
+        subTitle: "주민이 운영하는 소원 별미 프로그램",
+        description: "로컬 식재료와 주민 참여를 중심으로 구성한 주민소득상품을 소개합니다.",
+        gradient: "from-amber-50 to-yellow-100/40",
+        href: "/programs",
+        status: PublishStatus.published,
+      },
+      {
+        regionId,
+        tag: "추천 코스",
+        title: "하루로 만나는 소원 여정",
+        subTitle: "숙소, 체험, 별미를 잇는 추천 동선",
+        description: "소원권역의 공개 콘텐츠를 조합한 추천 코스를 확인해 보세요.",
+        gradient: "from-teal-50 to-emerald-100/40",
+        href: "/courses",
+        status: PublishStatus.published,
+      },
+      {
+        regionId,
+        tag: "운영자 검토용",
+        title: "비공개 이벤트 예시",
+        subTitle: "공개 화면 비노출 검증용 draft 데이터",
+        description: "이 이벤트는 draft 상태이므로 공개 화면에 노출되면 안 됩니다.",
+        gradient: "from-gray-50 to-slate-100/40",
+        href: "/stays",
+        status: PublishStatus.draft,
+      },
+    ],
   });
 
   await prisma.leadEvent.createMany({

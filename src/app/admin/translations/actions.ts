@@ -67,12 +67,9 @@ export async function saveContentTranslation(
       break;
     }
     case "event": {
-      const entity = await prisma.event.findUnique({ where: { id: targetId }, select: { id: true } });
+      const entity = await prisma.event.findUnique({ where: { id: targetId }, select: { regionId: true } });
       if (!entity) throw new Error("Event not found");
-      // Event 모델에는 regionId가 없으므로 sowon을 기본값으로 사용 (MVP 기준)
-      const region = await prisma.region.findUnique({ where: { slug: "sowon" }, select: { id: true } });
-      if (!region) throw new Error("Default region not found");
-      regionId = region.id;
+      regionId = entity.regionId;
       break;
     }
     default:

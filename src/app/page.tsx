@@ -2,6 +2,7 @@ import { getPrisma } from "@/lib/prisma";
 import { HomeClient } from "@/components/home/home-client";
 import { getServerTranslationLocale } from "@/lib/server-translation";
 import { getLocalizedList } from "@/lib/content-translation-server";
+import { PublishStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -26,13 +27,6 @@ type HomeEventItem = {
   description: string;
   gradient: string;
   href: string;
-};
-
-type HomeEventDelegate = {
-  findMany(args: {
-    where: { status: "published" };
-    orderBy: { createdAt: "desc" };
-  }): Promise<HomeEventItem[]>;
 };
 
 function toHomeProgramItem(program: HomeProgramItem): HomeProgramItem {
@@ -95,7 +89,6 @@ async function getHomeData() {
     }
 
     const regionId = sowonRegion.id;
-    const prismaWithEvent = prisma as typeof prisma & { event: HomeEventDelegate };
 
     const [stays, experiences, programs, courses, events] = await Promise.all([
       prisma.accommodation.findMany({
@@ -114,8 +107,8 @@ async function getHomeData() {
         where: { status: "published", regionId },
         orderBy: { createdAt: "desc" },
       }),
-      prismaWithEvent.event.findMany({
-        where: { status: "published" },
+      prisma.event.findMany({
+        where: { status: PublishStatus.published, regionId },
         orderBy: { createdAt: "desc" },
       }),
     ]);
@@ -154,12 +147,29 @@ export default async function Home() {
   const { stays, experiences, programs, courses, events } = await getHomeData();
   const currentLocale = await getServerTranslationLocale();
 
-  const [localizedStays, localizedExperiences, localizedPrograms, localizedCourses] = await Promise.all([
+  const eventItemsForTranslation = events.map((e) => ({
+    ...e,
+    summary: e.subTitle,
+  }));
+
+  const [
+    localizedStays,
+    localizedExperiences,
+    localizedPrograms,
+    localizedCourses,
+    localizedEventsRaw,
+  ] = await Promise.all([
     getLocalizedList(stays, "accommodation", currentLocale),
     getLocalizedList(experiences, "experience", currentLocale),
     getLocalizedList(programs, "local_income_program", currentLocale),
     getLocalizedList(courses, "course", currentLocale),
+    getLocalizedList(eventItemsForTranslation, "event", currentLocale),
   ]);
+
+  const localizedEvents = localizedEventsRaw.map((e) => ({
+    ...e,
+    subTitle: e.summary || "",
+  }));
 
   return (
     <HomeClient
@@ -167,7 +177,7 @@ export default async function Home() {
       experiences={localizedExperiences}
       programs={localizedPrograms}
       courses={localizedCourses}
-      events={events}
+      events={localizedEvents}
     />
   );
 }

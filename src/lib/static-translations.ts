@@ -64,6 +64,11 @@ export const STATIC_TRANSLATIONS = {
     navExpTag: "체험",
     navProgTag: "미식/프로그램",
     navCourseTag: "코스",
+    eventTitle: "이벤트",
+    eventEmpty: "진행 중인 소식이 없습니다.",
+    eventEmptyDesc: "새 운영 소식이 등록되면 이곳에 표시됩니다.",
+    viewMore: "더보기",
+    slideLabel: "슬라이드",
   },
   en: {
     backToList: "List Stays",
@@ -130,6 +135,11 @@ export const STATIC_TRANSLATIONS = {
     navExpTag: "Experiences",
     navProgTag: "Gourmet",
     navCourseTag: "Courses",
+    eventTitle: "Events",
+    eventEmpty: "No ongoing events.",
+    eventEmptyDesc: "New updates will appear here once posted.",
+    viewMore: "View More",
+    slideLabel: "Slide",
   },
   "zh-cn": {
     backToList: "民宿列表",
@@ -196,6 +206,11 @@ export const STATIC_TRANSLATIONS = {
     navExpTag: "体验",
     navProgTag: "美食",
     navCourseTag: "行程",
+    eventTitle: "活动",
+    eventEmpty: "暂无进行中的活动。",
+    eventEmptyDesc: "发布新的运营消息后将在此显示。",
+    viewMore: "查看更多",
+    slideLabel: "轮播页",
   },
   "ja-jp": {
     backToList: "宿泊一覧",
@@ -262,6 +277,11 @@ export const STATIC_TRANSLATIONS = {
     navExpTag: "体験",
     navProgTag: "グルメ",
     navCourseTag: "旅の記録",
+    eventTitle: "イベント",
+    eventEmpty: "進行中のイベントはありません。",
+    eventEmptyDesc: "新しいお知らせが登録されるとここに表示されます。",
+    viewMore: "もっと見る",
+    slideLabel: "スライド",
   },
 };
 

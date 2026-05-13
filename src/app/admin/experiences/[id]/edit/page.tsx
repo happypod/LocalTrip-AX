@@ -9,6 +9,15 @@ import { requireAdminSession } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
+type TranslationData = {
+  title: string | null;
+  summary: string | null;
+  description: string | null;
+  address?: string | null;
+  capacityText?: string | null;
+  priceText?: string | null;
+};
+
 export default async function EditExperiencePage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdminSession();
   const { id } = await params;
@@ -72,7 +81,7 @@ export default async function EditExperiencePage({ params }: { params: Promise<{
               priceText: meta.priceText,
             };
             return acc;
-          }, {} as Record<string, any>)}
+          }, {} as Record<string, TranslationData>)}
         />
       </div>
     </AdminShell>

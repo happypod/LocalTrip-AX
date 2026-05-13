@@ -12,11 +12,13 @@ export default async function AdminNewEventPage() {
 
   return (
     <AdminShell title="새 이벤트 등록">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="py-6 border-b mb-6">
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">새 이벤트 등록</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            새로운 프로모션이나 기획전 이벤트를 홈 화면에 배출할 수 있게 설정합니다.
+      <div className="mx-auto max-w-7xl px-4">
+        <div className="mb-6 border-b py-6">
+          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+            새 이벤트 등록
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            소원권역 공개 화면에 노출할 운영 소식을 등록합니다.
           </p>
         </div>
 

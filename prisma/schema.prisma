@@ -53,6 +53,7 @@ model Region {
   leadEvents          LeadEvent[]
   trainingCourses     TrainingCourse[]
   certifications      Certification[]
+  events              Event[]
   contentTranslations ContentTranslation[]
 
   @@index([status])
@@ -324,6 +325,8 @@ model Certification {
 
 model Event {
   id                  String                 @id @default(cuid())
+  regionId            String
+  region              Region                 @relation(fields: [regionId], references: [id], onDelete: Cascade)
   tag                 String
   title               String
   subTitle            String
@@ -333,6 +336,8 @@ model Event {
   href                String                 @default("/stays")
   createdAt           DateTime               @default(now())
   updatedAt           DateTime               @updatedAt
+
+  @@index([regionId, status])
 }
 
 model ContentTranslation {

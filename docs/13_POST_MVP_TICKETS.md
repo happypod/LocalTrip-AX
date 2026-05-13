@@ -799,6 +799,14 @@
   - Event가 다지역 확장 원칙을 따른다.
   - `/`, `/events`에서 소원권역 published 이벤트만 노출된다.
   - 이벤트가 없어도 fallback 또는 빈 상태 UI가 깨지지 않는다.
+- **실행 결과 (2026-05-13 완료)**:
+  - `Event.regionId` 및 `Region.events` relation을 추가하고 `@@index([regionId, status])`를 반영했다.
+  - seed 이벤트를 `sowon` region에 연결하고, 공개 이벤트 3건과 draft 비노출 검증용 1건을 추가했다.
+  - 홈 이벤트 조회를 `sowon regionId + status=published` 기준으로 변경했다.
+  - `/events` 페이지를 `/api/lead-events` 의존 및 fallback 병합 구조에서 제거하고 서버 DB 조회 기반으로 전환했다.
+  - 이벤트가 없을 때는 “진행 중인 소식이 없습니다” 빈 상태 UI를 표시하도록 정리했다.
+  - 관리자 이벤트 생성은 기본 `sowon` region에 연결되며, 상태 변경/수정/삭제 후 `/`, `/events`, `/admin/events`를 revalidate한다.
+  - Production DB schema 반영(`db push` 또는 migration)은 사용자 승인 전까지 실행하지 않았다.
 
 ### T-070 Event 관리자 CRUD region 검증
 

@@ -57,6 +57,7 @@ export interface ContentTranslationMetadata {
   linkedLifeService?: string | null;
   residentRole?: string | null;
   revenueUse?: string | null;
+  tag?: string | null;
 }
 
 export interface ContentTranslationRecord {
@@ -96,6 +97,7 @@ export function getLocalizedContent<
     linkedLifeService?: string | null;
     residentRole?: string | null;
     revenueUse?: string | null;
+    tag?: string | null;
   },
 >(original: T, translations: ContentTranslationRecord[], currentLocale: string): T {
   if (currentLocale === "ko") {
@@ -122,6 +124,13 @@ export function getLocalizedContent<
             selectedTranslation?.description ||
             englishTranslation?.description ||
             original.description,
+        }
+      : {}),
+    ...(original.tag !== undefined
+      ? {
+          tag:
+            getMetadataField("tag") ||
+            original.tag,
         }
       : {}),
     ...(original.address !== undefined
