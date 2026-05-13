@@ -11,6 +11,7 @@ interface StayData {
   title?: string;
   slug?: string;
   summary?: string;
+  category?: string;
   description?: string;
   address?: string;
   phone?: string;
@@ -85,6 +86,7 @@ function getStayInput(data: StayData) {
     title: getRequiredString(data.title, "숙소명"),
     slug: getStaySlug(data.slug),
     summary: getRequiredString(data.summary, "요약"),
+    category: getOptionalString(data.category),
     description: getOptionalString(data.description),
     address: getOptionalString(data.address),
     phone: getOptionalString(data.phone),

@@ -52,10 +52,10 @@ export default async function StaysPage({
 
   const rawStays = await getStays();
   
-  // Augment stays with inferred category
+  // Augment stays with explicit or inferred category
   const allStays = rawStays.map(stay => ({
     ...stay,
-    category: inferStayCategory(stay.title),
+    category: stay.category || inferStayCategory(stay.title),
   }));
 
   // Dynamically extract categories present in the DB

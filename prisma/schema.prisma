@@ -97,6 +97,7 @@ model Accommodation {
   title               String
   slug                String
   summary             String
+  category            String?
   description         String?
   address             String?
   priceText           String?

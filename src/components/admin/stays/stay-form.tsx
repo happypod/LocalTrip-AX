@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -37,6 +37,7 @@ export function StayForm({ initialData, regions, businesses }: StayFormProps) {
       title: formData.get("title") as string,
       slug,
       summary: formData.get("summary") as string,
+      category: formData.get("category") as string,
       description: formData.get("description") as string,
       address: formData.get("address") as string,
       phone: formData.get("phone") as string,
@@ -162,6 +163,17 @@ export function StayForm({ initialData, regions, businesses }: StayFormProps) {
               placeholder="바다가 보이는 조용한 숙소"
               className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-gray-700">카테고리</label>
+            <input
+              name="category"
+              defaultValue={initialData?.category || ""}
+              placeholder="예: 한옥, 글램핑, 민박, 펜션"
+              className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            />
+            <span className="text-xs text-gray-500">비워두면 숙소명 타이틀에서 키워드를 통해 자동으로 카테고리를 유추하여 필터에 노출합니다.</span>
           </div>
 
           <div className="flex flex-col gap-2">
