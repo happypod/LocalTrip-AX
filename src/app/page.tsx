@@ -132,7 +132,8 @@ async function getHomeData() {
       courses,
       events,
     };
-  } catch {
+  } catch (error) {
+    console.error("🚨 ERROR IN GET_HOME_DATA:", error);
     return {
       stays: [] as HomeItem[],
       experiences: [] as HomeItem[],

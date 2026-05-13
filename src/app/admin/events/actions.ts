@@ -5,11 +5,35 @@ import { PublishStatus } from "@prisma/client";
 import { requireAdminSession } from "@/lib/admin-auth";
 import { getPrisma } from "@/lib/prisma";
 
+type PrismaClientInstance = ReturnType<typeof getPrisma>;
+
 const PUBLISH_STATUSES: PublishStatus[] = [
   PublishStatus.draft,
   PublishStatus.published,
   PublishStatus.inactive,
 ];
+
+const DEFAULT_GRADIENT = "from-blue-50 to-indigo-100/40";
+
+const GRADIENT_PRESETS = new Set([
+  DEFAULT_GRADIENT,
+  "from-emerald-50 to-teal-100/40",
+  "from-amber-50 to-orange-100/40",
+  "from-rose-50 to-pink-100/40",
+  "from-violet-50 to-purple-100/40",
+  "from-slate-50 to-zinc-100/40",
+]);
+
+const EVENT_HREFS = new Set([
+  "/stays",
+  "/experiences",
+  "/programs",
+  "/courses",
+  "/map",
+  "/partner/apply",
+  "/events",
+  "/customer-center",
+]);
 
 export interface EventData {
   tag: string;
@@ -38,10 +62,18 @@ function assertPublishStatus(status: string): asserts status is PublishStatus {
 
 function normalizeHref(value: string | undefined) {
   const href = normalizeOptionalText(value, "/stays");
-  if (!href.startsWith("/")) {
-    throw new Error("이벤트 이동 경로는 내부 경로(`/...`)만 사용할 수 있습니다.");
+  if (!EVENT_HREFS.has(href)) {
+    throw new Error("허용되지 않은 이벤트 이동 경로입니다.");
   }
   return href;
+}
+
+function normalizeGradient(value: string | undefined) {
+  const gradient = normalizeOptionalText(value, DEFAULT_GRADIENT);
+  if (!GRADIENT_PRESETS.has(gradient)) {
+    throw new Error("허용되지 않은 이벤트 배경값입니다.");
+  }
+  return gradient;
 }
 
 function assertNonEmptyUpdatedText(fieldLabel: string, value: string) {
@@ -56,8 +88,7 @@ function revalidateEventPaths() {
   revalidatePath("/");
 }
 
-async function getSowonRegionId() {
-  const prisma = getPrisma();
+async function getSowonRegionId(prisma: PrismaClientInstance) {
   const region = await prisma.region.findUnique({
     where: { slug: "sowon" },
     select: { id: true },
@@ -70,10 +101,24 @@ async function getSowonRegionId() {
   return region.id;
 }
 
+async function assertSowonEvent(prisma: PrismaClientInstance, id: string) {
+  const regionId = await getSowonRegionId(prisma);
+  const event = await prisma.event.findFirst({
+    where: { id, regionId },
+    select: { id: true },
+  });
+
+  if (!event) {
+    throw new Error("이벤트를 찾을 수 없습니다.");
+  }
+
+  return event;
+}
+
 export async function createEvent(data: EventData) {
   await requireAdminSession();
   const prisma = getPrisma();
-  const regionId = await getSowonRegionId();
+  const regionId = await getSowonRegionId(prisma);
 
   const tag = normalizeRequiredText(data.tag);
   const title = normalizeRequiredText(data.title);
@@ -93,10 +138,7 @@ export async function createEvent(data: EventData) {
       title,
       subTitle,
       description,
-      gradient: normalizeOptionalText(
-        data.gradient,
-        "from-blue-50 to-indigo-100/40"
-      ),
+      gradient: normalizeGradient(data.gradient),
       status: data.status,
       href: normalizeHref(data.href),
     },
@@ -110,13 +152,7 @@ export async function updateEvent(id: string, data: Partial<EventData>) {
   await requireAdminSession();
   const prisma = getPrisma();
 
-  const existingEvent = await prisma.event.findUnique({
-    where: { id },
-    select: { id: true },
-  });
-  if (!existingEvent) {
-    throw new Error("이벤트를 찾을 수 없습니다.");
-  }
+  await assertSowonEvent(prisma, id);
 
   if (data.status !== undefined) {
     assertPublishStatus(data.status);
@@ -145,10 +181,7 @@ export async function updateEvent(id: string, data: Partial<EventData>) {
       ...(subTitle !== undefined && { subTitle }),
       ...(description !== undefined && { description }),
       ...(data.gradient !== undefined && {
-        gradient: normalizeOptionalText(
-          data.gradient,
-          "from-blue-50 to-indigo-100/40"
-        ),
+        gradient: normalizeGradient(data.gradient),
       }),
       ...(data.status !== undefined && { status: data.status }),
       ...(data.href !== undefined && { href: normalizeHref(data.href) }),
@@ -164,6 +197,7 @@ export async function updateEventStatus(id: string, status: PublishStatus) {
   const prisma = getPrisma();
 
   assertPublishStatus(status);
+  await assertSowonEvent(prisma, id);
 
   const event = await prisma.event.update({
     where: { id },
@@ -178,6 +212,7 @@ export async function deleteEvent(id: string) {
   await requireAdminSession();
   const prisma = getPrisma();
 
+  await assertSowonEvent(prisma, id);
   await prisma.event.delete({ where: { id } });
 
   revalidateEventPaths();

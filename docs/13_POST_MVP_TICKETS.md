@@ -819,6 +819,13 @@
   - 이벤트 삭제/비활성화 시 홈/이벤트 페이지 revalidate
 - 완료 기준:
   - 관리자 이벤트 CRUD가 regionId와 status 정책을 지킨다.
+- **실행 결과 (2026-05-13 완료)**:
+  - `createEvent`, `updateEvent`, `updateEventStatus`, `deleteEvent` 모두 Server Action 시작부에서 `requireAdminSession()`을 직접 호출하도록 유지했다.
+  - 수정/상태 변경/삭제 대상 Event는 `sowon` region에 속한 데이터인지 `findFirst({ id, regionId })`로 재검증한다.
+  - 필수 문자열(`tag`, `title`, `subTitle`, `description`)은 서버에서 `trim()` 후 빈 값 저장을 거부한다.
+  - `status`, `href`, `gradient`는 서버 allowlist 검증을 통과한 값만 저장한다.
+  - 관리자 이벤트 폼의 이동 경로와 배경값 입력을 allowlist 기반 select로 정리해 운영 입력 오류를 줄였다.
+  - 이벤트 변경 후 `/admin/events`, `/events`, `/`를 revalidate하도록 유지했다.
 
 ### T-071 Event 공개 노출 QA
 

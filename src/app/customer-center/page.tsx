@@ -31,8 +31,53 @@ interface ChatCategory {
   subTags: string[];
 }
 
+interface ChatCategoryTranslation extends Omit<ChatCategory, "icon"> {}
+
+interface CustomerCenterTranslation {
+  heroTitle: string;
+  heroBadge: string;
+  aiTitle: string;
+  aiDesc: string;
+  btnCheck: string;
+  btnLive: string;
+  faqTitle: string;
+  filterTitle: string;
+  actLive: string;
+  actLiveDesc: string;
+  actPhone: string;
+  actPhoneDesc: string;
+  actSearch: string;
+  actSearchDesc: string;
+  actEmerg: string;
+  actEmergDesc: string;
+  safeTitle: string;
+  safeDesc: string;
+  safeBtn: string;
+  downTitle: string;
+  downList1: string;
+  downList2: string;
+  downList3: string;
+  qrTitle: string;
+  qrDesc: string;
+  chatHead: string;
+  chatClose: string;
+  chatInputPlace: string;
+  chatSend: string;
+  botWelcome: string;
+  botCancel: string;
+  botPhone: string;
+  botDefault: string;
+  allTag: string;
+  categories: ChatCategoryTranslation[];
+}
+
+interface ChatMessage {
+  sender: "user" | "bot";
+  text: string;
+}
+
 // Pre-define UI and FAQ translations
-const TRANSLATIONS: Record<string, any> = {
+const TRANSLATIONS: Record<string, CustomerCenterTranslation> = {
   ko: {
     heroTitle: "고객센터",
     heroBadge: "30초 내 상담원 자동 연결",
@@ -498,13 +543,19 @@ export default function CustomerCenterPage() {
   const [activeCategory, setActiveCategory] = useState<string>("stay");
   const [selectedFAQ, setSelectedFAQ] = useState<FAQItem | null>(null);
   const [activeSubTag, setActiveSubTag] = useState<string>("all");
-  const [chatMessages, setChatMessages] = useState<{ sender: "user" | "bot"; text: string }[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => [
+    { sender: "bot", text: t.botWelcome },
+  ]);
   const [chatInput, setChatInput] = useState("");
   const [isLiveChatOpen, setIsLiveChatOpen] = useState(false);
 
   // Reset and set welcome message whenever language changes
   useEffect(() => {
-    setChatMessages([{ sender: "bot", text: t.botWelcome }]);
+    const resetId = window.setTimeout(() => {
+      setChatMessages([{ sender: "bot", text: t.botWelcome }]);
+    }, 0);
+
+    return () => window.clearTimeout(resetId);
   }, [currentLang, t.botWelcome]);
 
   // Map static icon metadata to the localized categories list
@@ -514,7 +565,7 @@ export default function CustomerCenterPage() {
     program: faUser,
   };
 
-  const mappedCategories: ChatCategory[] = t.categories.map((cat: any) => ({
+  const mappedCategories: ChatCategory[] = t.categories.map((cat) => ({
     ...cat,
     icon: categoryIcons[cat.id] || faHouseChimney,
   }));

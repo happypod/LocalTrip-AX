@@ -135,6 +135,16 @@
 - [x] draft/inactive 및 다른 region 이벤트 비노출 정책 반영
 - [x] 이벤트 없음 상태 UI 확인
 
+## T-070 Event Admin CRUD Region QA
+
+- [x] 이벤트 생성/수정/상태 변경/삭제 Server Action이 `requireAdminSession()`을 직접 호출한다
+- [x] 이벤트 수정/상태 변경/삭제 전 대상 Event가 `sowon` region에 속하는지 서버에서 재검증한다
+- [x] `tag`, `title`, `subTitle`, `description`은 서버에서 trim 후 빈 값 저장을 거부한다
+- [x] `status`는 `draft`, `published`, `inactive` allowlist만 허용한다
+- [x] `href`는 허용된 내부 운영 경로 allowlist만 저장한다
+- [x] `gradient`는 관리자 UI와 서버 allowlist가 같은 값 집합을 사용한다
+- [x] 이벤트 변경 후 `/admin/events`, `/events`, `/` 경로를 revalidate한다
+
 ## T-035 개인정보/문의/입점신청 QA
 
 - [x] 문의/입점신청 공개 폼 개인정보 수집 최소화 및 동의 Checkbox UI 정상

@@ -13,10 +13,22 @@ interface EventFormProps {
 
 const GRADIENT_PRESETS = [
   { label: "Blue / Indigo", value: "from-blue-50 to-indigo-100/40" },
+  { label: "Emerald / Teal", value: "from-emerald-50 to-teal-100/40" },
+  { label: "Amber / Orange", value: "from-amber-50 to-orange-100/40" },
   { label: "Rose / Pink", value: "from-rose-50 to-pink-100/40" },
-  { label: "Amber / Yellow", value: "from-amber-50 to-yellow-100/40" },
-  { label: "Teal / Emerald", value: "from-teal-50 to-emerald-100/40" },
-  { label: "Slate", value: "from-gray-50 to-slate-100/40" },
+  { label: "Violet / Purple", value: "from-violet-50 to-purple-100/40" },
+  { label: "Slate / Zinc", value: "from-slate-50 to-zinc-100/40" },
+];
+
+const HREF_PRESETS = [
+  { label: "숙소 목록", value: "/stays" },
+  { label: "체험 목록", value: "/experiences" },
+  { label: "주민소득상품 목록", value: "/programs" },
+  { label: "추천 코스 목록", value: "/courses" },
+  { label: "로컬 지도", value: "/map" },
+  { label: "입점신청", value: "/partner/apply" },
+  { label: "이벤트 목록", value: "/events" },
+  { label: "고객센터", value: "/customer-center" },
 ];
 
 export function EventForm({ initialEvent }: EventFormProps) {
@@ -103,7 +115,9 @@ export function EventForm({ initialEvent }: EventFormProps) {
         <div className="border-b pb-3">
           <h2 className="text-lg font-black text-gray-900">이벤트 상세 정보</h2>
           <p className="mt-1 text-sm text-gray-500">
-            이벤트는 기본 소원권역(`sowon`)에 연결되며, 공개 화면에는 Published 상태만 노출됩니다.
+            이벤트는 기본 소원권역(sowon)에 연결되며, 공개 화면에는 Published
+            상태만 노출됩니다. 이동 경로와 배경값은 운영 기준에 맞는 선택지만
+            사용할 수 있습니다.
           </p>
         </div>
 
@@ -132,30 +146,19 @@ export function EventForm({ initialEvent }: EventFormProps) {
             required
           />
 
-          <TextField
+          <SelectField
             label="클릭 이동 경로 *"
             value={href}
             onChange={setHref}
-            placeholder="/stays, /experiences, /programs, /courses"
-            required
+            options={HREF_PRESETS}
           />
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-black uppercase tracking-wider text-gray-600">
-              배경 그라디언트 *
-            </label>
-            <select
-              value={gradient}
-              onChange={(event) => setGradient(event.target.value)}
-              className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            >
-              {GRADIENT_PRESETS.map((preset) => (
-                <option key={preset.value} value={preset.value}>
-                  {preset.label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <SelectField
+            label="배경 그라디언트 *"
+            value={gradient}
+            onChange={setGradient}
+            options={GRADIENT_PRESETS}
+          />
 
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-black uppercase tracking-wider text-gray-600">
@@ -182,7 +185,7 @@ export function EventForm({ initialEvent }: EventFormProps) {
             rows={4}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
-            placeholder="이벤트 설명을 입력하세요."
+            placeholder="이벤트 설명을 입력해 주세요."
             className="rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold outline-none transition-all placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
         </div>
@@ -216,6 +219,37 @@ function TextField({
         placeholder={placeholder}
         className="rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold outline-none transition-all placeholder:text-gray-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
       />
+    </div>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: { label: string; value: string }[];
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className="text-xs font-black uppercase tracking-wider text-gray-600">
+        {label}
+      </label>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
