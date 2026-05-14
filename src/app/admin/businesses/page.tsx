@@ -3,10 +3,13 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { BusinessList } from "@/components/admin/businesses/business-list";
 import { getPrisma } from "@/lib/prisma";
 import { BusinessProfile, Region } from "@prisma/client";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const revalidate = 0;
 
 export default async function AdminBusinessesPage() {
+  await requireAdminSession();
+  
   const prisma = getPrisma();
   let businesses: (BusinessProfile & { region: Region })[] = [];
   let error = null;

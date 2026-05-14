@@ -141,6 +141,7 @@ function PremiumVideoEmbed({
           src={url}
           title={title}
           className="h-full w-full border-0"
+          sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
           allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
           allowFullScreen
           loading="lazy"

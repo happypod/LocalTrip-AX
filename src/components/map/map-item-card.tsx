@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MapItem } from "@/lib/map-data";
+import { MapItem } from "@/lib/map-types";
 import { Bed, Leaf, HeartHandshake, Compass, MapPin, ImageOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackMapLeadEvent } from "@/lib/track-map-lead-event";

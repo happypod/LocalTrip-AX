@@ -2,10 +2,12 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { BusinessForm } from "@/components/admin/businesses/business-form";
 import { getPrisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function EditBusinessPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdminSession();
   const { id } = await params;
   const prisma = getPrisma();
   

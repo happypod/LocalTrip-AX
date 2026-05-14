@@ -14,6 +14,7 @@ import {
   faCircleCheck,
   faCompass,
   faMapLocationDot,
+  faUser,
   faUsers,
 } from "@/lib/fontawesome";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -204,13 +205,24 @@ export function HomeClient({ stays, experiences, programs, courses, events }: Ho
         </section>
 
         <footer className="mt-7 flex flex-col gap-4 border-t border-[#dde4e6] py-7 text-sm text-persona-muted md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap items-center gap-5">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <span className="text-base font-black text-persona-text font-persona-display">{copy.hero.title}</span>
             <span>{labels.touristInquiry}</span>
-            <span>010-0233-4548</span>
-            <span>www.sowontrip.com</span>
+            <a href="tel:010-0233-4548" className="hover:underline hover:text-persona-primary transition-colors">010-0233-4548</a>
+            <a href="https://www.sowontrip.com" target="_blank" rel="noreferrer" className="hover:underline hover:text-persona-primary transition-colors">www.sowontrip.com</a>
+            <Link href="/customer-center" className="hover:underline hover:text-persona-primary transition-colors">{labels.navCustomerCenter}</Link>
+            <Link href="/partner/apply" className="hover:underline hover:text-persona-primary transition-colors">{labels.partnerTitle}</Link>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <Link
+              href="/admin"
+              aria-label="관리자 전용 페이지로 이동 (오픈 전 한시 허용)"
+              title="관리자 페이지 (운영 전용)"
+              className="inline-flex h-10 items-center gap-2 rounded-full border border-persona-primary/25 bg-white/75 px-4 text-sm font-black text-persona-text shadow-sm transition hover:border-persona-primary hover:bg-white hover:text-persona-primary"
+            >
+              <FontAwesomeIcon icon={faUser} className="h-4 w-4" />
+              관리자 페이지 (운영 전용)
+            </Link>
             <FontAwesomeIcon icon={faUsers} className="h-5 w-5" />
             <FontAwesomeIcon icon={faCompass} className="h-5 w-5" />
             <FontAwesomeIcon icon={faMapLocationDot} className="h-5 w-5" />

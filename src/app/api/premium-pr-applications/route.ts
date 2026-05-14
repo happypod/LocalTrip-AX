@@ -8,6 +8,7 @@ import {
   readStringField,
 } from "@/lib/public-api-validation";
 import { logOperationError, logOperationInfo } from "@/lib/operation-log";
+import { rateLimitCheck } from "@/lib/public-api-rate-limit";
 
 export const runtime = "nodejs";
 
@@ -92,6 +93,10 @@ function buildApplicationMessage({
 }
 
 export async function POST(req: Request) {
+  if (!rateLimitCheck(req, "premiumPrApplications")) {
+    return NextResponse.json({ ok: false, error: "RATE_LIMITED" }, { status: 429 });
+  }
+
   try {
     const body = await readJsonRecord(req);
     const applicantName = readStringField(body, "applicantName", {

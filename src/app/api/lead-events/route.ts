@@ -8,6 +8,7 @@ import {
   readStringField,
 } from "@/lib/public-api-validation";
 import { logOperationError, logOperationInfo } from "@/lib/operation-log";
+import { rateLimitCheck } from "@/lib/public-api-rate-limit";
 
 const REGION_SLUG_PATTERN = /^[a-z0-9-]+$/;
 const LEAD_ITEM_TYPES = [
@@ -65,6 +66,10 @@ function sanitizeMetadata(value: unknown) {
 }
 
 export async function POST(req: Request) {
+  if (!rateLimitCheck(req, "leadEvents")) {
+    return NextResponse.json({ ok: true, skipped: true, reason: "RATE_LIMITED" });
+  }
+
   try {
     const body = await readJsonRecord(req);
     const regionSlug = readStringField(body, "regionId", {

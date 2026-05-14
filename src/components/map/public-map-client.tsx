@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import Script from "next/script";
 import { trackMapLeadEvent } from "@/lib/track-map-lead-event";
-import { MapItem, MapItemType, MAP_REGIONS } from "@/lib/map-data";
+import { MapItem, MapItemType, MAP_REGIONS } from "@/lib/map-types";
 import { MapPlaceholder } from "./map-placeholder";
 import { MapFilterTabs } from "./map-filter-tabs";
 import { MapRegionSummary } from "./map-region-summary";

@@ -1,10 +1,12 @@
 import { AdminShell } from "@/components/admin/admin-shell";
 import { BusinessForm } from "@/components/admin/businesses/business-form";
 import { getPrisma } from "@/lib/prisma";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewBusinessPage() {
+  await requireAdminSession();
   const prisma = getPrisma();
   
   const regions = await prisma.region.findMany({

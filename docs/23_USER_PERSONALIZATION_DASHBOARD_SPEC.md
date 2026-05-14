@@ -100,6 +100,12 @@
 - 비로그인 상태에서는 게스트 대시보드 또는 로그인 준비 중 안내를 보여준다.
 - `/admin`은 운영자 전용 경로로 유지한다.
 - 결제내역, 예약현황은 실제 데이터 없이 준비 중 또는 문의 기반 안내로 표시한다.
+- 구현 상태: 완료
+- 구현 기록:
+  - `PublicNavigationShell`의 desktop/mobile `마이` 링크가 `/my`로 이동한다.
+  - `/my`는 게스트 모드 관광객 대시보드 placeholder로 추가되었다.
+  - 맞춤코스, 찜 목록, 문의 내역, 예약현황, 결제내역, 알림 섹션은 실제 예약/결제 확정 기능 없이 준비 상태로 표시한다.
+  - `/admin`은 기존 운영자 전용 인증 경로로 유지한다.
 
 ### T-083 맞춤코스 빌더 MVP Lite
 
@@ -109,6 +115,14 @@
 - 결과는 localStorage에 임시 저장한다.
 - 맞춤코스에서 문의 CTA로 연결할 수 있게 한다.
 - 예약 확정, 결제, 재고 확인은 제외한다.
+- 구현 상태: 완료
+- 구현 기록:
+  - `/course-builder` 공개 라우트를 추가했다.
+  - `/my/trips/new`는 `/course-builder`로 redirect한다.
+  - `region=sowon`, `status=published` 기준 숙소, 체험, 주민소득상품을 DB에서 조회하고 DB 실패 시 fallback 데이터로 렌더링한다.
+  - 사용자가 항목을 추가/삭제/순서 변경하고 여정 메모를 입력할 수 있다.
+  - 결과는 `ltax_custom_trip_plan_v1` localStorage key에 저장한다.
+  - 문의 CTA는 `/customer-center`로 연결하며, 예약 확정/결제/재고 확인 문구는 사용하지 않는다.
 
 ### T-084 관광객 Auth 및 사용자 데이터 모델 설계
 
@@ -117,6 +131,12 @@
 - `TouristUser`, `TouristProfile`, `SavedTripPlan`, `SavedTripPlanItem`, `UserNotification` 모델 초안을 작성한다.
 - 관리자 계정과 관광객 계정의 인증 체계를 분리한다.
 - 운영자/숙박관계자 대시보드는 별도 티켓으로 분리한다.
+- 구현 상태: 완료
+- 구현 기록:
+  - 실제 Auth/DB migration은 수행하지 않고 `docs/24_TOURIST_AUTH_DATA_MODEL_SPEC.md`에 설계 초안을 분리 작성했다.
+  - 관리자 세션과 관광객 세션을 분리하는 원칙을 명시했다.
+  - `TouristUser`, `TouristProfile`, `SavedTripPlan`, `SavedTripPlanItem`, `UserNotification` Prisma 모델 초안을 문서화했다.
+  - 개인정보 수집 최소화, localStorage 저장 제한, 로그인 후 DB 이전 기준을 정리했다.
 
 ### T-085 관광객 대시보드 1차 구현
 

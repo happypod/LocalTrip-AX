@@ -1,4 +1,4 @@
-import { MapItem, MapRegionUI } from "@/lib/map-data";
+import { MapItem, MapRegionUI } from "@/lib/map-types";
 
 interface MapRegionSummaryProps {
   region: MapRegionUI | null;

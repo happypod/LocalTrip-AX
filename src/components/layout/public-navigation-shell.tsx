@@ -149,11 +149,19 @@ function DesktopTopNav({
             <span>{labels.navWishlist}</span>
           </button>
 
-          <button type="button" className="flex items-center gap-2 transition hover:text-[#111827]">
+          <button 
+            type="button" 
+            onClick={() => alert(labels.cartNotice)}
+            className="flex items-center gap-2 transition hover:text-[#111827] cursor-pointer"
+          >
             <FontAwesomeIcon icon={faShoppingCart} className="h-4 w-4 text-[#566170]" />
             <span>{labels.navCart}</span>
           </button>
-          <button type="button" className="flex items-center gap-2 transition hover:text-[#111827]">
+          <button 
+            type="button" 
+            onClick={() => alert(labels.recentNotice)}
+            className="flex items-center gap-2 transition hover:text-[#111827] cursor-pointer"
+          >
             <FontAwesomeIcon icon={faClock} className="h-4 w-4 text-[#566170]" />
             <span>{labels.navRecent}</span>
           </button>
@@ -164,8 +172,11 @@ function DesktopTopNav({
             className="px-1"
           />
           <Link
-            href="/admin"
-            className="flex h-12 items-center gap-2 rounded-full bg-white px-6 text-[15px] font-black text-[#2f3744] shadow-[0_3px_14px_rgba(15,23,42,0.12)] ring-1 ring-gray-100 transition hover:text-[#111827]"
+            href="/my"
+            className={cn(
+              "flex h-12 items-center gap-2 rounded-full bg-white px-6 text-[15px] font-black text-[#2f3744] shadow-[0_3px_14px_rgba(15,23,42,0.12)] ring-1 ring-gray-100 transition hover:text-[#111827]",
+              pathname.startsWith("/my") && "text-[#ae2f34]",
+            )}
           >
             <FontAwesomeIcon icon={faUser} className="h-4 w-4" />
             {labels.navMy}
@@ -404,10 +415,10 @@ function MobileBottomNav({
     },
     {
       kind: "link" as const,
-      href: "/admin",
+      href: "/my",
       label: labels.my,
       icon: faUser,
-      match: (path: string) => path.startsWith("/admin") && !isCategoryOpen,
+      match: (path: string) => path.startsWith("/my") && !isCategoryOpen,
     },
   ];
 
@@ -490,6 +501,9 @@ function CategoryOverlay({
   const copy = usePersonaCopy();
   const currentLang = usePersonaThemeStore((state) => state.currentLang);
   const labels = getStaticLabels(currentLang);
+  const categoryLinkClass = "hover:text-[#ae2f34]";
+  const categoryTagClass =
+    "rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]";
 
   if (!isOpen) return null;
 
@@ -517,17 +531,18 @@ function CategoryOverlay({
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
-              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">한옥/전통가옥</Link>
-              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">독채/감성숙소</Link>
-              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">펜션/풀빌라</Link>
-              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">카라반/글램핑</Link>
-              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">게스트하우스</Link>
-              <Link href="/stays" onClick={onClose} className="hover:text-[#ae2f34]">전통민박/가족형</Link>
+              {labels.categoryOverlayStayItems.map((label) => (
+                <Link key={label} href="/stays" onClick={onClose} className={categoryLinkClass}>
+                  {label}
+                </Link>
+              ))}
             </div>
             <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-gray-50">
-              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">인기 머묾</Link>
-              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">초특가 숙소</Link>
-              <Link href="/stays" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">전통 한옥</Link>
+              {labels.categoryOverlayStayTags.map((label) => (
+                <Link key={label} href="/stays" onClick={onClose} className={categoryTagClass}>
+                  {label}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
@@ -540,17 +555,18 @@ function CategoryOverlay({
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">바다 서핑</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">해안 생태체험</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">염전 소금만들기</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">해안 트레킹</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">바다 낚시 투어</Link>
-              <Link href="/experiences" onClick={onClose} className="hover:text-[#ae2f34]">원데이 공예클래스</Link>
+              {labels.categoryOverlayExperienceItems.map((label) => (
+                <Link key={label} href="/experiences" onClick={onClose} className={categoryLinkClass}>
+                  {label}
+                </Link>
+              ))}
             </div>
             <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-gray-50">
-              <Link href="/experiences" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">액티비티</Link>
-              <Link href="/experiences" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">가족 체험</Link>
-              <Link href="/experiences" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">힐링 투어</Link>
+              {labels.categoryOverlayExperienceTags.map((label) => (
+                <Link key={label} href="/experiences" onClick={onClose} className={categoryTagClass}>
+                  {label}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
@@ -563,17 +579,18 @@ function CategoryOverlay({
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
-              <Link href="/programs" onClick={onClose} className="hover:text-[#ae2f34]">대하/꽃게 구이</Link>
-              <Link href="/programs" onClick={onClose} className="hover:text-[#ae2f34]">감태 떡만들기</Link>
-              <Link href="/programs" onClick={onClose} className="hover:text-[#ae2f34]">로컬 어촌 밥상</Link>
-              <Link href="/programs" onClick={onClose} className="hover:text-[#ae2f34]">제철 수산 미식</Link>
-              <Link href="/programs" onClick={onClose} className="hover:text-[#ae2f34]">전통주 페어링</Link>
-              <Link href="/programs" onClick={onClose} className="hover:text-[#ae2f34]">해산물 바비큐</Link>
+              {labels.categoryOverlayProgramItems.map((label) => (
+                <Link key={label} href="/programs" onClick={onClose} className={categoryLinkClass}>
+                  {label}
+                </Link>
+              ))}
             </div>
             <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-gray-50">
-              <Link href="/programs" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">로컬푸드</Link>
-              <Link href="/programs" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">제철 먹거리</Link>
-              <Link href="/programs" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">미식 기행</Link>
+              {labels.categoryOverlayProgramTags.map((label) => (
+                <Link key={label} href="/programs" onClick={onClose} className={categoryTagClass}>
+                  {label}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
@@ -586,15 +603,18 @@ function CategoryOverlay({
           </div>
           <div className="rounded-3xl border border-gray-100/50 bg-white p-6 shadow-sm">
             <div className="grid grid-cols-2 gap-y-4 text-sm font-bold text-gray-800">
-              <Link href="/courses" onClick={onClose} className="hover:text-[#ae2f34]">당일치기 쉼표코스</Link>
-              <Link href="/courses" onClick={onClose} className="hover:text-[#ae2f34]">1박2일 감성코스</Link>
-              <Link href="/courses" onClick={onClose} className="hover:text-[#ae2f34]">어촌 살아보기 코스</Link>
-              <Link href="/courses" onClick={onClose} className="hover:text-[#ae2f34]">가족 중심 맞춤여행</Link>
-              <Link href="/courses" onClick={onClose} className="hover:text-[#ae2f34]">연인 전용 데이트코스</Link>
+              {labels.categoryOverlayCourseItems.map((label) => (
+                <Link key={label} href="/courses" onClick={onClose} className={categoryLinkClass}>
+                  {label}
+                </Link>
+              ))}
             </div>
             <div className="mt-5 flex flex-wrap gap-2 pt-3 border-t border-gray-50">
-              <Link href="/courses" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">추천 코스</Link>
-              <Link href="/map" onClick={onClose} className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-500 hover:border-[#ae2f34] hover:text-[#ae2f34]">지도 탐색</Link>
+              {labels.categoryOverlayCourseTags.map((label, index) => (
+                <Link key={label} href={index === 1 ? "/map" : "/courses"} onClick={onClose} className={categoryTagClass}>
+                  {label}
+                </Link>
+              ))}
             </div>
           </div>
         </div>

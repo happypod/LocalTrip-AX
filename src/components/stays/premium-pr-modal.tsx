@@ -69,6 +69,7 @@ export function PremiumPrModal({
           src={url ?? undefined}
           title={title}
           className="min-h-0 flex-1 border-0"
+          sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
           allow="autoplay; fullscreen; xr-spatial-tracking; encrypted-media; picture-in-picture"
           allowFullScreen
           loading="lazy"

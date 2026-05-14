@@ -37,9 +37,11 @@ export const getPrisma = () => {
     });
 
     const adapter = new PrismaPg(pool);
+    const isDev = process.env.NODE_ENV === "development";
+    
     globalForPrisma.prisma = new PrismaClient({
       adapter,
-      log: ["query"],
+      log: isDev ? ["query", "warn", "error"] : ["warn", "error"],
     });
     globalForPrisma.pool = pool;
   }

@@ -1,10 +1,12 @@
 import { AdminShell } from "@/components/admin/admin-shell";
 import { StayForm } from "@/components/admin/stays/stay-form";
 import { getPrisma } from "@/lib/prisma";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewStayPage() {
+  await requireAdminSession();
   const prisma = getPrisma();
   
   const [regions, businesses] = await Promise.all([

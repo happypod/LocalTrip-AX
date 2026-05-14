@@ -1,6 +1,6 @@
 "use client";
 
-import { MapRegionUI } from "@/lib/map-data";
+import { MapRegionUI } from "@/lib/map-types";
 import { Map, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 

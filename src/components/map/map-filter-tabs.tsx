@@ -1,4 +1,4 @@
-import { MapItemType } from "@/lib/map-data";
+import { MapItemType } from "@/lib/map-types";
 import { cn } from "@/lib/utils";
 
 interface MapFilterTabsProps {

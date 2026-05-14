@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { MapItem, MapItemType, MAP_REGIONS } from "@/lib/map-data";
+import { MapItem, MapItemType, MAP_REGIONS } from "@/lib/map-types";
 import { MapPlaceholder } from "./map-placeholder";
 import { MapFilterTabs } from "./map-filter-tabs";
 import { MapRegionSummary } from "./map-region-summary";

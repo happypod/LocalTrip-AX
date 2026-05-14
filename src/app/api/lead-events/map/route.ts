@@ -7,12 +7,17 @@ import {
   readStringField,
 } from "@/lib/public-api-validation";
 import { logOperationError, logOperationInfo } from "@/lib/operation-log";
+import { rateLimitCheck } from "@/lib/public-api-rate-limit";
 
 const REGION_REF_PATTERN = /^[a-zA-Z0-9_-]+$/;
 const MAP_ACTION_TYPES = ["marker_click", "detail_click", "directions_click"] as const;
 const MAP_TARGET_TYPES = ["accommodation", "experience", "local_income_program", "business_profile"] as const;
 
 export async function POST(req: Request) {
+  if (!rateLimitCheck(req, "leadEvents")) {
+    return NextResponse.json({ ok: true, skipped: true, reason: "RATE_LIMITED" });
+  }
+
   try {
     const body = await readJsonRecord(req);
     

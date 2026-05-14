@@ -11,6 +11,7 @@ import {
   readStringField,
 } from "@/lib/public-api-validation";
 import { logOperationError, logOperationInfo } from "@/lib/operation-log";
+import { rateLimitCheck } from "@/lib/public-api-rate-limit";
 
 const REGION_SLUG_PATTERN = /^[a-z0-9-]+$/;
 const PHONE_PATTERN = /^[0-9+\-\s().]{7,30}$/;
@@ -24,6 +25,10 @@ const INQUIRY_ITEM_TYPES = [
 ] as const;
 
 export async function POST(req: Request) {
+  if (!rateLimitCheck(req, "inquiries")) {
+    return NextResponse.json({ ok: false, error: "RATE_LIMITED" }, { status: 429 });
+  }
+
   try {
     const body = await readJsonRecord(req);
     const regionSlug = readStringField(body, "regionId", {

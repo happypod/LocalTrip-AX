@@ -2,10 +2,7 @@ import "dotenv/config";
 import { PrismaClient, PublishStatus, LeadEventType, CourseItemType, InquiryStatus } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
-import { FALLBACK_STAYS } from "../src/lib/stay-data";
-import { FALLBACK_EXPERIENCES } from "../src/lib/experience-data";
-import { FALLBACK_PROGRAMS } from "../src/lib/program-data";
-import { FALLBACK_COURSES } from "../src/lib/course-data";
+import { FALLBACK_STAYS, FALLBACK_EXPERIENCES, FALLBACK_PROGRAMS, FALLBACK_COURSES } from "./seed-data";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);

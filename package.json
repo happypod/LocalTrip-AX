@@ -7,6 +7,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "smoke": "node scripts/smoke-test.mjs",
     "events:seed": "tsx prisma/seed-events.ts",
     "translations:seed": "tsx prisma/seed-content-translations.ts"
   },

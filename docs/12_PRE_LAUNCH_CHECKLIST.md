@@ -114,6 +114,8 @@ Local note:
 | `images` default array | Pass | Public content image arrays use `@default([])` |
 | Public query index | Pass | Main public models include `@@index([regionId, status])` |
 | LeadEvent analytics index | Pass | `@@index([regionId, eventType, createdAt])` |
+| Neon connection pooling | Pass | `DATABASE_URL` (pooled) and `DIRECT_URL` (direct) are planned/configured |
+| Prisma query log limitation | Pass | `query` logs are restricted to Development mode via `NODE_ENV` check |
 
 Operational rule:
 
@@ -184,10 +186,13 @@ Admin model:
 | Detail message access requires admin session | Pass |
 | Minimum security headers configured | Pass |
 | Real secrets excluded from docs | Pass |
+| Vercel WAF / Rate Limit 룰 구성 (T-072) | Pending |
+| Admin DB access require pre-validation (T-073) | Pass |
+| CSP(Content-Security-Policy) 적용 (T-077) | Pass |
 
 Remaining security follow-up:
 
-- CSP remains Post-MVP because it needs careful tuning with Next.js assets, images, and inline/runtime styles.
+- 추가적인 CSP 강화(inline script 제거 등)는 Post-MVP 이후 점진적으로 도입합니다.
 
 ## 10. LeadEvent Checklist
 
@@ -260,3 +265,38 @@ Required before broader public launch:
 2. Confirm real device QA.
 3. Decide custom domain timing.
 4. Re-run smoke checks after any env/domain/deployment change.
+
+## 14. Automated Smoke Test
+
+T-076 adds an operator smoke-test script that can be run against local or Production URLs.
+
+Command:
+
+```bash
+npm run smoke
+```
+
+Production check:
+
+```bash
+SMOKE_BASE_URL=https://localtrip-ax.vercel.app npm run smoke
+```
+
+PowerShell:
+
+```powershell
+$env:SMOKE_BASE_URL="https://localtrip-ax.vercel.app"; npm run smoke
+```
+
+The script checks:
+
+- Public routes return `200`: `/`, `/stays`, `/experiences`, `/programs`, `/courses`, `/events`, `/map`, `/partner/apply`, `/partner/premium-pr`, `/customer-center`, `/my`, `/course-builder`.
+- Admin routes redirect unauthenticated users to `/admin/login`: `/admin`, `/admin/stays`, `/admin/inquiries`.
+- Public form APIs reject invalid empty `POST {}` payloads: `/api/inquiries`, `/api/partner-applications`, `/api/premium-pr-applications`.
+- `/api/lead-events` is checked as best-effort and reports a warning rather than failing the run.
+
+Acceptance:
+
+- Run this after every Production deployment, DB connection change, env change, and domain change.
+- Any `[FAIL]` result blocks broad public launch until resolved.
+- `[WARN]` slow-route results should be reviewed before external promotion.

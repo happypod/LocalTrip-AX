@@ -124,13 +124,19 @@ export function MainHeader() {
             </button>
 
             {/* Cart (장바구니) - Hidden on mobile, visible on desktop */}
-            <button className="hidden md:flex items-center gap-1.5 hover:text-[#ae2f34] transition shrink-0">
+            <button 
+              onClick={() => alert("장바구니 기능은 향후 예약/결제 정책 확정 후 제공됩니다.")}
+              className="hidden md:flex items-center gap-1.5 hover:text-[#ae2f34] transition shrink-0"
+            >
               <FontAwesomeIcon icon={faShoppingCart} className="h-4 w-4 text-gray-500" />
               <span>장바구니</span>
             </button>
 
             {/* Recently Viewed (최근 본 상품) - Hidden on mobile, visible on desktop */}
-            <button className="hidden md:flex items-center gap-1.5 hover:text-[#ae2f34] transition shrink-0">
+            <button 
+              onClick={() => alert("최근 본 콘텐츠 기능은 준비 중입니다.")}
+              className="hidden md:flex items-center gap-1.5 hover:text-[#ae2f34] transition shrink-0"
+            >
               <FontAwesomeIcon icon={faClock} className="h-4 w-4 text-gray-500" />
               <span>최근 본 상품</span>
             </button>
@@ -150,7 +156,7 @@ export function MainHeader() {
 
             {/* My Page (마이) - Hidden on mobile (since it is on the bottom nav), visible on desktop */}
             <Link
-              href="/admin"
+              href="/my"
               className="hidden md:flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-gray-50 hover:bg-gray-100 transition shadow-sm border border-gray-100/50 text-xs sm:text-sm shrink-0"
             >
               <FontAwesomeIcon icon={faUser} className="h-4 w-4 text-gray-600" />
@@ -187,7 +193,7 @@ export function MainHeader() {
         </button>
 
         {/* 마이 */}
-        <Link href="/admin" className="flex flex-col items-center justify-center flex-1 py-1 text-gray-700 hover:text-[#ae2f34] active:text-[#ae2f34] transition">
+        <Link href="/my" className="flex flex-col items-center justify-center flex-1 py-1 text-gray-700 hover:text-[#ae2f34] active:text-[#ae2f34] transition">
           <FontAwesomeIcon icon={faUser} className="h-[18px] w-[18px] mb-1" />
           <span className="text-[10px] font-bold tracking-tight">마이</span>
         </Link>

@@ -3,10 +3,12 @@ import { ProgramForm } from "@/components/admin/programs/program-form";
 import { AdminShell } from "@/components/admin/admin-shell";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewProgramPage() {
+  await requireAdminSession();
   const prisma = getPrisma();
   
   const regions = await prisma.region.findMany({

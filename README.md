@@ -36,6 +36,25 @@ npm run build
 npm run start
 ```
 
+### 운영 Smoke Test
+```bash
+npm run smoke
+```
+
+운영 배포 URL을 직접 확인할 때는 `SMOKE_BASE_URL`을 지정합니다.
+
+```bash
+SMOKE_BASE_URL=https://localtrip-ax.vercel.app npm run smoke
+```
+
+PowerShell에서는 다음 형식을 사용합니다.
+
+```powershell
+$env:SMOKE_BASE_URL="https://localtrip-ax.vercel.app"; npm run smoke
+```
+
+스모크 테스트는 공개 주요 route의 200 응답, 관리자 route의 `/admin/login` redirect, 문의/입점/Premium PR API의 invalid body 거부를 확인합니다. `SMOKE_BASE_URL`이 없으면 `NEXT_PUBLIC_SITE_URL`, 그 값도 없으면 `http://localhost:3000`을 기준으로 실행합니다.
+
 ## MVP 범위 및 제외 사항
 
 ### 핵심 원칙
@@ -76,6 +95,7 @@ DB schema changes and seed execution are operator-controlled steps. Do not run `
 - `NEXT_PUBLIC_SITE_URL` is a public origin value, not a secret. In Production it should match the canonical public URL.
 - T-039 verification found that `NEXT_PUBLIC_SITE_URL` still needs Production env alignment before final public launch.
 - Domain decision and setup steps are tracked in `docs/12_PRE_LAUNCH_CHECKLIST.md`.
+- Operational smoke checks are available through `npm run smoke`; use `SMOKE_BASE_URL` for Production checks.
 
 ## Pre-Launch Status
 

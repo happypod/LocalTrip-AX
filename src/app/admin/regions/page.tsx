@@ -3,10 +3,12 @@ import { AdminShell } from "@/components/admin/admin-shell";
 import { RegionList } from "@/components/admin/regions/region-list";
 import { getPrisma } from "@/lib/prisma";
 import { Region } from "@prisma/client";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const revalidate = 0;
 
 export default async function AdminRegionsPage() {
+  await requireAdminSession();
   const prisma = getPrisma();
   let regions: Region[] = [];
   let error = null;

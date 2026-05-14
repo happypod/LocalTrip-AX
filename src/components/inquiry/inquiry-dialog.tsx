@@ -61,15 +61,15 @@ export function InquiryDialog({
 
     // Basic Validations
     if (!formData.name.trim() || formData.name.trim().length < 2) {
-      setError("이름을 2자 이상 입력해 주세요.");
+      setError(t.inquiryNameError);
       return;
     }
     if (!formData.phone.trim()) {
-      setError("연락처를 입력해 주세요.");
+      setError(t.inquiryPhoneError);
       return;
     }
     if (!formData.privacyAgreed) {
-      setError("개인정보 수집·이용 동의가 필요합니다.");
+      setError(t.inquiryPrivacyError);
       return;
     }
 
@@ -92,20 +92,20 @@ export function InquiryDialog({
 
       if (!res.ok || !data.ok) {
         if (data.error === "PRIVACY_AGREEMENT_REQUIRED") {
-          throw new Error("개인정보 수집·이용 동의가 필요합니다.");
+          throw new Error(t.inquiryPrivacyError);
         }
         if (data.error === "INVALID_INPUT") {
-          throw new Error("필수 항목을 올바르게 입력해 주세요.");
+          throw new Error(t.inquiryInvalidInputError);
         }
-        throw new Error("문의 접수 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        throw new Error(t.inquiryErrorDefault);
       }
 
       setIsSuccess(true);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message || "문의 접수 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        setError(err.message || t.inquiryErrorDefault);
       } else {
-        setError("문의 접수 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+        setError(t.inquiryErrorDefault);
       }
     } finally {
       setIsSubmitting(false);
@@ -143,9 +143,9 @@ export function InquiryDialog({
       
       <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>문의하기</DialogTitle>
+          <DialogTitle>{t.inquiryDialogTitle}</DialogTitle>
           <DialogDescription>
-            운영 일정과 가능 여부는 운영자 확인 후 안내됩니다. (이 문의는 예약 확정이 아닙니다.)
+            {t.inquiryDialogDescription}
           </DialogDescription>
         </DialogHeader>
 
@@ -155,24 +155,24 @@ export function InquiryDialog({
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <div className="text-center">
-              <h3 className="font-bold text-lg text-foreground">문의가 접수되었습니다.</h3>
+              <h3 className="font-bold text-lg text-foreground">{t.inquirySuccessTitle}</h3>
               <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                운영자가 내용 확인 후 기재해주신<br/>연락처로 안내해 드릴 예정입니다.
+                {t.inquirySuccessDescription}
               </p>
             </div>
             <Button onClick={() => handleOpenChange(false)} className="mt-4 w-full">
-              닫기
+              {t.inquiryClose}
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-2">
             
             <div className="grid gap-2">
-              <Label htmlFor="name" className="text-sm font-semibold">이름 (필수)</Label>
+              <Label htmlFor="name" className="text-sm font-semibold">{t.inquiryNameLabel}</Label>
               <Input
                 id="name"
                 name="name"
-                placeholder="예: 홍길동"
+                placeholder={t.inquiryNamePlaceholder}
                 value={formData.name}
                 onChange={handleChange}
                 disabled={isSubmitting}
@@ -180,12 +180,12 @@ export function InquiryDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="phone" className="text-sm font-semibold">연락처 (필수)</Label>
+              <Label htmlFor="phone" className="text-sm font-semibold">{t.inquiryPhoneLabel}</Label>
               <Input
                 id="phone"
                 name="phone"
                 type="tel"
-                placeholder="예: 010-1234-5678"
+                placeholder={t.inquiryPhonePlaceholder}
                 value={formData.phone}
                 onChange={handleChange}
                 disabled={isSubmitting}
@@ -193,12 +193,12 @@ export function InquiryDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="email" className="text-sm font-semibold text-muted-foreground">이메일 (선택)</Label>
+              <Label htmlFor="email" className="text-sm font-semibold text-muted-foreground">{t.inquiryEmailLabel}</Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                placeholder="답변 받을 이메일 주소"
+                placeholder={t.inquiryEmailPlaceholder}
                 value={formData.email}
                 onChange={handleChange}
                 disabled={isSubmitting}
@@ -207,24 +207,24 @@ export function InquiryDialog({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="desiredDate" className="text-sm font-semibold text-muted-foreground">희망일 (선택)</Label>
+                <Label htmlFor="desiredDate" className="text-sm font-semibold text-muted-foreground">{t.inquiryDesiredDateLabel}</Label>
                 <Input
                   id="desiredDate"
                   name="desiredDate"
-                  placeholder="예: 7/20"
+                  placeholder={t.inquiryDesiredDatePlaceholder}
                   value={formData.desiredDate}
                   onChange={handleChange}
                   disabled={isSubmitting}
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="peopleCount" className="text-sm font-semibold text-muted-foreground">인원 (선택)</Label>
+                <Label htmlFor="peopleCount" className="text-sm font-semibold text-muted-foreground">{t.inquiryPeopleCountLabel}</Label>
                 <Input
                   id="peopleCount"
                   name="peopleCount"
                   type="number"
                   min="1"
-                  placeholder="예: 4"
+                  placeholder={t.inquiryPeopleCountPlaceholder}
                   value={formData.peopleCount}
                   onChange={handleChange}
                   disabled={isSubmitting}
@@ -233,11 +233,11 @@ export function InquiryDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="message" className="text-sm font-semibold text-muted-foreground">문의내용 (선택)</Label>
+              <Label htmlFor="message" className="text-sm font-semibold text-muted-foreground">{t.inquiryMessageLabel}</Label>
               <Textarea
                 id="message"
                 name="message"
-                placeholder="궁금한 점이나 추가 요청사항을 남겨주세요."
+                placeholder={t.inquiryMessagePlaceholder}
                 rows={3}
                 value={formData.message}
                 onChange={handleChange}
@@ -269,10 +269,10 @@ export function InquiryDialog({
                     htmlFor="privacy" 
                     className="text-sm font-semibold leading-snug cursor-pointer"
                   >
-                    개인정보 수집·이용에 동의합니다.
+                    {t.inquiryPrivacyLabel}
                   </Label>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    입력하신 정보는 문의 확인 및 답변을 위해서만 사용되며, 예약 확정 또는 결제 정보로 사용되지 않습니다.
+                    {t.inquiryPrivacyDescription}
                   </p>
                 </div>
               </div>
@@ -282,10 +282,10 @@ export function InquiryDialog({
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  제출 중...
+                  {t.inquirySubmitting}
                 </>
               ) : (
-                "문의 남기기"
+                finalButtonText
               )}
             </Button>
             

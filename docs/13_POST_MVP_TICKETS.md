@@ -77,6 +77,7 @@
   - `/partner/apply`
   - `/admin`
   - `/admin/login`
+
 - API 확인:
   - 빈 body `POST /api/inquiries` -> 400
   - 빈 body `POST /api/partner-applications` -> 400
@@ -89,6 +90,50 @@
   - 관리자 로그인 정상 동작 확인. 
   - 비인가 상태로 `/admin` 라우트 접근 시, 기존 500 에러를 던지던 취약점(P1)을 수정하여, **안전하게 `/admin/login`으로 자동 리다이렉트(307) 처리되도록 보완 완료**.
   - API 검증: 빈 body POST 시 400 Bad Request 로직 정상 동작 방어 확인.
+
+### T-072 공개 API Rate Limit 및 WAF 기준 정리
+
+- 목적: API 무분별 호출을 방지하고 운영 안전성을 확보한다.
+- 작업 범위:
+  - `/api/inquiries`
+  - `/api/partner-applications`
+  - `/api/premium-pr-applications`
+  - `/api/lead-events`
+  - `/api/lead-events/map`
+- **실행 결과 (2026-05-14 완료)**:
+  - `src/lib/public-api-rate-limit.ts` 인메모리 Rate Limiting 헬퍼 구현.
+  - 위 5개 API에 IP 기반 방어 로직 적용 완료 (제한 초과 시 429 또는 best-effort 스킵 응답 반환).
+  - `docs/09_SECURITY_ENV.md`, `docs/12_PRE_LAUNCH_CHECKLIST.md`에 Vercel WAF 운영 기준 문서화 완료.
+
+### T-073 관리자 인증 선검증 리팩터링
+
+- 목적: 관리자 페이지에서 DB 조회 쿼리가 실행되기 전에 관리자 세션 검증을 먼저 수행하도록 리팩터링하여 비인증 DB Fetch 위협을 차단한다.
+- 작업 범위:
+  - `/admin/businesses/page.tsx`
+  - `/admin/businesses/new/page.tsx`
+  - `/admin/businesses/[id]/edit/page.tsx`
+  - `/admin/regions/page.tsx`
+  - `/admin/regions/[id]/edit/page.tsx`
+  - `/admin/stays/new/page.tsx`
+  - `/admin/experiences/new/page.tsx`
+  - `/admin/programs/new/page.tsx`
+- **실행 결과 (2026-05-14 완료)**:
+  - 식별된 8개 파일의 최상단(DB Fetch 이전)에 `await requireAdminSession()` 선행 적용 및 `AdminShell` 레이아웃 래퍼 구조 유지.
+  - `docs/09_SECURITY_ENV.md` 및 `22_FULL_SYSTEM_MONITORING_SPEC.md` (FIX-002)에 1, 2차 보안 관문 명문화 완료.
+
+### T-074 Prisma 운영 로그 / DB Pool 정리
+
+- 목적: 운영 환경에서 불필요한 Prisma 쿼리 로그 출력을 제한하고, Neon+Vercel 서버리스 특성에 맞추어 커넥션 풀링(Connection Pooling) 이원화 가이드를 수립한다.
+- 작업 범위:
+  - `src/lib/prisma.ts` 내 쿼리 로그 환경별 제한
+  - `.env.example`의 `DIRECT_URL` 명시 및 역할 가이드 작성
+  - Vercel Environment Variables를 위한 풀러(Pooled) 커넥션과 비풀러 커넥션 운영 원칙 정립
+- **실행 결과 (2026-05-14 완료)**:
+  - `src/lib/prisma.ts`의 로깅 구문을 `process.env.NODE_ENV === "development"`에 반응하도록 개선하여 운영 환경에선 `query` 로그 출력을 차단하고 `error`, `warn`만 남김.
+  - `.env.example`에 마이그레이션용 `DIRECT_URL` 템플릿 및 설명 주석 추가.
+  - `docs/09_SECURITY_ENV.md`에 네온 커넥션 풀링 분리 정책을 등재하고 `22_FULL_SYSTEM_MONITORING_SPEC.md` (FIX-003) 항목을 완료 종결함.
+  - Lazy Singleton 아키텍처 유지로 프리빌드 등 DB 비접근 작업 단계의 무결성을 재확인함.
+
 
 ### T-033 모바일/PC Viewport QA
 
@@ -895,6 +940,11 @@
   - 모바일 카테고리 확장 메뉴의 세부 태그가 현재 언어로 표시된다.
 - 권장 모델: Gemini 3.1 Pro High
 - 이유: 다국어 key 설계와 기존 persona/i18n 구조 정합성 검토가 필요하다.
+- 진행 상태: 완료
+- 완료 기록:
+  - `src/lib/static-translations.ts`에 문의 팝업과 모바일 카테고리 세부 태그용 정적 번역 key를 한국어, English, 简体中文, 日本語에 추가했다.
+  - `src/components/inquiry/inquiry-dialog.tsx`의 필드 라벨, placeholder, 검증 오류, 개인정보 동의, 제출/성공 문구를 `getStaticLabels(locale)` 기반으로 전환했다.
+  - `src/components/layout/public-navigation-shell.tsx`의 `CategoryOverlay` 세부 메뉴와 태그를 언어별 배열 key 기반 렌더링으로 전환했다.
 
 ### T-080 UI Placeholder 및 푸터 링크 사용성 보완
 
@@ -910,6 +960,16 @@
   - 푸터 전화번호와 홈페이지 주소가 실제 연결된다.
 - 권장 모델: Gemini 3 Flash
 - 이유: 범위가 명확한 UI 보완 작업이다.
+- 진행 상태: 완료
+- **실행 결과 (2026-05-14 완료)**:
+  - **Placeholder Alerts**: PC 상단 네비게이션(`public-navigation-shell.tsx`) 및 레거시 헤더(`main-header.tsx`)에 존재하던 미구현 '장바구니' 및 '최근 본 상품' 버튼의 클릭 리스너를 바인딩 완료. 다국어 대응을 위해 `src/lib/static-translations.ts` 내 `cartNotice` 및 `recentNotice` 키를 추가하여(KO, EN, ZH, JA) alert() 팝업으로 유려하게 안내됨.
+  - **Home/Event Footer Enrichment**: 홈 화면 클라이언트 풋터(`home-client.tsx`) 및 이벤트 페이지(`events/page.tsx`) 내 하드코딩된 텍스트를 연결성 높은 링크들로 완벽 개선.
+    - 전화번호: `tel:010-0233-4548` 링크 적용 완료
+    - 홈페이지: `https://www.sowontrip.com` 외부 링크 전환 (target blank / rel noreferrer)
+    - 고객센터 / 입점신청: 내부 `/customer-center` 및 `/partner/apply` 라우트로의 Active Link 추가 완료.
+  - **Admin Entrance**: 관리자 페이지 임시 진입 버튼은 제거하지 않되, 운영 편의용 목적을 강화하여 툴팁(`title`)과 접근성 뱃지(`aria-label`)에 '운영 전용' 문구를 명시함.
+  - **Decoupling from T-089**: 이번 작업은 개별 화면에 분절되어 있던 임시 풋터 링크를 정비하는 보완 작업에 국한되었으며, 전역 푸터 공통 컴포넌트 추출 및 통합 배포 과제는 향후 T-089의 온전한 범위로 보존시킴.
+
 
 ### T-081 번역 운영 자동화 및 DB 캐시 아키텍처 설계
 
@@ -924,6 +984,20 @@
   - AI API 연동 전 필요한 환경변수, 보안, 비용 기준이 명확하다.
 - 권장 모델: Claude Sonnet 4.6 Thinking 또는 Gemini 3.1 Pro High
 - 이유: 운영 아키텍처, 비용, 개인정보, 관리자 workflow 판단이 필요하다.
+
+## T-076 운영 Smoke Test 자동화 완료 기록
+
+- 진행 상태: 완료
+- 완료 기록:
+  - `scripts/smoke-test.mjs`를 추가해 공개 route status, 관리자 redirect, 주요 공개 API invalid body rejection을 자동 확인하도록 했다.
+  - `package.json`에 `npm run smoke` 스크립트를 추가했다.
+  - 기준 URL은 `SMOKE_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, `http://localhost:3000` 순서로 결정한다.
+  - `/api/lead-events`는 사용자 CTA를 막지 않는 best-effort 정책이므로 실패 조건이 아니라 warning 성격의 optional check로 분리했다.
+  - `README.md`와 `docs/12_PRE_LAUNCH_CHECKLIST.md`에 운영 실행 방법과 완료 기준을 반영했다.
+- 완료 기준:
+  - `npm run lint` 통과
+  - `npm run build` 통과
+  - 실행 가능한 smoke-test command 제공
 
 ## T-082~T-087 관광객 맞춤코스 및 사용자 대시보드
 
@@ -945,6 +1019,12 @@
   - `/my`는 비로그인 관광객에게도 안전하게 렌더링된다.
   - `/admin`은 기존 관리자 인증 정책을 유지한다.
 - 권장 모델: Gemini 3 Flash
+- 진행 상태: 완료
+- 완료 기록:
+  - `src/components/layout/public-navigation-shell.tsx`의 PC/모바일 `마이` 링크를 `/admin`에서 `/my`로 변경했다.
+  - `src/app/my/page.tsx`를 추가해 비로그인 관광객도 접근 가능한 게스트 대시보드 placeholder를 구현했다.
+  - `/my`에는 맞춤코스, 찜 목록, 문의 내역, 예약현황, 결제내역, 알림 섹션을 준비 상태로 표시하되 예약 확정/결제 완료처럼 오해될 문구는 사용하지 않았다.
+  - 기존 운영자 관리자 경로 `/admin`과 `/admin/login`은 수정하지 않았다.
 
 ### T-083 맞춤코스 빌더 MVP Lite
 
@@ -961,6 +1041,13 @@
   - 새로고침 후에도 localStorage 기반 임시 코스가 유지된다.
   - 예약/결제 확정처럼 오해될 문구가 없다.
 - 권장 모델: Gemini 3.1 Pro High
+- 진행 상태: 완료
+- 완료 기록:
+  - `/course-builder` 공개 라우트를 추가했다.
+  - `/my/trips/new`는 `/course-builder`로 redirect한다.
+  - published 숙소, 체험, 주민소득상품을 DB 기준으로 조회하고 DB 미연결 시 fallback으로 렌더링한다.
+  - 항목 추가/삭제/순서 변경, 여정 메모, localStorage 저장을 구현했다.
+  - 문의 CTA는 `/customer-center`로 연결하고 예약 확정/결제/재고 확인 기능은 넣지 않았다.
 
 ### T-084 관광객 Auth 및 사용자 데이터 모델 설계
 
@@ -974,6 +1061,12 @@
   - 관광객 계정과 운영자 관리자 권한이 분리된 구조로 문서화된다.
   - Prisma schema 변경 여부와 migration 전략이 정리된다.
 - 권장 모델: Claude Sonnet 4.6 Thinking
+- 진행 상태: 완료
+- 완료 기록:
+  - `docs/24_TOURIST_AUTH_DATA_MODEL_SPEC.md`를 추가했다.
+  - 관리자 세션과 관광객 세션을 분리하는 원칙을 명시했다.
+  - `TouristUser`, `TouristProfile`, `SavedTripPlan`, `SavedTripPlanItem`, `UserNotification` 모델 초안을 문서화했다.
+  - 이번 티켓에서는 실제 Auth 구현과 Prisma migration을 수행하지 않는 것으로 범위를 고정했다.
 
 ### T-085 관광객 대시보드 1차 구현
 
@@ -1017,3 +1110,93 @@
   - 알림 유형, 보관 기간, 수신 동의 기준이 문서화된다.
   - 실제 push/email/SMS 발송은 별도 티켓으로 분리된다.
 - 권장 모델: Gemini 3.1 Pro High
+
+### T-088 홈 플로팅 페르소나·언어 재선택 배너
+
+- 목적: 사용자가 첫 진입 때 선택했던 페르소나 테마와 언어를 홈 화면에서 언제든 다시 선택할 수 있게 한다.
+- 배경:
+  - 현재 첫 방문 온보딩과 GNB 언어/테마 모달은 존재하지만, 홈 화면에서 즉시 보이는 재진입점은 부족하다.
+  - 외국인 방문자는 첫 진입 시점부터 English, 简体中文, 日本語 선택지를 명확히 볼 수 있어야 한다.
+  - 중국어/일본어 방문자는 KR | KRW 버튼을 찾아야만 언어를 바꿀 수 있는 구조보다, 초기 온보딩과 홈 플로팅 배너 안에서 바로 선택할 수 있는 구조가 더 적합하다.
+- 작업 범위:
+  - 홈 화면 우측 하단에 페르소나·언어 재선택 플로팅 배너 추가
+  - 모바일에서는 하단 네비와 겹치지 않도록 하단 네비 위 플로팅 pill 또는 bottom sheet trigger로 배치
+  - 플로팅 배너 클릭 시 현재 `PersonaOnboardingDialog` 또는 재사용 가능한 selector panel을 열어 페르소나를 다시 선택할 수 있게 구성
+  - 초기 온보딩 화면에 언어 선택 영역 추가
+    - 한국어
+    - English
+    - 简体中文
+    - 日本語
+  - 플로팅 배너 내부에도 동일한 언어 선택 UI 제공
+  - 언어 선택 시 `usePersonaThemeStore.currentLang`, `ltax_lang` cookie, `localStorage` 상태가 일관되게 동기화되도록 설계
+  - 현재 선택된 페르소나와 언어를 배너에 짧게 표시
+  - `/admin`, `/admin/login` 등 관리자 화면에서는 노출하지 않음
+- UI 기획:
+  - Desktop: 홈 우측 하단 고정 배너
+    - 예: "여행 취향·언어 바꾸기"
+    - 현재 상태 예: "소원머묾 · JP"
+  - Mobile: 하단 네비 높이를 고려해 `bottom: calc(80px + env(safe-area-inset-bottom))` 수준으로 배치
+  - 배너는 닫기 버튼을 제공하되, 닫아도 설정 진입점이 완전히 사라지지 않도록 축약 아이콘 상태를 유지
+  - 사투리/로컬 테마 선택 시에도 언어 선택은 별도로 유지
+- 제외 범위:
+  - URL 기반 locale 라우팅(`/en`, `/zh-cn`, `/ja-jp`) 도입 제외
+  - 자동 브라우저 언어 감지 강제 전환 제외
+  - AI 번역 API 호출 제외
+  - DB schema 변경 제외
+  - 결제, 예약 확정, 회원가입과 연결 제외
+- 완료 기준:
+  - 첫 방문 온보딩에서 KO/EN/ZH/JA 언어 선택이 가능하다.
+  - 홈 우측 하단 플로팅 배너에서 페르소나와 언어를 다시 선택할 수 있다.
+  - 선택값이 새로고침 후에도 유지된다.
+  - 모바일에서 하단 네비와 배너가 겹치지 않는다.
+  - `/admin` 계열 화면에는 배너가 노출되지 않는다.
+  - `npm run lint`, `npm run build`가 통과한다.
+- 권장 모델: Gemini 3.1 Pro High
+- 이유: 기존 온보딩, Zustand 상태, cookie 기반 SSR 언어 동기화, 모바일 네비 레이아웃을 함께 건드리는 UI/상태 연동 작업이다.
+
+### T-089 공개 전역 푸터 공통화 및 전체 페이지 적용
+
+- 목적: 메인 화면에만 제한적으로 보이는 푸터를 공개 전체 페이지에 일관 적용한다.
+- 배경:
+  - 현재 홈 화면에는 푸터가 있으나 `/stays`, `/experiences`, `/programs`, `/courses`, `/events`, `/map`, `/partner/apply`, `/customer-center` 및 상세 페이지에는 푸터가 누락되거나 페이지별로 분산되어 있다.
+  - T-080은 푸터 전화번호/홈페이지 링크 사용성 보완 중심이었고, 전역 레이아웃 공통화는 별도 작업으로 분리해야 한다.
+- 작업 범위:
+  - `src/components/layout/public-footer.tsx` 공통 컴포넌트 생성
+  - `PublicNavigationShell` 또는 공개 route layout 레벨에서 관리자(`/admin`)를 제외한 공개 페이지에 푸터 적용
+  - 홈/이벤트 등 기존 페이지 내부 푸터가 있다면 중복 노출되지 않도록 정리
+  - 푸터 기본 구성:
+    - 브랜드명
+    - 고객센터 또는 문의 링크
+    - 전화번호 `tel:` 링크
+    - 홈페이지/운영 URL 링크
+    - 파트너 입점 신청 링크
+    - 개인정보/이용안내 placeholder 또는 고객센터 연결
+  - 모바일 하단 네비와 겹치지 않도록 하단 여백 적용
+  - 언어 상태에 맞춰 최소 UI 문구 다국어 key 적용
+  - 관리자 화면과 관리자 로그인 화면에는 푸터 미노출
+- 적용 대상:
+  - `/`
+  - `/stays`, `/stays/[slug]`
+  - `/experiences`, `/experiences/[slug]`
+  - `/programs`, `/programs/[slug]`
+  - `/courses`, `/courses/[slug]`
+  - `/events`
+  - `/map`
+  - `/partner/apply`
+  - `/partner/premium-pr`
+  - `/customer-center`
+  - `/my`
+- 제외 범위:
+  - 별도 회사 소개 페이지 신규 제작 제외
+  - 법무 문서 전문 작성 제외
+  - 관리자 레이아웃 수정 제외
+  - DB schema 변경 제외
+- 완료 기준:
+  - 공개 전체 페이지에서 동일한 푸터가 보인다.
+  - 홈과 이벤트 페이지에서 푸터가 중복 노출되지 않는다.
+  - 모바일 하단 네비와 푸터 텍스트/링크가 겹치지 않는다.
+  - 전화번호와 홈페이지는 실제 클릭 가능한 링크로 동작한다.
+  - `/admin` 계열에는 푸터가 노출되지 않는다.
+  - `npm run lint`, `npm run build`가 통과한다.
+- 권장 모델: Gemini 3 Flash
+- 이유: 범위가 명확한 공통 레이아웃 정리 작업이며, 복잡한 데이터/인증 판단은 없다.

@@ -3,10 +3,12 @@ import { ExperienceForm } from "@/components/admin/experiences/experience-form";
 import { AdminShell } from "@/components/admin/admin-shell";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import { requireAdminSession } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewExperiencePage() {
+  await requireAdminSession();
   const prisma = getPrisma();
   const [regions, businesses] = await Promise.all([
     prisma.region.findMany({ orderBy: { name: "asc" } }),
