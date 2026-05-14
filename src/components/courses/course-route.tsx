@@ -1,6 +1,7 @@
 import type { CourseItemUI } from "@/lib/course-data";
 import { Bed, Leaf, HeartHandshake, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getStaticLabels, getLocalizedCategory } from "@/lib/static-translations";
 
 const COURSE_ITEM_TYPE = {
   accommodation: "accommodation",
@@ -10,6 +11,7 @@ const COURSE_ITEM_TYPE = {
 
 interface CourseRouteProps {
   items: CourseItemUI[];
+  locale?: string;
 }
 
 function getItemIcon(type: CourseItemUI["itemType"]) {
@@ -25,24 +27,26 @@ function getItemIcon(type: CourseItemUI["itemType"]) {
   }
 }
 
-function getItemLabel(type: CourseItemUI["itemType"]) {
+function getItemLabel(type: CourseItemUI["itemType"], locale: string = "ko") {
   switch (type) {
     case COURSE_ITEM_TYPE.accommodation:
-      return "숙소";
+      return getLocalizedCategory("숙소", locale);
     case COURSE_ITEM_TYPE.experience:
-      return "체험";
+      return getLocalizedCategory("체험", locale);
     case COURSE_ITEM_TYPE.localIncomeProgram:
-      return "주민소득상품";
+      return getLocalizedCategory("주민소득상품", locale);
     default:
-      return "스팟";
+      return getLocalizedCategory("스팟", locale);
   }
 }
 
-export function CourseRoute({ items }: CourseRouteProps) {
+export function CourseRoute({ items, locale = "ko" }: CourseRouteProps) {
+  const t = getStaticLabels(locale);
+
   if (!items || items.length === 0) {
     return (
       <div className="bg-muted/50 rounded-xl p-8 text-center border border-dashed">
-        <p className="text-muted-foreground text-sm">등록된 코스 일정이 없습니다.</p>
+        <p className="text-muted-foreground text-sm">{t.emptyCourseRoute}</p>
       </div>
     );
   }
@@ -79,7 +83,7 @@ export function CourseRoute({ items }: CourseRouteProps) {
                   <div className="flex items-center gap-2">
                     <span className="flex items-center gap-1.5 px-2 py-0.5 bg-muted rounded-md text-[10px] font-bold text-muted-foreground">
                       {getItemIcon(item.itemType)}
-                      {getItemLabel(item.itemType)}
+                      {getItemLabel(item.itemType, locale)}
                     </span>
                     {item.time && (
                       <span className="text-xs font-semibold text-primary">{item.time}</span>
@@ -96,7 +100,7 @@ export function CourseRoute({ items }: CourseRouteProps) {
 
                 {item.note && (
                   <p className="text-sm text-muted-foreground leading-relaxed mt-1">
-                    {item.note}
+                    {getLocalizedCategory(item.note, locale)}
                   </p>
                 )}
               </div>

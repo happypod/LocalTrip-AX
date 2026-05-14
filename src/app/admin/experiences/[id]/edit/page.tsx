@@ -16,6 +16,7 @@ type TranslationData = {
   address?: string | null;
   capacityText?: string | null;
   priceText?: string | null;
+  durationText?: string | null;
 };
 
 export default async function EditExperiencePage({ params }: { params: Promise<{ id: string }> }) {
@@ -69,6 +70,7 @@ export default async function EditExperiencePage({ params }: { params: Promise<{
             address: experience.location,
             capacityText: experience.capacityText,
             priceText: experience.priceText,
+            durationText: experience.durationText,
           }}
           existingTranslations={translations.reduce((acc, t) => {
             const meta = (t.metadata || {}) as Record<string, string | null>;
@@ -79,6 +81,7 @@ export default async function EditExperiencePage({ params }: { params: Promise<{
               address: meta.address,
               capacityText: meta.capacityText,
               priceText: meta.priceText,
+              durationText: meta.durationText,
             };
             return acc;
           }, {} as Record<string, TranslationData>)}

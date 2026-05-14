@@ -7,6 +7,8 @@ import { usePersonaThemeStore } from "@/store/persona-theme-store";
 import { sortByPersona } from "@/lib/persona-curation";
 import { useIsClient } from "@/hooks/use-is-client";
 
+import { getStaticLabels, getLocalizedCategory } from "@/lib/static-translations";
+
 export type CourseFilterItem = {
   id: string;
   title: string;
@@ -89,6 +91,10 @@ export function CourseFilterGrid({ courses }: { courses: CourseFilterItem[] }) {
 
   const currentTheme = usePersonaThemeStore((state) => state.currentTheme);
   const isClient = useIsClient();
+  const currentLang = usePersonaThemeStore((state) => state.currentLang);
+  
+  const effectiveLang = isClient ? currentLang : "ko";
+  const labels = getStaticLabels(effectiveLang);
 
   const targetFilters = useMemo(
     () => TARGET_FILTERS.filter((filter) => courses.some((course) => matchesTargetFilter(course, filter))),
@@ -121,20 +127,20 @@ export function CourseFilterGrid({ courses }: { courses: CourseFilterItem[] }) {
       <div className="flex flex-col gap-4">
         {/* Filter Row 1: Target Audience */}
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold text-muted-foreground/70 pl-1">대상별</span>
+          <span className="text-xs font-semibold text-muted-foreground/70 pl-1">{labels.allCourseFilterTarget}</span>
           <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <FilterButton
-              label="전체"
+              label={getLocalizedCategory("전체", effectiveLang) || "전체"}
               active={selectedTarget === "전체"}
-              ariaLabel="대상 카테고리 전체 보기"
+              ariaLabel="Category all"
               onClick={() => setSelectedTarget("전체")}
             />
             {targetFilters.map((filter) => (
               <FilterButton
                 key={`target-${filter}`}
-                label={filter}
+                label={getLocalizedCategory(filter, effectiveLang) || filter}
                 active={selectedTarget === filter}
-                ariaLabel={`대상 카테고리 ${filter} 보기`}
+                ariaLabel={`Filter ${filter}`}
                 onClick={() => setSelectedTarget(filter)}
               />
             ))}
@@ -143,20 +149,20 @@ export function CourseFilterGrid({ courses }: { courses: CourseFilterItem[] }) {
 
         {/* Filter Row 2: Duration */}
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold text-muted-foreground/70 pl-1">기간별</span>
+          <span className="text-xs font-semibold text-muted-foreground/70 pl-1">{labels.allCourseFilterDuration}</span>
           <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <FilterButton
-              label="전체"
+              label={getLocalizedCategory("전체", effectiveLang) || "전체"}
               active={selectedDuration === "전체"}
-              ariaLabel="기간 카테고리 전체 보기"
+              ariaLabel="Duration all"
               onClick={() => setSelectedDuration("전체")}
             />
             {durationFilters.map((filter) => (
               <FilterButton
                 key={`duration-${filter}`}
-                label={filter}
+                label={getLocalizedCategory(filter, effectiveLang) || filter}
                 active={selectedDuration === filter}
-                ariaLabel={`기간 카테고리 ${filter} 보기`}
+                ariaLabel={`Filter ${filter}`}
                 onClick={() => setSelectedDuration(filter)}
               />
             ))}
@@ -168,7 +174,7 @@ export function CourseFilterGrid({ courses }: { courses: CourseFilterItem[] }) {
         <div className="flex flex-col gap-4">
           {isClient && (
             <div className="inline-flex items-center gap-1.5 self-start rounded-full bg-persona-primary/5 px-3 py-1 text-[11px] font-extrabold text-persona-primary/80 border border-persona-primary/5">
-              <span>✨ 여행 취향에 어울리는 여정의 기록을 먼저 추천해드려요.</span>
+              <span>✨ {labels.allCourseRecomTip}</span>
             </div>
           )}
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -184,13 +190,14 @@ export function CourseFilterGrid({ courses }: { courses: CourseFilterItem[] }) {
               linkedStayCount={course.linkedStayCount}
               linkedExpCount={course.linkedExpCount}
               linkedProgCount={course.linkedProgCount}
+              lang={effectiveLang}
             />
           ))}
         </div>
       </div>
       ) : (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-20 text-center">
-          <p className="text-muted-foreground">선택한 조건에 맞는 여정의 기록이 없습니다.</p>
+          <p className="text-muted-foreground">{labels.allCourseEmptyDesc}</p>
           <button
             type="button"
             onClick={() => {
@@ -199,7 +206,7 @@ export function CourseFilterGrid({ courses }: { courses: CourseFilterItem[] }) {
             }}
             className="mt-4 rounded-full bg-category-course px-5 py-2 text-sm font-bold text-white"
           >
-            전체 보기
+            {getLocalizedCategory("전체", effectiveLang)}
           </button>
         </div>
       )}

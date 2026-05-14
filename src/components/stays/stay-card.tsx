@@ -2,6 +2,8 @@ import Link from "next/link";
 import { StayImage } from "./stay-image";
 import { MapPin, Users } from "lucide-react";
 
+import { getStaticLabels } from "@/lib/static-translations";
+
 interface StayCardProps {
   title: string;
   summary: string;
@@ -10,6 +12,7 @@ interface StayCardProps {
   capacityText?: string | null;
   imageUrl?: string;
   slug: string;
+  lang?: string;
 }
 
 export function StayCard({
@@ -20,7 +23,10 @@ export function StayCard({
   capacityText,
   imageUrl,
   slug,
+  lang = "ko",
 }: StayCardProps) {
+  const labels = getStaticLabels(lang);
+  
   return (
     <Link
       href={`/stays/${slug}`}
@@ -56,10 +62,10 @@ export function StayCard({
           {priceText ? (
             <span className="text-base font-bold text-foreground">{priceText}</span>
           ) : (
-            <span className="text-sm text-muted-foreground italic">문의 필요</span>
+            <span className="text-sm text-muted-foreground italic">{labels.pgRequiredInquiry}</span>
           )}
           <span className="text-xs font-semibold text-primary group-hover:underline">
-            상세보기
+            {labels.pgViewDetail}
           </span>
         </div>
       </div>

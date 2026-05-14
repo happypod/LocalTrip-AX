@@ -648,6 +648,12 @@
 - 완료 기준:
   - Prisma schema와 데이터 모델 문서에 `premiumPr` 구조가 정의되어 있다.
   - 기존 숙소 생성/수정/공개 조회가 깨지지 않는다.
+- 실행 결과 (2026-05-14 완료):
+  - `Accommodation.premiumPr Json @default("{\"isPremium\":false}")` 필드를 추가했다.
+  - `src/lib/premium-pr.ts`에 `PremiumPrConfig`, `DEFAULT_PREMIUM_PR`, `normalizePremiumPr`, `isPremiumPrEnabled`, iframe URL allowlist 검증 함수를 추가했다.
+  - 허용 iframe URL은 `my.matterport.com/show`, `www.youtube.com/embed`, `www.youtube-nocookie.com/embed`, `player.vimeo.com/video`로 제한했다.
+  - `docs/03_DATA_MODEL.md`와 `docs/14_B2B_PREMIUM_PR.md`에 JSON 계약과 제외 범위를 반영했다.
+  - T-061은 공개 UI, 관리자 입력 UI, LeadEvent 수집을 구현하지 않고 T-062~T-064로 넘긴다.
 
 ### T-062 숙소 상세 Premium PR 노출 UI
 
@@ -864,3 +870,150 @@
   - `npx prisma validate` 통과
   - `npm run lint` 통과
   - `npm run build` 통과
+
+## T-065~T-068 완료 기록
+
+- T-065: `/partner/premium-pr` 제작대행 신청 폼과 `/api/premium-pr-applications` 저장 API를 추가했다.
+- T-066: `/admin/premium-pr-applications` 목록/상세/상태 변경 화면을 추가했다.
+- T-067: Premium PR 현장 제작 workflow 문서를 작성했다.
+- T-068: Premium PR QA / 보안 기준 문서를 작성했다.
+- 신규 DB 모델과 Prisma schema 변경 없이 기존 `PartnerApplication`과 `LeadEvent` 모델을 재사용한다.
+- 결제, 정산, 구독 과금, 파일 업로드, 외부 API 연동은 제외 범위로 유지한다.
+
+## T-079~T-081 보완 티켓 편성
+
+### T-079 다국어 번역 P0 긴급 보완
+
+- 목적: 실 고객 접점에 남은 한국어 하드코딩 문구를 제거한다.
+- 작업 범위:
+  - `src/components/inquiry/inquiry-dialog.tsx` 문의 팝업의 필드 라벨, placeholder, 버튼, 개인정보 동의 문구 다국어화
+  - `src/components/layout/public-navigation-shell.tsx`의 `CategoryOverlay` 세부 카테고리 태그 다국어 매핑
+  - `src/lib/static-translations.ts` 또는 현재 사용 중인 persona/i18n 사전에 필요한 key 추가
+  - 한국어, English, 简体中文, 日本語 전환 QA
+- 완료 기준:
+  - 상세 페이지에서 "문의 남기기" 팝업을 열었을 때 현재 언어와 다른 하드코딩 문구가 보이지 않는다.
+  - 모바일 카테고리 확장 메뉴의 세부 태그가 현재 언어로 표시된다.
+- 권장 모델: Gemini 3.1 Pro High
+- 이유: 다국어 key 설계와 기존 persona/i18n 구조 정합성 검토가 필요하다.
+
+### T-080 UI Placeholder 및 푸터 링크 사용성 보완
+
+- 목적: 클릭 가능한 UI가 무반응으로 남아 사용자가 혼동하는 상태를 줄인다.
+- 작업 범위:
+  - GNB 상단 장바구니 버튼에 "준비 중" 알림 또는 비활성 상태 적용
+  - GNB 상단 최근 본 상품 버튼에 "준비 중" 알림 또는 실제 최근 본 목록 연결 여부 결정
+  - 홈/공개 푸터 전화번호에 `tel:` 링크 적용
+  - 홈/공개 푸터 홈페이지 주소에 정상 하이퍼링크 적용
+  - 모바일/PC 네비게이션 모두 확인
+- 완료 기준:
+  - 장바구니/최근 본 상품 클릭 시 무반응 상태가 없다.
+  - 푸터 전화번호와 홈페이지 주소가 실제 연결된다.
+- 권장 모델: Gemini 3 Flash
+- 이유: 범위가 명확한 UI 보완 작업이다.
+
+### T-081 번역 운영 자동화 및 DB 캐시 아키텍처 설계
+
+- 목적: 신규 DB 콘텐츠 추가 시 수동 번역 매핑 누락을 줄이는 장기 구조를 설계한다.
+- 작업 범위:
+  - `ContentTranslation` 모델 기반 번역 캐시 운영 흐름 정리
+  - AI 실시간 번역 후보 생성, 관리자 검수, 공개 반영 workflow 설계
+  - 비용 제한, rate limit, 개인정보 제외, 관리자 승인 정책 정의
+  - 실제 AI API 호출은 구현하지 않고 설계 문서와 후속 티켓만 작성
+- 완료 기준:
+  - 신규 콘텐츠 등록 후 번역 생성/검수/캐시/공개 노출 흐름이 문서화된다.
+  - AI API 연동 전 필요한 환경변수, 보안, 비용 기준이 명확하다.
+- 권장 모델: Claude Sonnet 4.6 Thinking 또는 Gemini 3.1 Pro High
+- 이유: 운영 아키텍처, 비용, 개인정보, 관리자 workflow 판단이 필요하다.
+
+## T-082~T-087 관광객 맞춤코스 및 사용자 대시보드
+
+현재 공개 네비게이션의 `마이`는 `/admin`으로 연결되어 있다. `/admin`은 플랫폼 운영자 전용 관리자 화면이므로 관광객용 마이페이지와 분리해야 한다. 관광객 계정, 맞춤코스, 예약현황, 결제내역, 알림은 MVP 범위 밖이므로 Post-MVP 확장 티켓으로 편성한다.
+
+상세 명세: `docs/23_USER_PERSONALIZATION_DASHBOARD_SPEC.md`
+
+### T-082 공개 네비 `마이` 라우팅 분리 및 관광객 `/my` placeholder
+
+- 목적: 공개 사용자용 `마이`와 운영자용 `/admin`을 분리한다.
+- 작업 범위:
+  - `src/components/layout/public-navigation-shell.tsx`의 desktop/mobile `마이` 링크를 `/admin`에서 `/my`로 변경
+  - `/my` 라우트 추가
+  - `/my`는 관광객용 게스트 대시보드 placeholder로 구현
+  - 관리자 진입은 `/admin/login` 또는 운영자 전용 URL로만 유지
+  - 결제내역/예약현황은 실제 기능 없이 준비 중 또는 문의 기반 안내로 표시
+- 완료 기준:
+  - 공개 페이지에서 `마이` 클릭 시 `/admin`으로 이동하지 않는다.
+  - `/my`는 비로그인 관광객에게도 안전하게 렌더링된다.
+  - `/admin`은 기존 관리자 인증 정책을 유지한다.
+- 권장 모델: Gemini 3 Flash
+
+### T-083 맞춤코스 빌더 MVP Lite
+
+- 목적: 사용자가 숙박, 음식/주민소득상품, 체험을 직접 조합해 임시 코스를 만들 수 있게 한다.
+- 작업 범위:
+  - `/course-builder` 또는 `/my/trips/new` 라우트 추가
+  - published 숙소, 체험, 주민소득상품을 선택 후보로 조회
+  - 항목 추가/삭제/순서 변경 UI 구현
+  - localStorage 기반 임시 저장
+  - 맞춤코스 결과에서 문의 CTA 연결
+  - 결제, 예약 확정, 재고 확인은 제외
+- 완료 기준:
+  - 사용자가 2개 이상 콘텐츠를 조합해 하나의 임시 코스를 만들 수 있다.
+  - 새로고침 후에도 localStorage 기반 임시 코스가 유지된다.
+  - 예약/결제 확정처럼 오해될 문구가 없다.
+- 권장 모델: Gemini 3.1 Pro High
+
+### T-084 관광객 Auth 및 사용자 데이터 모델 설계
+
+- 목적: 관광객 계정 기능 도입 전 인증/권한/개인정보/데이터 모델을 확정한다.
+- 작업 범위:
+  - 관광객 로그인 방식 검토
+  - 관리자 계정과 관광객 계정 분리
+  - `TouristUser`, `TouristProfile`, `SavedTripPlan`, `SavedTripPlanItem`, `UserNotification` 모델 초안 작성
+  - 예약/결제 관련 모델은 placeholder 또는 별도 승인 대상임을 명시
+- 완료 기준:
+  - 관광객 계정과 운영자 관리자 권한이 분리된 구조로 문서화된다.
+  - Prisma schema 변경 여부와 migration 전략이 정리된다.
+- 권장 모델: Claude Sonnet 4.6 Thinking
+
+### T-085 관광객 대시보드 1차 구현
+
+- 목적: `/my`에 관광객용 대시보드 shell을 구축한다.
+- 작업 범위:
+  - 맞춤코스
+  - 찜 목록
+  - 최근 본 콘텐츠
+  - 문의한 항목 안내
+  - 예약현황 placeholder
+  - 결제내역 placeholder
+  - 알림 placeholder
+  - Auth 미도입 상태에서는 localStorage 기반 표시
+- 완료 기준:
+  - 관광객이 `/my`에서 자신의 임시 활동 데이터를 확인할 수 있다.
+  - 결제/예약 확정 데이터가 없는 상태를 명확히 표시한다.
+- 권장 모델: Gemini 3.1 Pro High
+
+### T-086 예약현황/결제내역 정책 결정
+
+- 목적: 실제 예약/결제 기능을 도입할지, 외부 연결/문의 상태 표시까지만 할지 결정한다.
+- 작업 범위:
+  - PG, 환불/취소, 정산, 재고, 개인정보 보관 범위 검토
+  - MVP 문의·연결 중심 원칙과 충돌 여부 검토
+  - 실제 결제 도입 전 필요한 운영 계약과 법무 체크리스트 작성
+- 완료 기준:
+  - `/my`의 예약현황/결제내역 표현 범위가 확정된다.
+  - 실제 결제/예약 확정 구현 여부가 별도 승인 대상으로 분리된다.
+- 권장 모델: Claude Sonnet 4.6 Thinking
+
+### T-087 관광객 알림 센터 설계
+
+- 목적: 관광객 대시보드에 표시할 알림의 구조와 동의 정책을 설계한다.
+- 작업 범위:
+  - 문의 접수 알림
+  - 맞춤코스 저장 알림
+  - 이벤트/혜택 알림
+  - 운영자 답변 알림
+  - 마케팅 수신 동의와 개인정보 동의 분리
+- 완료 기준:
+  - 알림 유형, 보관 기간, 수신 동의 기준이 문서화된다.
+  - 실제 push/email/SMS 발송은 별도 티켓으로 분리된다.
+- 권장 모델: Gemini 3.1 Pro High

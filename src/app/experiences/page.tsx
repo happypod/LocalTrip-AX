@@ -7,6 +7,7 @@ import Link from "next/link";
 import { getServerTranslationLocale } from "@/lib/server-translation";
 import { getLocalizedList } from "@/lib/content-translation-server";
 import { cn } from "@/lib/utils";
+import { getStaticLabels, getLocalizedCategory } from "@/lib/static-translations";
 
 export const dynamic = "force-dynamic";
 
@@ -133,6 +134,8 @@ export default async function ExperiencesPage({
   const activeCategory = queryCategory || "전체";
 
   const currentLocale = await getServerTranslationLocale();
+  const labels = getStaticLabels(currentLocale);
+  
   const rawExperiences = await getExperiences();
   const experiencesOnly = await getLocalizedList(rawExperiences, "experience", currentLocale);
   const programExperiences = await getProgramsAsExperiences(currentLocale);
@@ -151,14 +154,13 @@ export default async function ExperiencesPage({
       <header className="px-6 py-12 bg-muted/30 border-b">
         <div className="max-w-screen-xl mx-auto flex flex-col gap-3">
           <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-            <Link href="/" className="hover:text-foreground">홈</Link>
+            <Link href="/" className="hover:text-foreground">{labels.home}</Link>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-foreground font-medium">노님</span>
+            <span className="text-foreground font-medium">{labels.tabExperience}</span>
           </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight">소원머묾 로컬노님</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">{labels.allExpTitle}</h1>
           <p className="text-muted-foreground text-sm max-w-md leading-relaxed">
-            고요한 바닷바람을 맞으며 만나는 나만의 예술적이고 감성적인 체험.
-            해변, 어촌, 공방에서 만나는 특별한 시간을 직접 문의해보세요.
+            {labels.allExpDesc}
           </p>
         </div>
       </header>
@@ -177,7 +179,7 @@ export default async function ExperiencesPage({
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
             >
-              {cat}
+              {getLocalizedCategory(cat, currentLocale)}
             </Link>
           ))}
         </div>
@@ -187,7 +189,7 @@ export default async function ExperiencesPage({
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed rounded-xl">
             <p className="text-muted-foreground">
-              {activeCategory} 카테고리에 해당하는 노님이 없습니다.
+              {labels.allExpEmpty}
             </p>
           </div>
         )}

@@ -170,3 +170,77 @@ LeadEvent 저장 실패는 사용자 콘텐츠 열람을 막지 않는다.
 - T-066 B2B 제작대행 관리자 관리 화면
 - T-067 현장센터 제작 Workflow 문서화
 - T-068 Premium PR QA / 보안 기준
+
+## 11. T-061 확정 구현 기준
+
+T-061에서는 `Accommodation`에 Premium PR 전용 JSON 필드와 앱 레벨 정규화 유틸을 추가한다.
+
+### DB 필드
+
+```prisma
+premiumPr Json @default("{\"isPremium\":false}")
+```
+
+### JSON 계약
+
+```json
+{
+  "isPremium": false,
+  "features": {
+    "matterportUrl": null,
+    "hostVideoUrl": null,
+    "droneViewUrl": null
+  },
+  "display": {
+    "badgeLabel": "3D 숙소 투어"
+  },
+  "contract": {
+    "packageName": null,
+    "expiresAt": null
+  }
+}
+```
+
+### URL Allowlist
+
+공개 iframe 또는 관리자 저장 검증에서 허용할 URL은 아래 출처와 경로로 제한한다.
+
+- `https://my.matterport.com/show/`
+- `https://www.youtube.com/embed/`
+- `https://www.youtube-nocookie.com/embed/`
+- `https://player.vimeo.com/video/`
+
+### 제외 범위
+
+T-061은 DB 계약과 유틸만 다룬다. 숙소 상세 노출 UI는 T-062, 관리자 입력 UI는 T-063, 클릭 이벤트 수집은 T-064에서 다룬다. 결제, 정산, 구독 과금, 예약 확정 자동화는 Premium PR 단계에서도 제외한다.
+
+## 12. T-063 관리자 입력 UI 구현 기준
+
+T-063에서는 관리자 숙소 생성/수정 화면에서 `Accommodation.premiumPr` JSON을 입력하고 저장한다.
+
+- `프리미엄 PR 적용` 체크박스가 꺼져 있으면 `isPremium=false` 기본 구조로 저장한다.
+- 체크박스가 켜져 있으면 Matterport, 호스트 영상, 드론 영상 중 하나 이상의 URL을 요구한다.
+- 저장 전 서버 액션에서 URL allowlist를 검증한다.
+- 허용 URL은 Matterport show, YouTube embed, YouTube nocookie embed, Vimeo player URL로 제한한다.
+- 배지 문구, PR 패키지명, 노출 종료일은 운영 관리용 메타데이터로 저장한다.
+- 클릭 성과 수집은 T-064에서 처리한다.
+
+## 13. T-064 LeadEvent 수집 기준
+
+T-064에서는 Premium PR 콘텐츠 상호작용을 기존 `LeadEvent` 모델로 수집한다.
+
+- DB enum 확장은 하지 않고 `eventType=website_click`으로 저장한다.
+- 실제 액션은 `metadata.originalAction`에 저장한다.
+  - `premium_pr_matterport_click`
+  - `premium_pr_host_video_click`
+  - `premium_pr_drone_video_click`
+- 추가 metadata로 `premiumPrFeature`, `premiumPrPlacement`, `targetUrl`, `itemSlug`를 저장한다.
+- Matterport 배지/버튼 클릭과 영상 카드 첫 상호작용을 수집한다.
+- 수집 실패는 사용자 경험을 막지 않는 best-effort 방식으로 처리한다.
+
+## 14. T-065~T-068 구현/운영 문서
+
+- T-065 제작대행 신청 폼: [18_T065_B2B_PRODUCTION_APPLICATION.md](./18_T065_B2B_PRODUCTION_APPLICATION.md)
+- T-066 제작대행 관리자 화면: [19_T066_B2B_PRODUCTION_ADMIN.md](./19_T066_B2B_PRODUCTION_ADMIN.md)
+- T-067 현장 제작 Workflow: [20_T067_PREMIUM_PR_WORKFLOW.md](./20_T067_PREMIUM_PR_WORKFLOW.md)
+- T-068 QA / 보안 기준: [21_T068_PREMIUM_PR_QA.md](./21_T068_PREMIUM_PR_QA.md)

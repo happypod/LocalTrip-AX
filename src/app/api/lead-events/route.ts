@@ -28,7 +28,41 @@ const LEAD_ACTION_TYPES = [
   "detail_click",
   "map_click",
   "share_click",
+  "premium_pr_matterport_click",
+  "premium_pr_host_video_click",
+  "premium_pr_drone_video_click",
 ] as const;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function sanitizeMetadata(value: unknown) {
+  if (!isRecord(value)) {
+    return {};
+  }
+
+  return Object.entries(value).reduce<Record<string, string | number | boolean | null>>(
+    (metadata, [key, rawValue]) => {
+      if (!/^[a-zA-Z0-9_:-]{1,60}$/.test(key)) {
+        return metadata;
+      }
+
+      if (
+        typeof rawValue === "string" ||
+        typeof rawValue === "number" ||
+        typeof rawValue === "boolean" ||
+        rawValue === null
+      ) {
+        metadata[key] =
+          typeof rawValue === "string" ? rawValue.substring(0, 300) : rawValue;
+      }
+
+      return metadata;
+    },
+    {},
+  );
+}
 
 export async function POST(req: Request) {
   try {
@@ -61,7 +95,10 @@ export async function POST(req: Request) {
       view: "website_click",
       detail_click: "website_click",
       map_click: "website_click",
-      share_click: "website_click"
+      share_click: "website_click",
+      premium_pr_matterport_click: "website_click",
+      premium_pr_host_video_click: "website_click",
+      premium_pr_drone_video_click: "website_click",
     };
 
     const eventType = actionToEnumMap[actionType];
@@ -103,9 +140,10 @@ export async function POST(req: Request) {
         userAgent,
         referrer,
         metadata: {
+          ...sanitizeMetadata(body.metadata),
           originalAction: actionType,
           itemSlug,
-          targetUrl
+          targetUrl,
         }
       }
     });

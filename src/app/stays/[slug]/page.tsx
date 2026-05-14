@@ -2,9 +2,13 @@ import { notFound } from "next/navigation";
 import { getPrisma } from "@/lib/prisma";
 import { getLocalizedContent } from "@/lib/content-translation";
 import { getServerTranslationLocale } from "@/lib/server-translation";
-import { getStaticLabels } from "@/lib/static-translations";
+import { getStaticLabels, getLocalizedCategory } from "@/lib/static-translations";
 import { StayImage } from "@/components/stays/stay-image";
 import { StayCTA } from "@/components/stays/stay-cta";
+import {
+  PremiumPrHeroBadge,
+  PremiumPrSection,
+} from "@/components/stays/premium-pr-section";
 import { MapPin, Users, Info, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
@@ -83,11 +87,19 @@ export default async function StayDetailPage({ params }: { params: Promise<{ slu
 
         {/* Hero Section */}
         <section className="px-6">
-          <StayImage
-            src={stay.images?.[0]}
-            alt={stay.title}
-            className="rounded-2xl shadow-sm"
-          />
+          <div className="relative">
+            <StayImage
+              src={stay.images?.[0]}
+              alt={stay.title}
+              className="rounded-2xl shadow-sm"
+            />
+            <PremiumPrHeroBadge
+              premiumPr={stay.premiumPr}
+              stayTitle={stay.title}
+              itemId={stay.id}
+              itemSlug={stay.slug}
+            />
+          </div>
         </section>
 
         {/* Content Section */}
@@ -109,7 +121,7 @@ export default async function StayDetailPage({ params }: { params: Promise<{ slu
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xs font-semibold text-muted-foreground uppercase">{labels.address}</span>
-                  <span className="text-sm font-medium">{stay.address}</span>
+                  <span className="text-sm font-medium">{getLocalizedCategory(stay.address, currentLocale)}</span>
                 </div>
               </div>
             )}
@@ -120,7 +132,7 @@ export default async function StayDetailPage({ params }: { params: Promise<{ slu
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xs font-semibold text-muted-foreground uppercase">{labels.capacity}</span>
-                  <span className="text-sm font-medium">{stay.capacityText}</span>
+                  <span className="text-sm font-medium">{getLocalizedCategory(stay.capacityText, currentLocale)}</span>
                 </div>
               </div>
             )}
@@ -131,7 +143,7 @@ export default async function StayDetailPage({ params }: { params: Promise<{ slu
                 </div>
                 <div className="flex flex-col">
                   <span className="text-xs font-semibold text-muted-foreground uppercase">{labels.price}</span>
-                  <span className="text-sm font-medium font-bold text-primary">{stay.priceText}</span>
+                  <span className="text-sm font-medium font-bold text-primary">{getLocalizedCategory(stay.priceText, currentLocale)}</span>
                 </div>
               </div>
             )}
@@ -143,6 +155,13 @@ export default async function StayDetailPage({ params }: { params: Promise<{ slu
               {stay.description || stay.summary}
             </div>
           </div>
+
+          <PremiumPrSection
+            premiumPr={stay.premiumPr}
+            stayTitle={stay.title}
+            itemId={stay.id}
+            itemSlug={stay.slug}
+          />
 
           {/* CTA Section */}
           <section className="mt-8 p-6 bg-card border rounded-2xl shadow-sm">

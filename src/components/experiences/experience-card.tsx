@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ExperienceImage } from "./experience-image";
 import { MapPin, Clock, Users } from "lucide-react";
 
+import { getStaticLabels, getLocalizedCategory } from "@/lib/static-translations";
+
 interface ExperienceCardProps {
   title: string;
   summary: string;
@@ -13,6 +15,7 @@ interface ExperienceCardProps {
   imageUrl?: string;
   slug: string;
   href?: string;
+  lang?: string;
 }
 
 export function ExperienceCard({
@@ -26,7 +29,10 @@ export function ExperienceCard({
   imageUrl,
   slug,
   href,
+  lang = "ko",
 }: ExperienceCardProps) {
+  const labels = getStaticLabels(lang);
+  
   return (
     <Link
       href={href || `/experiences/${slug}`}
@@ -36,7 +42,7 @@ export function ExperienceCard({
         <ExperienceImage src={imageUrl} alt={title} />
         {category && (
           <div className="absolute top-3 left-3 px-2 py-1 bg-category-experience text-white text-[10px] font-bold rounded uppercase tracking-wider">
-            {category}
+            {getLocalizedCategory(category, lang)}
           </div>
         )}
       </div>
@@ -54,19 +60,19 @@ export function ExperienceCard({
           {location && (
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <MapPin className="w-3.5 h-3.5" />
-              <span className="line-clamp-1">{location}</span>
+              <span className="line-clamp-1">{getLocalizedCategory(location, lang)}</span>
             </div>
           )}
           {durationText && (
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Clock className="w-3.5 h-3.5" />
-              <span>{durationText}</span>
+              <span>{getLocalizedCategory(durationText, lang)}</span>
             </div>
           )}
           {capacityText && (
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Users className="w-3.5 h-3.5" />
-              <span>{capacityText}</span>
+              <span>{getLocalizedCategory(capacityText, lang)}</span>
             </div>
           )}
         </div>
@@ -75,10 +81,10 @@ export function ExperienceCard({
           {priceText ? (
             <span className="text-base font-bold text-foreground">{priceText}</span>
           ) : (
-            <span className="text-sm text-muted-foreground italic">문의 필요</span>
+            <span className="text-sm text-muted-foreground italic">{labels.pgRequiredInquiry}</span>
           )}
           <span className="text-xs font-semibold text-primary group-hover:underline">
-            상세보기
+            {labels.pgViewDetail}
           </span>
         </div>
       </div>

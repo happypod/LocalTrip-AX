@@ -50,6 +50,7 @@ export const ADMIN_MENU_GROUPS: AdminMenuGroup[] = [
   { group: "문의 및 접수", items: [
     { name: "문의 관리", href: "/admin/inquiries", icon: faMessage },
     { name: "입점신청 관리", href: "/admin/partner-applications", icon: faUserPlus },
+    { name: "프리미엄 PR 문의", href: "/admin/premium-pr-applications", icon: faWandMagicSparkles },
   ]},
   { group: "기타", items: [
     { name: "교육·인증", href: "/admin/training", icon: faGraduationCap },

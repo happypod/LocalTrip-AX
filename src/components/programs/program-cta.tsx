@@ -5,6 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { trackLeadEvent, LeadActionType } from "@/lib/lead-event";
 import { InquiryDialog } from "@/components/inquiry/inquiry-dialog";
+import { getStaticLabels } from "@/lib/static-translations";
 
 interface ProgramCTAProps {
   itemId: string;
@@ -13,9 +14,11 @@ interface ProgramCTAProps {
   kakaoUrl?: string | null;
   naverBookingUrl?: string | null;
   websiteUrl?: string | null;
+  locale?: string;
 }
 
-export function ProgramCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl, websiteUrl }: ProgramCTAProps) {
+export function ProgramCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl, websiteUrl, locale }: ProgramCTAProps) {
+  const t = getStaticLabels(locale);
   const handleTrack = (actionType: LeadActionType, targetUrl?: string) => {
     trackLeadEvent({
       itemType: "local_income_program",
@@ -30,10 +33,10 @@ export function ProgramCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl,
 
   return (
     <div className="bg-card border rounded-xl p-5 md:p-6 shadow-sm">
-      <h3 className="font-bold text-lg mb-4 text-foreground">운영 문의 및 연결</h3>
+      <h3 className="font-bold text-lg mb-4 text-foreground">{t.contactTitle}</h3>
       
       <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-        이 프로그램은 주민들이 직접 운영하는 로컬소득 모델입니다. 상세 운영 일정과 참여 방법은 아래 채널로 문의해 주세요.
+        {t.progDesc}
       </p>
 
       {hasContact ? (
@@ -46,7 +49,7 @@ export function ProgramCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl,
                 className={cn(buttonVariants({ variant: "default", size: "xl" }), "w-full sm:flex-1 bg-gray-900 hover:bg-gray-800 text-white")}
               >
                 <Phone className="w-4 h-4 mr-2" />
-                전화 문의
+                {t.phoneCall}
               </a>
             )}
             
@@ -59,7 +62,7 @@ export function ProgramCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl,
                 className={cn(buttonVariants({ variant: "outline", size: "xl" }), "w-full sm:flex-1 bg-[#FEE500] hover:bg-[#FEE500]/90 text-black border-transparent hover:border-transparent")}
               >
                 <MessageCircle className="w-4 h-4 mr-2 fill-black" />
-                카카오 문의
+                {t.kakaoInquiry}
               </a>
             )}
           </div>
@@ -74,7 +77,7 @@ export function ProgramCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl,
                 className={cn(buttonVariants({ variant: "outline", size: "xl" }), "w-full sm:flex-1 text-[#03C75A] border-[#03C75A]/30 hover:bg-[#03C75A]/5")}
               >
                 <CalendarDays className="w-4 h-4 mr-2" />
-                네이버예약에서 확인
+                {t.naverBookingConfirm}
               </a>
             )}
             
@@ -87,23 +90,23 @@ export function ProgramCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl,
                 className={cn(buttonVariants({ variant: "outline", size: "xl" }), "w-full sm:flex-1")}
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
-                운영자 페이지 보기
+                {t.opPage}
               </a>
             )}
           </div>
         </div>
       ) : (
         <div className="bg-muted/50 rounded-lg p-6 text-center border border-dashed">
-          <p className="text-muted-foreground text-sm">연결 가능한 채널을 확인 중입니다.</p>
+          <p className="text-muted-foreground text-sm">{t.checkingContact}</p>
         </div>
       )}
 
       {/* Inquiry Dialog */}
       <div className="mt-6 pt-5 border-t border-dashed">
         <div className="bg-muted/30 rounded-lg p-4 text-center">
-          <p className="text-xs text-muted-foreground mb-1">플랫폼 직접 문의</p>
-          <p className="text-xs text-muted-foreground mb-3">
-            주민 운영 프로그램은 일정과 운영 방식이 달라질 수 있습니다.<br/>문의를 남기면 확인 후 안내드립니다.
+          <p className="text-xs text-muted-foreground mb-1">{t.platformDirectInquiry}</p>
+          <p className="text-xs text-muted-foreground mb-3 whitespace-pre-line">
+            {t.platformDirectInquiryDesc}
           </p>
           <InquiryDialog 
             itemType="local_income_program"
@@ -111,6 +114,7 @@ export function ProgramCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl,
             itemSlug={itemSlug}
             variant="secondary"
             className="w-full"
+            buttonText={t.leaveInquiry}
           />
         </div>
       </div>

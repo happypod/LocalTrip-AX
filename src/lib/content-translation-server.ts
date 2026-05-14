@@ -10,8 +10,10 @@ export async function getLocalizedList<
     summary: string | null;
     description?: string | null;
     address?: string | null;
+    location?: string | null;
     capacityText?: string | null;
     priceText?: string | null;
+    durationText?: string | null;
     linkedLifeService?: string | null;
     residentRole?: string | null;
     revenueUse?: string | null;

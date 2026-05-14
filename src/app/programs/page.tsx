@@ -7,6 +7,7 @@ import Link from "next/link";
 import { getServerTranslationLocale } from "@/lib/server-translation";
 import { getLocalizedList } from "@/lib/content-translation-server";
 import { cn } from "@/lib/utils";
+import { getStaticLabels, getLocalizedCategory } from "@/lib/static-translations";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +66,8 @@ export default async function ProgramsPage({
   const activeCategory = queryCategory || "전체";
 
   const currentLocale = await getServerTranslationLocale();
+  const labels = getStaticLabels(currentLocale);
+  
   const rawPrograms = await getPrograms();
   const allPrograms = await getLocalizedList(rawPrograms, "local_income_program", currentLocale);
   const programs: ProgramGridItem[] = allPrograms.filter(isFoodProgram);
@@ -81,13 +84,13 @@ export default async function ProgramsPage({
       <header className="px-6 py-12 bg-muted/30 border-b">
         <div className="max-w-screen-xl mx-auto flex flex-col gap-3">
           <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-            <Link href="/" className="hover:text-foreground">홈</Link>
+            <Link href="/" className="hover:text-foreground">{labels.home}</Link>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-foreground font-medium">소원 별미</span>
+            <span className="text-foreground font-medium">{labels.tabProgram}</span>
           </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight">소원머묾 로컬 별미</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">{labels.pgTitle}</h1>
           <p className="text-muted-foreground text-sm max-w-md leading-relaxed">
-            주민들이 정성스레 길러내고 만든 태안 소원면의 향토 특산품이자 특별한 별미를 소개합니다.
+            {labels.pgDesc}
           </p>
         </div>
       </header>
@@ -97,8 +100,8 @@ export default async function ProgramsPage({
         {/* Required Message Block */}
         <div className="bg-category-program/10 border border-category-program/20 rounded-xl p-5 text-sm leading-relaxed text-foreground/80 shadow-sm">
           <p>
-            <strong className="text-category-program font-bold">이 프로그램은 일반 관광상품이 아닙니다.</strong><br/>
-            주민이 직접 운영하고, 그 수익이 지역 생활서비스의 지속 가능성(노인 돌봄, 환경 정화 등)과 연결되는 특별한 소득활동입니다.
+            <strong className="text-category-program font-bold">{labels.pgBannerBold}</strong><br/>
+            {labels.pgBannerText}
           </p>
         </div>
 
@@ -115,7 +118,7 @@ export default async function ProgramsPage({
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
             >
-              {cat}
+              {getLocalizedCategory(cat, currentLocale)}
             </Link>
           ))}
         </div>
@@ -125,7 +128,7 @@ export default async function ProgramsPage({
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed rounded-xl">
             <p className="text-muted-foreground">
-              {activeCategory} 카테고리에 해당하는 소원 별미가 없습니다.
+              {labels.pgEmpty}
             </p>
           </div>
         )}

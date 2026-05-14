@@ -4,6 +4,9 @@ import { CourseFilterGrid, CourseFilterItem } from "@/components/courses/course-
 import type { CourseUI } from "@/lib/course-data";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { getServerTranslationLocale } from "@/lib/server-translation";
+import { getLocalizedList } from "@/lib/content-translation-server";
+import { getStaticLabels } from "@/lib/static-translations";
 
 export const dynamic = "force-dynamic";
 
@@ -46,8 +49,13 @@ async function getCourses(): Promise<CourseUI[]> {
 }
 
 export default async function CoursesPage() {
-  const courses = await getCourses();
-  const courseItems: CourseFilterItem[] = courses.map((course) => ({
+  const currentLocale = await getServerTranslationLocale();
+  const labels = getStaticLabels(currentLocale);
+
+  const rawCourses = await getCourses();
+  const localizedCourses = await getLocalizedList(rawCourses, "course", currentLocale);
+
+  const courseItems: CourseFilterItem[] = localizedCourses.map((course) => ({
     id: course.id,
     title: course.title,
     summary: course.summary,
@@ -65,13 +73,13 @@ export default async function CoursesPage() {
       <header className="px-6 py-12 bg-muted/30 border-b">
         <div className="max-w-screen-xl mx-auto flex flex-col gap-3">
           <nav className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-            <Link href="/" className="hover:text-foreground">홈</Link>
+            <Link href="/" className="hover:text-foreground">{labels.home}</Link>
             <ChevronRight className="w-3 h-3" />
-            <span className="text-foreground font-medium">여정의 기록</span>
+            <span className="text-foreground font-medium">{labels.tabCourse}</span>
           </nav>
-          <h1 className="text-3xl font-extrabold tracking-tight">소원머묾 여정의 기록</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight">{labels.allCourseTitle}</h1>
           <p className="text-muted-foreground text-sm max-w-md leading-relaxed">
-            머묾, 노님, 소원 별미를 고요히 연결해 태안 바다에서 보내는 힐링 하루를 남깁니다.
+            {labels.allCourseDesc}
           </p>
         </div>
       </header>
@@ -81,8 +89,8 @@ export default async function CoursesPage() {
         {/* Required Message Block */}
         <div className="bg-category-course/10 border border-category-course/20 rounded-xl p-5 text-sm leading-relaxed text-foreground/80 shadow-sm">
           <p>
-            <strong className="text-category-course font-bold">이동 최소화 중심의 체류형 코스</strong><br/>
-            소원로컬트립의 추천 코스는 이동을 많이 하는 관광이 아니라, 머무는 곳 주변에서 숙박·체험·식사·마을 이야기를 연결하는 체류형 코스입니다.
+            <strong className="text-category-course font-bold">{labels.allCourseBannerBold}</strong><br/>
+            {labels.allCourseBannerText}
           </p>
         </div>
 
@@ -90,7 +98,7 @@ export default async function CoursesPage() {
           <CourseFilterGrid courses={courseItems} />
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed rounded-xl">
-            <p className="text-muted-foreground">현재 등록된 여정의 기록이 없습니다.</p>
+            <p className="text-muted-foreground">{labels.allCourseEmpty}</p>
           </div>
         )}
       </main>

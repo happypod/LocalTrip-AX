@@ -99,6 +99,7 @@ export function StayCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl, we
           itemSlug={itemSlug}
           variant="secondary"
           className="w-full mt-1 rounded-lg"
+          buttonText={labels.leaveInquiry}
         />
       </div>
     </div>

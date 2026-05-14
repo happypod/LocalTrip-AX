@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ProgramImage } from "./program-image";
 import { Users, HeartHandshake } from "lucide-react";
+import { getStaticLabels, getLocalizedCategory } from "@/lib/static-translations";
 
 interface ProgramCardProps {
   title: string;
@@ -12,6 +13,7 @@ interface ProgramCardProps {
   category?: string | null;
   imageUrl?: string;
   slug: string;
+  lang?: string;
 }
 
 export function ProgramCard({
@@ -24,7 +26,10 @@ export function ProgramCard({
   category,
   imageUrl,
   slug,
+  lang = "ko",
 }: ProgramCardProps) {
+  const labels = getStaticLabels(lang);
+  
   return (
     <Link
       href={`/programs/${slug}`}
@@ -34,7 +39,7 @@ export function ProgramCard({
         <ProgramImage src={imageUrl} alt={title} />
         {category && (
           <div className="absolute top-3 left-3 px-2 py-1 bg-category-program text-white text-[10px] font-bold rounded uppercase tracking-wider shadow-sm">
-            {category}
+            {getLocalizedCategory(category, lang)}
           </div>
         )}
       </div>
@@ -53,13 +58,13 @@ export function ProgramCard({
           <div className="flex items-start gap-2 text-xs text-foreground/80">
             <HeartHandshake className="w-3.5 h-3.5 mt-0.5 text-category-program shrink-0" />
             <span className="line-clamp-2 leading-tight">
-              <span className="font-semibold text-foreground">생활서비스 연계:</span> {linkedLifeService}
+              <span className="font-semibold text-foreground">{labels.lifeServiceTitle}:</span> {linkedLifeService}
             </span>
           </div>
           <div className="flex items-start gap-2 text-xs text-foreground/80">
             <Users className="w-3.5 h-3.5 mt-0.5 text-category-program shrink-0" />
             <span className="line-clamp-2 leading-tight">
-              <span className="font-semibold text-foreground">주민 역할:</span> {residentRole}
+              <span className="font-semibold text-foreground">{labels.residentRoleTitle}:</span> {residentRole}
             </span>
           </div>
         </div>
@@ -69,14 +74,14 @@ export function ProgramCard({
             {priceText ? (
               <span className="text-base font-bold text-foreground">{priceText}</span>
             ) : (
-              <span className="text-sm text-muted-foreground italic">문의 필요</span>
+              <span className="text-sm text-muted-foreground italic">{labels.pgRequiredInquiry}</span>
             )}
             {durationText && (
-              <span className="text-[10px] text-muted-foreground">{durationText} 소요</span>
+              <span className="text-[10px] text-muted-foreground">{durationText} {labels.pgDurationTook}</span>
             )}
           </div>
           <span className="text-xs font-semibold text-category-program group-hover:underline">
-            자세히 보기
+            {labels.pgViewDetail}
           </span>
         </div>
       </div>

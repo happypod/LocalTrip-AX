@@ -2,6 +2,11 @@
 
 import { requireAdminSession } from "@/lib/admin-auth";
 import { getPrisma } from "@/lib/prisma";
+import type { PremiumPrConfig } from "@/lib/premium-pr";
+import {
+  DEFAULT_PREMIUM_PR,
+  isAllowedPremiumPrIframeUrl,
+} from "@/lib/premium-pr";
 import { PublishStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
@@ -27,6 +32,15 @@ interface StayData {
   mapAddress?: string | null;
   mapPlaceId?: string | null;
   mapProvider?: string | null;
+  premiumPr?: {
+    isPremium?: boolean;
+    matterportUrl?: string;
+    hostVideoUrl?: string;
+    droneViewUrl?: string;
+    badgeLabel?: string;
+    packageName?: string;
+    expiresAt?: string;
+  };
 }
 
 const STAY_SLUG_PATTERN = /^[a-z0-9-]+$/;
@@ -75,6 +89,59 @@ function getImages(images: string[] | undefined) {
   return (images ?? []).map((image) => image.trim()).filter(Boolean);
 }
 
+function getPremiumPrUrl(value: string | undefined, fieldName: string) {
+  const url = getOptionalString(value);
+
+  if (!url) {
+    return null;
+  }
+
+  if (!isAllowedPremiumPrIframeUrl(url)) {
+    throw new Error(
+      `${fieldName}은 허용된 iframe URL만 입력할 수 있습니다. Matterport show, YouTube embed, YouTube nocookie embed, Vimeo player URL을 사용해 주세요.`
+    );
+  }
+
+  return url;
+}
+
+function getPremiumPrInput(input: StayData["premiumPr"]): PremiumPrConfig {
+  if (!input?.isPremium) {
+    return DEFAULT_PREMIUM_PR;
+  }
+
+  const premiumPr: PremiumPrConfig = {
+    isPremium: true,
+    features: {
+      matterportUrl: getPremiumPrUrl(input.matterportUrl, "Matterport URL"),
+      hostVideoUrl: getPremiumPrUrl(input.hostVideoUrl, "호스트 영상 URL"),
+      droneViewUrl: getPremiumPrUrl(input.droneViewUrl, "드론 영상 URL"),
+    },
+    display: {
+      badgeLabel: getOptionalString(input.badgeLabel) ?? "3D 숙소 투어",
+    },
+    contract: {
+      packageName: getOptionalString(input.packageName),
+      expiresAt: getOptionalString(input.expiresAt),
+    },
+  };
+
+  if (!Object.values(premiumPr.features).some(Boolean)) {
+    throw new Error(
+      "프리미엄 PR을 적용하려면 Matterport, 호스트 영상, 드론 영상 중 하나 이상의 URL을 입력해 주세요."
+    );
+  }
+
+  if (
+    premiumPr.contract.expiresAt &&
+    !/^\d{4}-\d{2}-\d{2}$/.test(premiumPr.contract.expiresAt)
+  ) {
+    throw new Error("프리미엄 PR 노출 종료일은 YYYY-MM-DD 형식이어야 합니다.");
+  }
+
+  return premiumPr;
+}
+
 import { parseMapFields } from "@/lib/admin-map-input";
 
 function getStayInput(data: StayData) {
@@ -96,6 +163,7 @@ function getStayInput(data: StayData) {
     priceText: getOptionalString(data.priceText),
     capacityText: getOptionalString(data.capacityText),
     images: getImages(data.images),
+    premiumPr: getPremiumPrInput(data.premiumPr),
     status: getPublishStatus(data.status),
     ...mapData,
   };

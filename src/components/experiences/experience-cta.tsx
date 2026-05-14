@@ -5,6 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Phone, MessageCircle, Globe, CalendarCheck, MessageSquare } from "lucide-react";
 import { trackLeadEvent, LeadActionType } from "@/lib/lead-event";
 import { InquiryDialog } from "@/components/inquiry/inquiry-dialog";
+import { getStaticLabels } from "@/lib/static-translations";
 
 interface ExperienceCTAProps {
   itemId: string;
@@ -13,9 +14,11 @@ interface ExperienceCTAProps {
   kakaoUrl?: string | null;
   naverBookingUrl?: string | null;
   websiteUrl?: string | null;
+  locale?: string;
 }
 
-export function ExperienceCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl, websiteUrl }: ExperienceCTAProps) {
+export function ExperienceCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingUrl, websiteUrl, locale }: ExperienceCTAProps) {
+  const t = getStaticLabels(locale);
   const handleTrack = (actionType: LeadActionType, targetUrl?: string) => {
     trackLeadEvent({
       itemType: "experience",
@@ -35,7 +38,7 @@ export function ExperienceCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingU
             className={cn(buttonVariants({ size: "xl" }), "w-full rounded-xl flex items-center justify-center gap-2")}
           >
             <Phone className="w-5 h-5" />
-            전화 문의
+            {t.phoneCall}
           </a>
         )}
         {kakaoUrl && (
@@ -50,7 +53,7 @@ export function ExperienceCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingU
             )}
           >
             <MessageCircle className="w-5 h-5" />
-            카카오 문의
+            {t.kakaoInquiry}
           </a>
         )}
         {naverBookingUrl && (
@@ -65,7 +68,7 @@ export function ExperienceCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingU
             )}
           >
             <CalendarCheck className="w-5 h-5" />
-            네이버에서 확인
+            {t.naverBookingConfirm}
           </a>
         )}
         {websiteUrl && (
@@ -77,7 +80,7 @@ export function ExperienceCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingU
             className={cn(buttonVariants({ variant: "outline", size: "xl" }), "w-full rounded-xl flex items-center justify-center gap-2")}
           >
             <Globe className="w-5 h-5" />
-            운영자 페이지 보기
+            {t.opPage}
           </a>
         )}
       </div>
@@ -85,10 +88,10 @@ export function ExperienceCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingU
       <div className="mt-4 p-4 border border-dashed rounded-xl flex flex-col items-center gap-2 bg-muted/20">
         <div className="flex items-center gap-2 text-muted-foreground">
           <MessageSquare className="w-4 h-4" />
-          <span className="text-sm font-medium">플랫폼 통합 문의</span>
+          <span className="text-sm font-medium">{t.platformInquiry}</span>
         </div>
         <p className="text-xs text-muted-foreground text-center leading-relaxed">
-          운영일과 참여 가능 여부는 문의를 통해 확인해 주세요.
+          {t.platformDesc}
         </p>
         <InquiryDialog 
           itemType="experience"
@@ -96,6 +99,7 @@ export function ExperienceCTA({ itemId, itemSlug, phone, kakaoUrl, naverBookingU
           itemSlug={itemSlug}
           variant="secondary"
           className="w-full mt-1 rounded-lg"
+          buttonText={t.leaveInquiry}
         />
       </div>
     </div>

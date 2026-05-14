@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { EventSlider } from "@/components/home/event-slider";
 import { HeroSearch } from "@/components/home/hero-search";
@@ -49,6 +50,13 @@ interface HomeClientProps {
   events: HomeEventItem[];
 }
 
+const HERO_SLIDES = [
+  "/images/hero-slide-1.png",
+  "/images/hero-slide-2.png",
+  "/images/hero-slide-3.png",
+  "/images/hero-slide-4.png",
+];
+
 function SectionHeader({ title, href, viewAllText }: { title: string; href: string; viewAllText: string }) {
   return (
     <div className="mb-4 flex items-center justify-between">
@@ -66,6 +74,14 @@ export function HomeClient({ stays, experiences, programs, courses, events }: Ho
   const currentLang = usePersonaThemeStore((state) => state.currentLang);
   const labels = getStaticLabels(currentLang);
   const isClient = useIsClient();
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const sortedStays = isClient
     ? sortByPersona(stays, currentTheme, (i) => `${i.title} ${i.summary}`)
@@ -117,12 +133,23 @@ export function HomeClient({ stays, experiences, programs, courses, events }: Ho
 
   return (
     <main className="min-h-screen bg-persona-bg text-persona-text transition-colors duration-200">
-      <section
-        className="relative min-h-[580px] overflow-hidden bg-cover bg-center md:min-h-[640px]"
-        style={{ backgroundImage: "url('/images/hero-main.jpg')" }}
-      >
-        <div className="absolute inset-0 bg-black/30" />
-        <div className="relative mx-auto flex min-h-[580px] max-w-7xl flex-col px-5 py-5 md:min-h-[640px]">
+      <section className="relative min-h-[580px] overflow-hidden md:min-h-[640px]">
+        {/* Auto-Rotating Slider Backgrounds */}
+        {HERO_SLIDES.map((src, index) => (
+          <div
+            key={src}
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ 
+              backgroundImage: `url('${src}')`,
+              transition: "opacity 1500ms ease-in-out, transform 1500ms ease-in-out",
+              opacity: index === currentSlide ? 1 : 0,
+              transform: index === currentSlide ? "scale(1)" : "scale(1.05)",
+              zIndex: 0,
+            }}
+          />
+        ))}
+        <div className="absolute inset-0 bg-black/35 backdrop-brightness-90 z-10" />
+        <div className="relative z-20 mx-auto flex min-h-[580px] max-w-7xl flex-col px-5 py-5 md:min-h-[640px]">
           <div className="flex flex-1 flex-col items-center justify-center pb-20 text-center text-white">
             <h1 className="text-5xl font-black tracking-tight drop-shadow-lg md:text-7xl font-persona-display">
               {copy.hero.title}

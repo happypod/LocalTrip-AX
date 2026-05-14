@@ -17,6 +17,7 @@ interface TranslationData {
   address?: string | null;
   capacityText?: string | null;
   priceText?: string | null;
+  durationText?: string | null;
   linkedLifeService?: string | null;
   residentRole?: string | null;
   revenueUse?: string | null;
@@ -43,6 +44,7 @@ function emptyTranslationData(): TranslationData {
     address: "",
     capacityText: "",
     priceText: "",
+    durationText: "",
     linkedLifeService: "",
     residentRole: "",
     revenueUse: "",
@@ -105,6 +107,7 @@ export function TranslationForm({
         address: toSaveValue(formData[locale].address),
         capacityText: toSaveValue(formData[locale].capacityText),
         priceText: toSaveValue(formData[locale].priceText),
+        durationText: toSaveValue(formData[locale].durationText),
         linkedLifeService: toSaveValue(formData[locale].linkedLifeService),
         residentRole: toSaveValue(formData[locale].residentRole),
         revenueUse: toSaveValue(formData[locale].revenueUse),
@@ -153,6 +156,9 @@ export function TranslationForm({
             )}
             {originalData.priceText !== undefined && (
               <OriginalField label="가격 (Price)" value={originalData.priceText} />
+            )}
+            {originalData.durationText !== undefined && (
+              <OriginalField label="소요시간 (Duration)" value={originalData.durationText} />
             )}
 
             {isLocalIncomeProgram && (
@@ -276,6 +282,14 @@ export function TranslationForm({
                 value={activeData.priceText}
                 placeholder="해당 언어로 번역한 가격 정보"
                 onChange={(value) => handleInputChange("priceText", value)}
+              />
+            )}
+            {originalData.durationText !== undefined && (
+              <TranslationInput
+                label="번역 소요시간 안내"
+                value={activeData.durationText}
+                placeholder="해당 언어로 번역한 소요시간 정보"
+                onChange={(value) => handleInputChange("durationText", value)}
               />
             )}
 

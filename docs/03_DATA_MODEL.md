@@ -1,5 +1,44 @@
 # Data Model (Draft)
 
+## T-061 Accommodation Premium PR 확장 필드
+
+- **목적**: 숙소 기본 데이터 구조를 크게 흔들지 않고 3D 투어, 호스트 영상, 드론 영상 같은 B2B Premium PR 옵션을 저장하기 위한 확장 지점을 둔다.
+- **적용 모델**: `Accommodation`
+- **필드**: `premiumPr Json @default("{\"isPremium\":false}")`
+- **PostgreSQL 저장 형태**: Prisma `Json` 필드는 PostgreSQL/Neon에서 JSONB 계열 저장 구조로 매핑된다.
+- **기본값**:
+
+```json
+{
+  "isPremium": false
+}
+```
+
+- **정규화 후 앱에서 사용하는 구조**:
+
+```json
+{
+  "isPremium": false,
+  "features": {
+    "matterportUrl": null,
+    "hostVideoUrl": null,
+    "droneViewUrl": null
+  },
+  "display": {
+    "badgeLabel": "3D 숙소 투어"
+  },
+  "contract": {
+    "packageName": null,
+    "expiresAt": null
+  }
+}
+```
+
+- **운영 원칙**:
+  - `premiumPr.isPremium=false`이면 URL이 저장되어 있어도 공개 UI는 노출하지 않는다.
+  - 결제, 정산, 구독 과금, 예약 확정 자동화는 이 필드의 책임이 아니다.
+  - iframe URL은 앱 레벨 allowlist 유틸(`src/lib/premium-pr.ts`)을 통해 검증한다.
+
 ## DB Source of Truth 정리
 
 - 공개 페이지의 숙소, 체험, 소원 별미(주민소득상품), 코스 노출 기준은 DB의 `sowon` region 및 `status = published` 데이터로 통일한다.

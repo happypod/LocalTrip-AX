@@ -108,6 +108,7 @@ model Accommodation {
   kakaoUrl            String?
   naverBookingUrl     String?
   websiteUrl          String?
+  premiumPr           Json                   @default("{\"isPremium\":false}")
   status              PublishStatus          @default(draft)
   createdAt           DateTime               @default(now())
   updatedAt           DateTime               @updatedAt

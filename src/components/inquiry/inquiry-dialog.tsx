@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { MessageSquare, Loader2, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { getStaticLabels } from "@/lib/static-translations";
+
 interface InquiryDialogProps {
   itemType: "accommodation" | "experience" | "local_income_program" | "course";
   itemId: string;
@@ -18,17 +20,21 @@ interface InquiryDialogProps {
   className?: string;
   variant?: "default" | "outline" | "secondary" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon" | "xl";
+  locale?: string;
 }
 
 export function InquiryDialog({ 
   itemType, 
   itemId, 
   itemSlug, 
-  buttonText = "문의 남기기",
+  buttonText,
   className,
   variant = "secondary",
-  size = "default"
+  size = "default",
+  locale = "ko"
 }: InquiryDialogProps) {
+  const t = getStaticLabels(locale);
+  const finalButtonText = buttonText || t.inquiryBtn;
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -132,7 +138,7 @@ export function InquiryDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button variant={variant} size={size} className={cn("gap-2", className)} />}>
         <MessageSquare className="w-4 h-4" />
-        {buttonText}
+        {finalButtonText}
       </DialogTrigger>
       
       <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-[90vh]">

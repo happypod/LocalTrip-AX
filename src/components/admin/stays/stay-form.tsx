@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Accommodation, BusinessProfile, Region } from "@prisma/client";
 import { createStay, updateStay } from "@/app/admin/stays/actions";
+import { normalizePremiumPr } from "@/lib/premium-pr";
 
 interface StayFormProps {
   initialData?: Accommodation;
@@ -13,9 +14,13 @@ interface StayFormProps {
 
 export function StayForm({ initialData, regions, businesses }: StayFormProps) {
   const router = useRouter();
+  const initialPremiumPr = normalizePremiumPr(initialData?.premiumPr);
   const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [imagesInput, setImagesInput] = useState(initialData?.images?.join("\n") || "");
+  const [isPremiumPrEnabled, setIsPremiumPrEnabled] = useState(
+    initialPremiumPr.isPremium
+  );
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -53,6 +58,15 @@ export function StayForm({ initialData, regions, businesses }: StayFormProps) {
       mapAddress: formData.get("mapAddress") as string,
       mapPlaceId: formData.get("mapPlaceId") as string,
       mapProvider: formData.get("mapProvider") as string,
+      premiumPr: {
+        isPremium: formData.get("premiumPrIsPremium") === "on",
+        matterportUrl: formData.get("premiumPrMatterportUrl") as string,
+        hostVideoUrl: formData.get("premiumPrHostVideoUrl") as string,
+        droneViewUrl: formData.get("premiumPrDroneViewUrl") as string,
+        badgeLabel: formData.get("premiumPrBadgeLabel") as string,
+        packageName: formData.get("premiumPrPackageName") as string,
+        expiresAt: formData.get("premiumPrExpiresAt") as string,
+      },
     };
 
     try {
@@ -289,6 +303,121 @@ export function StayForm({ initialData, regions, businesses }: StayFormProps) {
               />
               <span className="text-xs text-gray-500">쉼표 또는 줄바꿈으로 여러 개를 입력할 수 있습니다. 첫 번째 이미지가 대표 이미지로 사용됩니다.</span>
             </div>
+          </section>
+
+          <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-4">
+            <div className="flex flex-col gap-1 border-b pb-3">
+              <h2 className="text-lg font-bold">프리미엄 PR 옵션</h2>
+              <p className="text-xs leading-relaxed text-gray-500">
+                3D 투어, 호스트 영상, 드론 영상 등 유료 PR 콘텐츠를 적용한 숙소에만 사용합니다.
+              </p>
+            </div>
+
+            <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <input
+                type="checkbox"
+                name="premiumPrIsPremium"
+                defaultChecked={initialPremiumPr.isPremium}
+                onChange={(e) => setIsPremiumPrEnabled(e.target.checked)}
+                className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/20"
+              />
+              <span className="flex flex-col gap-1">
+                <span className="text-sm font-bold text-gray-900">
+                  프리미엄 PR 적용
+                </span>
+                <span className="text-xs leading-relaxed text-gray-500">
+                  체크한 경우 공개 숙소 상세 화면에 검증된 PR 콘텐츠가 조건부로 노출됩니다.
+                </span>
+              </span>
+            </label>
+
+            {isPremiumPrEnabled && (
+              <div className="flex flex-col gap-4 rounded-2xl border border-amber-100 bg-amber-50/60 p-4">
+                <div className="rounded-xl bg-white p-3 text-xs leading-relaxed text-amber-700">
+                  허용 URL: Matterport <code className="font-mono">/show/</code>,
+                  YouTube <code className="font-mono">/embed/</code>,
+                  YouTube nocookie <code className="font-mono">/embed/</code>,
+                  Vimeo player <code className="font-mono">/video/</code>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    Matterport 3D 투어 URL
+                  </label>
+                  <input
+                    name="premiumPrMatterportUrl"
+                    type="url"
+                    defaultValue={initialPremiumPr.features.matterportUrl || ""}
+                    placeholder="https://my.matterport.com/show/?m=..."
+                    className="px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    호스트 영상 Embed URL
+                  </label>
+                  <input
+                    name="premiumPrHostVideoUrl"
+                    type="url"
+                    defaultValue={initialPremiumPr.features.hostVideoUrl || ""}
+                    placeholder="https://www.youtube.com/embed/..."
+                    className="px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    드론 영상 Embed URL
+                  </label>
+                  <input
+                    name="premiumPrDroneViewUrl"
+                    type="url"
+                    defaultValue={initialPremiumPr.features.droneViewUrl || ""}
+                    placeholder="https://player.vimeo.com/video/..."
+                    className="px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-semibold text-gray-700">
+                      배지 문구
+                    </label>
+                    <input
+                      name="premiumPrBadgeLabel"
+                      defaultValue={initialPremiumPr.display.badgeLabel}
+                      placeholder="3D 숙소 투어"
+                      className="px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <label className="text-sm font-semibold text-gray-700">
+                      PR 패키지명
+                    </label>
+                    <input
+                      name="premiumPrPackageName"
+                      defaultValue={initialPremiumPr.contract.packageName || ""}
+                      placeholder="3D+호스트 영상 패키지"
+                      className="px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    노출 종료일
+                  </label>
+                  <input
+                    name="premiumPrExpiresAt"
+                    type="date"
+                    defaultValue={initialPremiumPr.contract.expiresAt || ""}
+                    className="px-4 py-2 bg-white border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                </div>
+              </div>
+            )}
           </section>
 
           <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col gap-4">

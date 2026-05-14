@@ -47,6 +47,30 @@ export default function PartnerApplyPage() {
           </div>
         </header>
 
+        <section className="px-6 pb-8">
+          <div className="rounded-3xl border border-primary/15 bg-primary/5 p-5">
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-primary">
+              Premium PR
+            </p>
+            <h2 className="mt-2 text-lg font-black text-foreground">
+              3D 투어·영상 제작이 필요하신가요?
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              숙소와 로컬 운영자를 위한 프리미엄 PR 제작대행 문의는 별도
+              신청 폼으로 접수합니다.
+            </p>
+            <Link
+              href="/partner/premium-pr"
+              className={cn(
+                buttonVariants({ size: "sm" }),
+                "mt-4 rounded-xl"
+              )}
+            >
+              프리미엄 PR 제작 문의
+            </Link>
+          </div>
+        </section>
+
         {/* Form Section */}
         <main className="px-6 pb-12">
           <PartnerApplyForm />

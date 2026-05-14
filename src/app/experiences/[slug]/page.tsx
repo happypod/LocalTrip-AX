@@ -4,6 +4,7 @@ import { getLocalizedContent } from "@/lib/content-translation";
 import { getServerTranslationLocale } from "@/lib/server-translation";
 import { PublishStatus } from "@prisma/client";
 import type { ExperienceUI } from "@/lib/experience-data";
+import { getStaticLabels, getLocalizedCategory } from "@/lib/static-translations";
 import { ExperienceImage } from "@/components/experiences/experience-image";
 import { ExperienceCTA } from "@/components/experiences/experience-cta";
 import { MapPin, Clock, Users, Info, ChevronLeft, AlertCircle, CheckCircle2, ShoppingBag } from "lucide-react";
@@ -67,6 +68,10 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
     notFound();
   }
 
+  const currentLocale = await getServerTranslationLocale();
+  const t = getStaticLabels(currentLocale);
+  const localizedCategory = getLocalizedCategory(exp.category, currentLocale);
+
   return (
     <div className="flex flex-col min-h-screen pb-20">
       <div className="max-w-screen-md mx-auto w-full">
@@ -77,7 +82,7 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
             className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "gap-1 -ml-2 text-muted-foreground")}
           >
             <ChevronLeft className="w-4 h-4" />
-            체험 목록
+            {t.backToExperiences}
           </Link>
         </div>
 
@@ -88,9 +93,9 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
             alt={exp.title}
             className="rounded-2xl shadow-sm"
           />
-          {exp.category && (
+          {localizedCategory && (
             <div className="absolute top-10 left-10 px-3 py-1.5 bg-category-experience text-white text-[11px] font-bold rounded-lg uppercase tracking-wider shadow-lg">
-              {exp.category}
+              {localizedCategory}
             </div>
           )}
         </section>
@@ -114,8 +119,8 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
                   <MapPin className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">장소</span>
-                  <span className="text-sm font-medium">{exp.location}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase">{t.location}</span>
+                  <span className="text-sm font-medium">{getLocalizedCategory(exp.location, currentLocale)}</span>
                 </div>
               </div>
             )}
@@ -125,8 +130,8 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
                   <Clock className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">소요시간</span>
-                  <span className="text-sm font-medium">{exp.durationText}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase">{t.duration}</span>
+                  <span className="text-sm font-medium">{getLocalizedCategory(exp.durationText, currentLocale)}</span>
                 </div>
               </div>
             )}
@@ -136,8 +141,8 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
                   <Users className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">인원</span>
-                  <span className="text-sm font-medium">{exp.capacityText}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase">{t.capacity}</span>
+                  <span className="text-sm font-medium">{getLocalizedCategory(exp.capacityText, currentLocale)}</span>
                 </div>
               </div>
             )}
@@ -147,8 +152,8 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
                   <Info className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold text-muted-foreground uppercase">가격</span>
-                  <span className="text-sm font-bold text-primary">{exp.priceText}</span>
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase">{t.price}</span>
+                  <span className="text-sm font-bold text-primary">{getLocalizedCategory(exp.priceText, currentLocale)}</span>
                 </div>
               </div>
             )}
@@ -157,7 +162,7 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
           {/* Details */}
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-3">
-              <h2 className="text-xl font-bold">프로그램 소개</h2>
+              <h2 className="text-xl font-bold">{t.programIntro}</h2>
               <div className="text-muted-foreground leading-loose whitespace-pre-wrap">
                 {exp.description || exp.summary}
               </div>
@@ -169,7 +174,7 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2 text-foreground font-bold text-sm">
                     <MapPin className="w-4 h-4 text-primary" />
-                    만남 장소
+                    {t.meetingPoint}
                   </div>
                   <p className="text-sm text-muted-foreground pl-6">{exp.meetingPoint}</p>
                 </div>
@@ -178,7 +183,7 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2 text-foreground font-bold text-sm">
                     <ShoppingBag className="w-4 h-4 text-primary" />
-                    준비물
+                    {t.preparation}
                   </div>
                   <p className="text-sm text-muted-foreground pl-6">{exp.preparation}</p>
                 </div>
@@ -187,7 +192,7 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
                 <div className="flex flex-col gap-1.5">
                   <div className="flex items-center gap-2 text-foreground font-bold text-sm">
                     <CheckCircle2 className="w-4 h-4 text-primary" />
-                    포함 사항
+                    {t.includes}
                   </div>
                   <p className="text-sm text-muted-foreground pl-6">{exp.includes}</p>
                 </div>
@@ -198,7 +203,7 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
               <div className="p-4 bg-destructive/5 border border-destructive/20 rounded-xl flex gap-3">
                 <AlertCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
                 <div className="flex flex-col gap-1">
-                  <span className="text-sm font-bold text-destructive">안전 및 안내사항</span>
+                  <span className="text-sm font-bold text-destructive">{t.safetyNotice}</span>
                   <p className="text-xs text-destructive/80 leading-relaxed">{exp.safetyNotice}</p>
                 </div>
               </div>
@@ -208,10 +213,9 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
           {/* CTA Section */}
           <section className="mt-8 p-6 bg-card border rounded-2xl shadow-sm">
             <div className="flex flex-col gap-4 mb-6">
-              <h3 className="text-lg font-bold">문의 및 연결</h3>
+              <h3 className="text-lg font-bold">{t.contactTitle}</h3>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                이 체험은 예약 확정 상품이 아닙니다. 운영 일시, 정확한 가격, 인원은
-                운영자 사정에 따라 변동될 수 있으므로 아래 채널로 먼저 문의해 주세요.
+                {t.expDesc}
               </p>
             </div>
             <ExperienceCTA
@@ -221,6 +225,7 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
               kakaoUrl={exp.kakaoUrl}
               naverBookingUrl={exp.naverBookingUrl}
               websiteUrl={exp.websiteUrl}
+              locale={currentLocale}
             />
           </section>
         </main>

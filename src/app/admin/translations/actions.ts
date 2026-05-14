@@ -86,6 +86,7 @@ export async function saveContentTranslation(
     address: safeTrim(data.address),
     capacityText: safeTrim(data.capacityText),
     priceText: safeTrim(data.priceText),
+    durationText: safeTrim(data.durationText),
     linkedLifeService: safeTrim(data.linkedLifeService),
     residentRole: safeTrim(data.residentRole),
     revenueUse: safeTrim(data.revenueUse),

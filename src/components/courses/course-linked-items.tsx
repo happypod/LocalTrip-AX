@@ -4,6 +4,7 @@ import type { CourseItemUI } from "@/lib/course-data";
 import { Bed, Leaf, HeartHandshake, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { trackLeadEvent } from "@/lib/lead-event";
+import { getStaticLabels } from "@/lib/static-translations";
 
 const COURSE_ITEM_TYPE = {
   accommodation: "accommodation",
@@ -15,9 +16,11 @@ interface CourseLinkedItemsProps {
   courseId: string;
   courseSlug: string;
   items: CourseItemUI[];
+  locale?: string;
 }
 
-export function CourseLinkedItems({ courseId, courseSlug, items }: CourseLinkedItemsProps) {
+export function CourseLinkedItems({ courseId, courseSlug, items, locale = "ko" }: CourseLinkedItemsProps) {
+  const t = getStaticLabels(locale);
   const linkedItems = items.filter(i => i.slug);
 
   const handleTrack = (targetSlug: string, targetType: string) => {
@@ -33,7 +36,7 @@ export function CourseLinkedItems({ courseId, courseSlug, items }: CourseLinkedI
   if (linkedItems.length === 0) {
     return (
       <div className="bg-muted/30 rounded-xl p-6 text-center border border-dashed">
-        <p className="text-muted-foreground text-sm">관련 콘텐츠 링크 준비 중입니다.</p>
+        <p className="text-muted-foreground text-sm">{t.emptyLinkedItems}</p>
       </div>
     );
   }
@@ -49,7 +52,7 @@ export function CourseLinkedItems({ courseId, courseSlug, items }: CourseLinkedI
         <div className="flex flex-col gap-2">
           <h4 className="text-sm font-bold text-foreground flex items-center gap-1.5">
             <Bed className="w-4 h-4 text-category-stay" />
-            관련 숙소
+            {t.linkedStay}
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {stays.map(item => (
@@ -71,7 +74,7 @@ export function CourseLinkedItems({ courseId, courseSlug, items }: CourseLinkedI
         <div className="flex flex-col gap-2 mt-2">
           <h4 className="text-sm font-bold text-foreground flex items-center gap-1.5">
             <Leaf className="w-4 h-4 text-category-experience" />
-            관련 체험
+            {t.linkedExperience}
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {experiences.map(item => (
@@ -93,7 +96,7 @@ export function CourseLinkedItems({ courseId, courseSlug, items }: CourseLinkedI
         <div className="flex flex-col gap-2 mt-2">
           <h4 className="text-sm font-bold text-foreground flex items-center gap-1.5">
             <HeartHandshake className="w-4 h-4 text-category-program" />
-            관련 주민소득상품
+            {t.linkedProgram}
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {programs.map(item => (

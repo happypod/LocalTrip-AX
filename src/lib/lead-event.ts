@@ -7,7 +7,10 @@ export type LeadActionType =
   | "homepage_click"
   | "inquiry_submit"
   | "map_click"
-  | "share_click";
+  | "share_click"
+  | "premium_pr_matterport_click"
+  | "premium_pr_host_video_click"
+  | "premium_pr_drone_video_click";
 
 export type LeadItemType = 
   | "accommodation" 
@@ -25,6 +28,7 @@ export interface TrackLeadEventPayload {
   actionType: LeadActionType;
   sourcePath?: string;
   targetUrl?: string;
+  metadata?: Record<string, string | number | boolean | null>;
 }
 
 /**

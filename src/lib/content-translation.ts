@@ -45,6 +45,7 @@ export interface ContentTranslationFormData {
   address?: string;
   capacityText?: string;
   priceText?: string;
+  durationText?: string;
   linkedLifeService?: string;
   residentRole?: string;
   revenueUse?: string;
@@ -54,6 +55,7 @@ export interface ContentTranslationMetadata {
   address?: string | null;
   capacityText?: string | null;
   priceText?: string | null;
+  durationText?: string | null;
   linkedLifeService?: string | null;
   residentRole?: string | null;
   revenueUse?: string | null;
@@ -92,8 +94,10 @@ export function getLocalizedContent<
     summary: string | null;
     description?: string | null;
     address?: string | null;
+    location?: string | null;
     capacityText?: string | null;
     priceText?: string | null;
+    durationText?: string | null;
     linkedLifeService?: string | null;
     residentRole?: string | null;
     revenueUse?: string | null;
@@ -140,6 +144,13 @@ export function getLocalizedContent<
             original.address,
         }
       : {}),
+    ...(original.location !== undefined
+      ? {
+          location:
+            getMetadataField("address") ||
+            original.location,
+        }
+      : {}),
     ...(original.capacityText !== undefined
       ? {
           capacityText:
@@ -152,6 +163,13 @@ export function getLocalizedContent<
           priceText:
             getMetadataField("priceText") ||
             original.priceText,
+        }
+      : {}),
+    ...(original.durationText !== undefined
+      ? {
+          durationText:
+            getMetadataField("durationText") ||
+            original.durationText,
         }
       : {}),
     ...(original.linkedLifeService !== undefined

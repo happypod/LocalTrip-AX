@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getPrisma } from "@/lib/prisma";
 import { getLocalizedContent } from "@/lib/content-translation";
 import { getServerTranslationLocale } from "@/lib/server-translation";
+import { getStaticLabels, getLocalizedCategory } from "@/lib/static-translations";
 import { PublishStatus, CourseItemType } from "@prisma/client";
 import type { Prisma } from "@prisma/client";
 import type { CourseUI, CourseItemUI } from "@/lib/course-data";
@@ -180,6 +181,8 @@ async function getCourseBySlug(slug: string): Promise<CourseUI | undefined> {
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const currentLocale = await getServerTranslationLocale();
+  const t = getStaticLabels(currentLocale);
   const course = await getCourseBySlug(slug);
 
   if (!course) {
@@ -192,9 +195,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
         <div className="mx-auto flex h-14 max-w-screen-md items-center justify-between px-4">
           <Link href="/courses" className="flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             <ChevronLeft className="mr-1 h-5 w-5" />
-            추천 코스 목록
+            {t.backToCourses}
           </Link>
-          <Link href="/" className="text-xs text-muted-foreground hover:underline">홈</Link>
+          <Link href="/" className="text-xs text-muted-foreground hover:underline">{t.home}</Link>
         </div>
       </header>
 
@@ -204,12 +207,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
           <div className="absolute left-4 top-4 flex gap-2">
             {course.targetType && (
               <div className="rounded-lg bg-category-course px-3 py-1.5 text-[11px] font-bold text-white shadow-lg">
-                {course.targetType}
+                {getLocalizedCategory(course.targetType, currentLocale)}
               </div>
             )}
             {course.durationType && (
               <div className="rounded-lg bg-background/90 px-3 py-1.5 text-[11px] font-bold text-foreground shadow-lg backdrop-blur-sm">
-                {course.durationType}
+                {getLocalizedCategory(course.durationType, currentLocale)}
               </div>
             )}
           </div>
@@ -219,7 +222,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
           <section className="flex flex-col gap-3">
             <div className="flex items-center gap-2 text-sm font-bold text-category-course">
               <Compass className="h-4 w-4" />
-              소원권역 추천 코스
+              {t.sowonCourseRegion}
             </div>
             <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-foreground md:text-3xl">
               {course.title}
@@ -233,7 +236,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
             <section className="rounded-2xl border bg-muted/20 p-5">
               <h2 className="mb-2 flex items-center gap-2 text-lg font-bold text-foreground">
                 <Info className="h-5 w-5 text-category-course" />
-                코스 소개
+                {t.courseIntro}
               </h2>
               <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
                 {course.description}
@@ -244,19 +247,19 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
           <section className="rounded-2xl border bg-card p-5 shadow-sm">
             <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-foreground">
               <Route className="h-5 w-5 text-category-course" />
-              추천 일정표
+              {t.recommendedRoute}
             </h2>
-            <CourseRoute items={course.routeItems} />
+            <CourseRoute items={course.routeItems} locale={currentLocale} />
           </section>
 
           {course.routeItems.length > 0 && (
             <section className="rounded-2xl border bg-card p-5 shadow-sm">
-              <h2 className="mb-4 text-lg font-bold text-foreground">연결된 콘텐츠</h2>
-              <CourseLinkedItems courseId={course.id} courseSlug={course.slug} items={course.routeItems} />
+              <h2 className="mb-4 text-lg font-bold text-foreground">{t.linkedContents}</h2>
+              <CourseLinkedItems courseId={course.id} courseSlug={course.slug} items={course.routeItems} locale={currentLocale} />
             </section>
           )}
 
-          <CourseCTA itemId={course.id} itemSlug={course.slug} />
+          <CourseCTA itemId={course.id} itemSlug={course.slug} locale={currentLocale} />
         </div>
       </main>
     </div>
