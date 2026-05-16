@@ -211,21 +211,6 @@ export default async function EventsPage({
           </div>
         )}
 
-        <footer className="mt-16 flex flex-col gap-4 border-t border-gray-200/60 py-8 text-sm text-gray-500 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <span className="text-base font-black text-gray-900">Sowon Trip</span>
-            <span>관광문의</span>
-            <a href="tel:010-0233-4548" className="hover:underline hover:text-gray-700 transition-colors">010-0233-4548</a>
-            <a href="https://www.sowontrip.com" target="_blank" rel="noreferrer" className="hover:underline hover:text-gray-700 transition-colors">www.sowontrip.com</a>
-            <Link href="/customer-center" className="hover:underline hover:text-gray-700 transition-colors">고객센터</Link>
-            <Link href="/partner/apply" className="hover:underline hover:text-gray-700 transition-colors">파트너 입점 신청</Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <FontAwesomeIcon icon={faUsers} className="h-5 w-5 text-gray-400" />
-            <FontAwesomeIcon icon={faCompass} className="h-5 w-5 text-gray-400" />
-            <FontAwesomeIcon icon={faMapLocationDot} className="h-5 w-5 text-gray-400" />
-          </div>
-        </footer>
       </div>
     </main>
   );

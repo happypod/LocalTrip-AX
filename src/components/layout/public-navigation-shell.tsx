@@ -25,6 +25,7 @@ import {
   faUser,
   faXmark,
 } from "@/lib/fontawesome";
+import { Footer } from "@/components/layout/footer";
 
 interface LanguageItem {
   code: string;
@@ -807,6 +808,7 @@ export function PublicNavigationShell({ children }: { children: ReactNode }) {
       ) : (
         <>
           {children}
+          <Footer />
           <div aria-hidden="true" className="h-20 md:hidden" />
         </>
       )}

@@ -156,6 +156,27 @@ export default async function StayDetailPage({ params }: { params: Promise<{ slu
             </div>
           </div>
 
+          {/* Image Gallery Section */}
+          {stay.images && stay.images.length > 1 && (
+            <div className="flex flex-col gap-6 py-8 border-t">
+              <h2 className="text-xl font-bold">공간과 분위기</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {stay.images[1] && (
+                  <div className="flex flex-col gap-2">
+                    <StayImage src={stay.images[1]} alt={`${stay.title} 분위기`} className="rounded-xl overflow-hidden" />
+                    <span className="text-sm text-muted-foreground font-medium text-center">지역과 어우러진 분위기</span>
+                  </div>
+                )}
+                {stay.images[2] && (
+                  <div className="flex flex-col gap-2">
+                    <StayImage src={stay.images[2]} alt={`${stay.title} 상세`} className="rounded-xl overflow-hidden" />
+                    <span className="text-sm text-muted-foreground font-medium text-center">공간의 디테일</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <PremiumPrSection
             premiumPr={stay.premiumPr}
             stayTitle={stay.title}

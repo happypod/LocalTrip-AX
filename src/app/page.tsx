@@ -36,13 +36,6 @@ type HomeEventItem = {
 
 function toHomeProgramItem(program: HomeProgramItem): HomeProgramItem {
   let images = program.images;
-  if (program.slug === "shrimp-grill-experience") {
-    images = ["/images/programs/shrimp-grill.png"];
-  } else if (program.slug === "fishing-village-dining-class") {
-    images = ["/images/programs/dining-class.png"];
-  } else if (program.slug === "shrimp-seafood-bbq") {
-    images = ["/images/programs/seafood-bbq.png"];
-  }
 
   return {
     id: program.id,

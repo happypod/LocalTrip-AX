@@ -168,6 +168,27 @@ export default async function ExperienceDetailPage({ params }: { params: Promise
               </div>
             </div>
 
+            {/* Image Gallery Section */}
+            {exp.images && exp.images.length > 1 && (
+              <div className="flex flex-col gap-6 py-8 border-t">
+                <h2 className="text-xl font-bold">생생한 현장 스케치</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {exp.images[1] && (
+                    <div className="flex flex-col gap-2">
+                      <ExperienceImage src={exp.images[1]} alt={`${exp.title} 분위기`} className="rounded-xl overflow-hidden" />
+                      <span className="text-sm text-muted-foreground font-medium text-center">함께 즐기는 순간</span>
+                    </div>
+                  )}
+                  {exp.images[2] && (
+                    <div className="flex flex-col gap-2">
+                      <ExperienceImage src={exp.images[2]} alt={`${exp.title} 상세`} className="rounded-xl overflow-hidden" />
+                      <span className="text-sm text-muted-foreground font-medium text-center">체험의 디테일</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Practical Info */}
             <div className="grid grid-cols-1 gap-6 bg-muted/30 p-6 rounded-2xl">
               {exp.meetingPoint && (

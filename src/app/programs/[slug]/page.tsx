@@ -164,6 +164,27 @@ export default async function ProgramDetailPage({ params }: { params: Promise<{ 
             </div>
           )}
 
+          {/* Image Gallery Section */}
+          {prog.images && prog.images.length > 1 && (
+            <div className="flex flex-col gap-6 py-8 border-t">
+              <h2 className="text-xl font-bold">로컬 라이프 엿보기</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {prog.images[1] && (
+                  <div className="flex flex-col gap-2">
+                    <ProgramImage src={prog.images[1]} alt={`${prog.title} 분위기`} className="rounded-xl overflow-hidden" />
+                    <span className="text-sm text-muted-foreground font-medium text-center">프로그램 현장 분위기</span>
+                  </div>
+                )}
+                {prog.images[2] && (
+                  <div className="flex flex-col gap-2">
+                    <ProgramImage src={prog.images[2]} alt={`${prog.title} 상세`} className="rounded-xl overflow-hidden" />
+                    <span className="text-sm text-muted-foreground font-medium text-center">자세한 활동 모습</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Metadata Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-muted/30 rounded-xl p-5 border">
             {prog.location && (

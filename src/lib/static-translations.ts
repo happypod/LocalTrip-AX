@@ -185,6 +185,11 @@ export const STATIC_TRANSLATIONS = {
     categoryOverlayProgramTags: ["로컬푸드", "제철 먹거리", "미식 기행"],
     categoryOverlayCourseItems: ["당일치기 쉼표코스", "1박2일 감성코스", "어촌 살아보기 코스", "가족 중심 맞춤여행", "연인 전용 데이트코스"],
     categoryOverlayCourseTags: ["추천 코스", "지도 탐색"],
+    privacyPolicy: "개인정보 처리방침",
+    cookiePolicy: "쿠키 정책",
+    termsOfService: "이용약관",
+    refundPolicy: "환불 정책",
+    electronicFinanceTerms: "전자금융거래 이용약관",
   },
   en: {
     backToList: "List Stays",
@@ -372,6 +377,11 @@ export const STATIC_TRANSLATIONS = {
     categoryOverlayProgramTags: ["Resident Local Food", "Seasonal Local Food", "Gourmet Trip"],
     categoryOverlayCourseItems: ["One-day Slow Course", "2D1N Mood Course", "Fishing Village Stay Course", "Family Custom Trip", "Couple Date Course"],
     categoryOverlayCourseTags: ["Recommended Courses", "Map Explore"],
+    privacyPolicy: "Privacy Policy",
+    cookiePolicy: "Cookie Policy",
+    termsOfService: "Terms of Service",
+    refundPolicy: "Refund Policy",
+    electronicFinanceTerms: "Electronic Finance Transaction Terms",
   },
   "zh-cn": {
     backToList: "民宿列表",
@@ -559,6 +569,11 @@ export const STATIC_TRANSLATIONS = {
     categoryOverlayProgramTags: ["居民本地美食", "时令食材", "美食之旅"],
     categoryOverlayCourseItems: ["当日慢游路线", "两天一夜感性路线", "渔村生活体验路线", "家庭定制旅行", "情侣约会路线"],
     categoryOverlayCourseTags: ["推荐路线", "地图探索"],
+    privacyPolicy: "隐私政策",
+    cookiePolicy: "Cookie 政策",
+    termsOfService: "服务条款",
+    refundPolicy: "退款政策",
+    electronicFinanceTerms: "电子金融交易条款",
   },
   "ja-jp": {
     backToList: "宿泊一覧",
@@ -746,6 +761,11 @@ export const STATIC_TRANSLATIONS = {
     categoryOverlayProgramTags: ["住民運営のローカルフード", "旬の味覚", "美食の旅"],
     categoryOverlayCourseItems: ["日帰りゆったりコース", "1泊2日感性コース", "漁村暮らし体験コース", "家族向けカスタム旅", "カップル向けデートコース"],
     categoryOverlayCourseTags: ["おすすめコース", "地図で探す"],
+    privacyPolicy: "個人情報保護方針",
+    cookiePolicy: "クッキーポリシー",
+    termsOfService: "利用規約",
+    refundPolicy: "返金ポリシー",
+    electronicFinanceTerms: "電子金融取引規約",
   },
 };
 
