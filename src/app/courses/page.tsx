@@ -6,6 +6,7 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { getServerTranslationLocale } from "@/lib/server-translation";
 import { getLocalizedList } from "@/lib/content-translation-server";
+import { logOperationError } from "@/lib/operation-log";
 import { getStaticLabels } from "@/lib/static-translations";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +44,7 @@ async function getCourses(): Promise<CourseUI[]> {
       routeItems: [],
     })) as CourseUI[];
   } catch (error) {
-    console.warn("Failed to fetch courses from DB:", error);
+    logOperationError("courses_db_fetch_failed", error, { route: "/courses", operation: "getCourses" });
     return [];
   }
 }

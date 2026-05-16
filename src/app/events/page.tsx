@@ -12,6 +12,7 @@ import {
   normalizeEventHrefForDisplay,
 } from "@/lib/event-policy";
 import { getPrisma } from "@/lib/prisma";
+import { logOperationError } from "@/lib/operation-log";
 import { PublishStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -96,7 +97,7 @@ async function getPublishedEvents(): Promise<EventItem[]> {
       gradient: normalizeEventGradientForDisplay(event.gradient),
     }));
   } catch (error) {
-    console.warn("Failed to load public events:", error);
+    logOperationError("events_db_fetch_failed", error, { route: "/events", operation: "getPublishedEvents" });
     return [];
   }
 }

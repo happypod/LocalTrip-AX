@@ -15,6 +15,7 @@ import {
   faRoute,
   faStore,
   faTrash,
+  faTriangleExclamation,
 } from "@/lib/fontawesome";
 import { ContentImage } from "@/components/common/content-image";
 import type {
@@ -65,6 +66,7 @@ type BuilderCopy = {
   programLabel: string;
   optionEmptyTitle: string;
   optionEmptyDesc: string;
+  dbErrorMsg: string;
 };
 
 const COPY: Record<string, BuilderCopy> = {
@@ -98,6 +100,7 @@ const COPY: Record<string, BuilderCopy> = {
     programLabel: "주민소득상품",
     optionEmptyTitle: "선택 가능한 콘텐츠가 없습니다",
     optionEmptyDesc: "현재 소원권역의 등록된 콘텐츠를 불러올 수 없거나 준비 중입니다.",
+    dbErrorMsg: "콘텐츠를 불러오지 못했습니다. 데이터베이스 연결 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
   },
   en: {
     badge: "Guest Trip Builder",
@@ -129,6 +132,7 @@ const COPY: Record<string, BuilderCopy> = {
     programLabel: "Local product",
     optionEmptyTitle: "No selectable contents available",
     optionEmptyDesc: "Currently there are no registered items or we failed to load them.",
+    dbErrorMsg: "We could not load content options. A database error occurred. Please try again shortly.",
   },
   "zh-cn": {
     badge: "游客行程草稿",
@@ -160,6 +164,7 @@ const COPY: Record<string, BuilderCopy> = {
     programLabel: "本地产品",
     optionEmptyTitle: "暂无可选择的内容",
     optionEmptyDesc: "当前所愿地区暂无已注册内容，或无法正常加载。",
+    dbErrorMsg: "内容加载失败，数据库连接发生错误。请稍后再试。",
   },
   "ja-jp": {
     badge: "ゲスト用コース作成",
@@ -191,6 +196,7 @@ const COPY: Record<string, BuilderCopy> = {
     programLabel: "地元商品",
     optionEmptyTitle: "選択可能なコンテンツがありません",
     optionEmptyDesc: "現在、ソウォン圏域に登録されたコンテンツがないか、読み込めません。",
+    dbErrorMsg: "コンテンツを読み込めませんでした。データベース接続エラーが発生しました。しばらくしてから再試行してください。",
   },
 };
 
@@ -383,6 +389,12 @@ export function CourseBuilderClient({ data, locale }: CourseBuilderClientProps) 
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-6 px-5 py-6 sm:px-8 lg:grid-cols-[minmax(0,1fr)_400px]">
+        {data.source === "error" && (
+          <div className="col-span-full rounded-2xl border border-red-200 bg-red-50 p-5 text-sm font-bold leading-6 text-red-800 flex items-start gap-3">
+            <FontAwesomeIcon icon={faTriangleExclamation} className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+            <span>{copy.dbErrorMsg}</span>
+          </div>
+        )}
         <div className="min-w-0">
           <div className="flex gap-2 overflow-x-auto pb-2">
             {tabs.map((tab) => (

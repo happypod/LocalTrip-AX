@@ -2,6 +2,7 @@ import "server-only";
 
 import { PublishStatus } from "@prisma/client";
 import { getPrisma } from "@/lib/prisma";
+import { logOperationError } from "@/lib/operation-log";
 import { MapItem, MapItemType } from "./map-types";
 
 export * from "./map-types";
@@ -9,6 +10,8 @@ export * from "./map-types";
 export interface MapFetchResult {
   items: MapItem[];
   isFallback: boolean;
+  /** "db" = DB 정상 데이터, "empty" = DB 정상이나 데이터 없음, "error" = DB 연결/조회 실패 */
+  source: "db" | "empty" | "error";
 }
 
 export async function getMapItems(): Promise<MapFetchResult> {
@@ -22,8 +25,11 @@ export async function getMapItems(): Promise<MapFetchResult> {
     });
 
     if (!sowonRegion) {
-      console.warn("Map region 'sowon' not found in DB.");
-      return { items: [], isFallback: true };
+      logOperationError("map_region_not_found", new Error("Region 'sowon' not found"), {
+        route: "/map",
+        operation: "getMapItems",
+      });
+      return { items: [], isFallback: true, source: "empty" };
     }
 
     // Fetch all items from DB in parallel
@@ -96,9 +102,12 @@ export async function getMapItems(): Promise<MapFetchResult> {
       }))
     ];
 
-    return { items: mapItems, isFallback: false };
+    return { items: mapItems, isFallback: mapItems.length === 0, source: mapItems.length > 0 ? "db" : "empty" };
   } catch (error) {
-    console.warn("Failed to fetch map items from DB:", error);
-    return { items: [], isFallback: true };
+    logOperationError("map_db_fetch_failed", error, {
+      route: "/map",
+      operation: "getMapItems",
+    });
+    return { items: [], isFallback: true, source: "error" };
   }
 }

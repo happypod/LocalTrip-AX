@@ -186,7 +186,7 @@ Admin model:
 | Detail message access requires admin session | Pass |
 | Minimum security headers configured | Pass |
 | Real secrets excluded from docs | Pass |
-| Vercel WAF / Rate Limit 룰 구성 (T-072) | Pending |
+| Vercel WAF / Rate Limit 룰 구성 (T-072/T-090) | Pending Approval | Dashboard 적용 전, 초안 문서화 완료 |
 | Admin DB access require pre-validation (T-073) | Pass |
 | CSP(Content-Security-Policy) 적용 (T-077) | Pass |
 

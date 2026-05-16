@@ -88,7 +88,7 @@
 
 | ID | 우선순위 | 대상 | 수정 내용 | 이유 | 완료 기준 |
 |---|---:|---|---|---|---|
-| FIX-001 | P1 | 공개 쓰기 API | `/api/inquiries`, `/api/partner-applications`, `/api/premium-pr-applications`, `/api/lead-events`, `/api/lead-events/map`에 rate limit 또는 Vercel Firewall/WAF 기준 추가 | 공개 운영 시 DB 스팸, LeadEvent 폭증, 문의 테이블 오염 가능 | **[완료] T-072에서 인메모리 적용 및 WAF 기준 문서화 완료** |
+| FIX-001 | P1 | 공개 쓰기 API | `/api/inquiries`, `/api/partner-applications`, `/api/premium-pr-applications`, `/api/lead-events`, `/api/lead-events/map`에 rate limit 또는 Vercel Firewall/WAF 기준 추가 | 공개 운영 시 DB 스팸, LeadEvent 폭증, 문의 테이블 오염 가능 | **[완료] T-072/T-090 인메모리 적용 및 Vercel WAF 초안 작성 완료 (대시보드 실제 적용은 사용자 승인 대기)** |
 | FIX-002 | P2 | 관리자 페이지 | DB 조회가 있는 관리자 `page.tsx`에서 `requireAdminSession()`을 데이터 조회보다 먼저 호출 | 비인증 요청이 DB 조회를 유발하는 구조 제거 | **[완료] T-073에서 8개 누락 파일 전수 적용 및 선검증 구조로 통일 완료** |
 | FIX-003 | P2 | Prisma client | `src/lib/prisma.ts`의 `log: ["query"]`를 development 환경으로 제한 | 운영 로그 비용 증가 및 쿼리 노출 리스크 감소 | **[완료] T-074에서 process.env.NODE_ENV 분기 통해 운영 환경 query 로그 차단 및 풀링 정책 문서화 완료** |
 | FIX-004 | P2 | 지도 데이터 구조 | `src/lib/map-data.ts`에서 seed fallback import와 `FALLBACK_MAP_ITEMS`를 분리 또는 삭제 | 공개 지도는 DB 기준이어야 하며, client bundle에 seed fallback 배열이 섞이지 않도록 정리 | 지도 UI 상수와 타입만 남긴 lean module로 분리 |

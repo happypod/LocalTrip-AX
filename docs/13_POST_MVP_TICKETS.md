@@ -1,6 +1,72 @@
 # Post-MVP Tickets
 
+## T-094 공개 섹션 콘텐츠 매핑 정책 정리
+
+- 목적: 관리자 대시보드의 `체험 관리`와 `주민소득상품 관리`에 등록된 콘텐츠가 공개 메인 섹션 및 전체보기 페이지에서 일관된 기준으로 노출되도록 정리한다.
+- 배경:
+  - 현재 관리자 화면은 `Experience`와 `LocalIncomeProgram`을 모델 기준으로 분리해 보여준다.
+  - 공개 홈은 `Experience`를 체험 섹션에 노출하면서, `LocalIncomeProgram` 일부를 `isFoodProgram()` 하드코딩 조건으로 `주민소득상품` 섹션과 `체험` 섹션으로 다시 나눈다.
+  - 이 때문에 운영자는 관리자에 등록한 위치와 공개 메인 노출 위치가 다르게 보여 혼란을 겪을 수 있다.
+  - `isFoodProgram()` 내부에 인코딩이 깨진 category 조건이 있어 분류 안정성도 낮다.
+- 작업 범위:
+  - 공개 섹션 매핑 정책을 확정한다.
+    - 기본 원칙: `Experience`는 체험 섹션, `LocalIncomeProgram`은 주민소득상품 섹션에 노출한다.
+    - 음식/별미/마을밥상 같은 세부 구분은 `/programs` 내부 category/filter로 처리한다.
+  - `src/app/page.tsx`, `/experiences`, `/programs`의 분류 기준을 동일하게 맞춘다.
+  - `isFoodProgram()`의 slug 기반 하드코딩과 깨진 문자열 조건을 제거하거나 공통 정책 함수로 분리한다.
+  - 관리자 `체험 관리`, `주민소득상품 관리` 목록에 공개 노출 기준을 안내하는 짧은 설명 또는 배지를 추가한다.
+  - 공개 조회는 `regionId + status=published` 기준을 유지하고, 가능하면 Region `status=published` 정책도 함께 확인한다.
+  - 기존 번역(`ContentTranslation`)은 대상 모델 기준을 유지하되, 섹션 이동 때문에 번역 조회가 누락되지 않는지 확인한다.
+- 제외 범위:
+  - DB schema 변경은 기본적으로 하지 않는다.
+  - 결제, 예약 확정, 쿠폰, 후기, 운송 기능은 포함하지 않는다.
+  - seed 전체 재작성이나 운영 DB overwrite는 사용자 승인 없이 하지 않는다.
+- 완료 기준:
+  - 관리자 `체험 관리`에 있는 published 체험은 공개 체험 섹션/목록과 일치한다.
+  - 관리자 `주민소득상품 관리`에 있는 published 주민소득상품은 공개 주민소득상품 섹션/목록과 일치한다.
+  - 홈, `/experiences`, `/programs`가 서로 다른 분류 정책을 사용하지 않는다.
+  - 깨진 category 문자열 조건이 제거된다.
+  - 메인 섹션과 전체보기 페이지에서 다국어 번역이 유지된다.
+  - `npm run lint`, `npm run build`가 통과한다.
+- 권장 모델: Gemini 3.1 Pro High
+- 이유: 단순 UI 수정이 아니라 공개 IA, 관리자 운영 인지, 콘텐츠 모델 분리 원칙을 함께 맞추는 정책성 리팩터링이다.
+
 이 문서는 T-028 MVP 완료 이후 작업을 정의한다. 아래 티켓은 MVP 완료 기준에 포함하지 않으며, 운영 점검 또는 고도화 작업으로 분리한다.
+
+## T-075 Runtime fallback 데이터 분리
+
+- 목적: 공개 런타임 코드에 섞여 있는 seed/mock fallback 데이터를 정리하고 DB Source of Truth 원칙을 코드와 문서에 반영한다.
+- 진행 상태: 완료 (2026-05-15)
+- 완료 내용:
+  - **fallback 현황 조사 완료**: `src/lib/*-data.ts` 전체가 이미 빈 배열(`[]`)로 정리되어 runtime에서 seed 콘텐츠를 노출하지 않는 상태 확인.
+  - **`MapFetchResult`에 `source` 필드 추가**: `"db" | "empty" | "error"` 를 구분하여 지도 페이지가 DB 장애와 DB empty를 다르게 안내할 수 있게 변경.
+  - **`CourseBuilderData`에 `source` 필드 추가**: 동일하게 course-builder-data.ts에 반영하여, DB 장애 시 사용자 화면에 명시적 오류 배너 표시.
+  - **`logOperationError` 전면 적용**: 기존 `console.warn`만 사용하던 모든 공개 data helper catch 블록을 `logOperationError`로 교체. 대상: `/stays`, `/experiences`, `/programs`, `/courses`, `/events`, `/map`, `/course-builder`.
+  - **`/map` 페이지 UX 개선**: `source === "error"` 시 destructive 배너, `source === "empty"` 시 muted 안내 배너를 구분 표시.
+  - **`/course-builder` 페이지 UX 개선**: `source === "error"` 시 다국어(ko/en/zh-cn/ja-jp) 오류 배너 표시. 모든 경우 empty state는 seed 데이터를 자동 주입하지 않음.
+  - **`faTriangleExclamation` 아이콘 추가**: `src/lib/fontawesome.ts`에 경고 아이콘 등록.
+  - **문서 반영**: `docs/13_POST_MVP_TICKETS.md` T-075 완료 기록.
+- fallback 정책 확정:
+  - DB 정상 + 데이터 있음: DB 콘텐츠를 regionId + published 기준으로 노출.
+  - DB 정상 + 데이터 없음: `source: "empty"` 반환. 사용자에게 준비 중 안내. mock 노출 없음.
+  - DB 연결 실패: `source: "error"` 반환. 사용자에게 장애 안내. mock 노출 없음. `logOperationError` 로그 기록.
+  - 이미지 fallback: `ContentImage` 컴포넌트의 로컬 placeholder UI 유지. 외부 네트워크 의존 없음.
+  - localStorage 맞춤코스: DB 후보와 별개로 사용자가 저장한 임시 코스는 hydration 후 유지. DB 후보와 혼합하지 않음.
+- 검증 결과:
+  - `npx prisma validate`: 통과
+  - `npm run lint`: 통과 (exit 0)
+  - `npx next build`: 통과 (exit 0, TypeScript 0 error)
+  - `npm run smoke`: 19/19 통과
+
+## T-090 Production WAF 실제 적용/검증
+
+- 목적: T-072에서 정리된 코드 레벨 rate limit 기준을 바탕으로, Vercel Production 환경의 공개 쓰기 API 보호 상태를 확인하고 WAF(Web Application Firewall) 설정 초안을 작성한다.
+- 진행 상태: 완료 (2026-05-15) - 문서화 및 검증만 진행 (Vercel 설정 적용 대기)
+- 완료 내용:
+  - **코드 레벨 방어 확인**: `src/lib/public-api-rate-limit.ts` 인메모리 방식 적용 유지 확인.
+  - **운영 URL 검증**: `https://localtrip-ax.vercel.app` 대상 `npm run smoke` 실행하여 19/19 통과 확인. 비정상 POST 페이로드에 대한 400 거절 동작 확인.
+  - **WAF 룰 초안 작성 완료**: `docs/09_SECURITY_ENV.md`에 WAF 룰 권장 기준(문의 1분/5회, 입점 10분/3회, LeadEvent 1분/60회) 명시 확인.
+  - **문서화 반영**: 사용자 승인 없이 Vercel Dashboard를 조작할 수 없으므로, Vercel WAF 설정은 "초안 완료, 실제 대시보드 적용은 운영자 승인 및 수동 적용 대기" 상태로 `docs/12_PRE_LAUNCH_CHECKLIST.md`와 `docs/22_FULL_SYSTEM_MONITORING_SPEC.md`에 반영.
 
 ## 진행 원칙
 

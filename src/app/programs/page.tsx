@@ -6,6 +6,7 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { getServerTranslationLocale } from "@/lib/server-translation";
 import { getLocalizedList } from "@/lib/content-translation-server";
+import { logOperationError } from "@/lib/operation-log";
 import { cn } from "@/lib/utils";
 import { getStaticLabels, getLocalizedCategory } from "@/lib/static-translations";
 
@@ -33,7 +34,7 @@ async function getPrograms(): Promise<LocalIncomeProgramUI[]> {
       orderBy: { createdAt: "desc" },
     }) as LocalIncomeProgramUI[];
   } catch (error) {
-    console.warn("Failed to fetch programs from DB:", error);
+    logOperationError("programs_db_fetch_failed", error, { route: "/programs", operation: "getPrograms" });
     return [];
   }
 }

@@ -2,6 +2,7 @@ import "server-only";
 
 import { getPrisma } from "@/lib/prisma";
 import { getLocalizedList } from "@/lib/content-translation-server";
+import { logOperationError } from "@/lib/operation-log";
 
 export type CourseBuilderItemType =
   | "accommodation"
@@ -24,6 +25,8 @@ export interface CourseBuilderData {
   stays: CourseBuilderOption[];
   experiences: CourseBuilderOption[];
   programs: CourseBuilderOption[];
+  /** "db" = DB 정상 데이터, "empty" = DB 정상이나 데이터 없음, "error" = DB 연결/조회 실패 */
+  source: "db" | "empty" | "error";
 }
 
 type LocalizableOption = CourseBuilderOption & {
@@ -75,11 +78,12 @@ function buildOption(
   };
 }
 
-function fallbackData(): CourseBuilderData {
+function fallbackData(source: "empty" | "error"): CourseBuilderData {
   return {
     stays: [],
     experiences: [],
     programs: [],
+    source,
   };
 }
 
@@ -93,7 +97,7 @@ async function localizeOptions(
     getLocalizedList(data.programs, "local_income_program", locale),
   ]);
 
-  return { stays, experiences, programs };
+  return { stays, experiences, programs, source: data.source };
 }
 
 export async function getCourseBuilderData(locale: string): Promise<CourseBuilderData> {
@@ -107,7 +111,11 @@ export async function getCourseBuilderData(locale: string): Promise<CourseBuilde
     });
 
     if (!region) {
-      return localizeOptions(fallbackData(), locale);
+      logOperationError("course_builder_region_not_found", new Error("Region 'sowon' not found"), {
+        route: "/course-builder",
+        operation: "getCourseBuilderData",
+      });
+      return localizeOptions(fallbackData("empty"), locale);
     }
 
     const [stays, experiences, programs] = await Promise.all([
@@ -163,9 +171,15 @@ export async function getCourseBuilderData(locale: string): Promise<CourseBuilde
     const hasAnyOption =
       data.stays.length + data.experiences.length + data.programs.length > 0;
 
-    return localizeOptions(hasAnyOption ? data : fallbackData(), locale);
+    return localizeOptions(
+      hasAnyOption ? { ...data, source: "db" as const } : fallbackData("empty"),
+      locale,
+    );
   } catch (error) {
-    console.warn("Failed to load course builder data:", error);
-    return localizeOptions(fallbackData(), locale);
+    logOperationError("course_builder_db_fetch_failed", error, {
+      route: "/course-builder",
+      operation: "getCourseBuilderData",
+    });
+    return localizeOptions(fallbackData("error"), locale);
   }
 }

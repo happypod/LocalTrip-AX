@@ -4,7 +4,7 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { getServerTranslationLocale } from "@/lib/server-translation";
 import { getLocalizedList } from "@/lib/content-translation-server";
-
+import { logOperationError } from "@/lib/operation-log";
 import { cn } from "@/lib/utils";
 import { getStaticLabels, getLocalizedCategory } from "@/lib/static-translations";
 
@@ -40,7 +40,7 @@ async function getStays() {
       orderBy: { createdAt: "desc" },
     });
   } catch (error) {
-    console.warn("Failed to fetch stays from DB:", error);
+    logOperationError("stays_db_fetch_failed", error, { route: "/stays", operation: "getStays" });
     return [];
   }
 }

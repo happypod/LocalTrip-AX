@@ -6,6 +6,7 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { getServerTranslationLocale } from "@/lib/server-translation";
 import { getLocalizedList } from "@/lib/content-translation-server";
+import { logOperationError } from "@/lib/operation-log";
 import { cn } from "@/lib/utils";
 import { getStaticLabels, getLocalizedCategory } from "@/lib/static-translations";
 
@@ -87,7 +88,7 @@ async function getExperiences(): Promise<ExperienceUI[]> {
       orderBy: { createdAt: "desc" },
     }) as ExperienceUI[];
   } catch (error) {
-    console.warn("Failed to fetch experiences from DB:", error);
+    logOperationError("experiences_db_fetch_failed", error, { route: "/experiences", operation: "getExperiences" });
     return [];
   }
 }
@@ -120,7 +121,7 @@ async function getProgramsAsExperiences(locale: string = "ko"): Promise<ProgramE
       .filter((program) => !isFoodProgram(program))
       .map(toProgramExperience);
   } catch (error) {
-    console.warn("Failed to fetch resident programs for experiences from DB:", error);
+    logOperationError("experience_programs_db_fetch_failed", error, { route: "/experiences", operation: "getProgramsAsExperiences" });
     return [];
   }
 }

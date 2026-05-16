@@ -16,7 +16,7 @@ interface MapPageProps {
 
 export default async function MapPage({ searchParams }: MapPageProps) {
   const { q, date, guests, type } = await searchParams;
-  const { items, isFallback } = await getMapItems();
+  const { items, isFallback, source } = await getMapItems();
 
   return (
     <div className="flex flex-col min-h-screen pb-20">
@@ -45,13 +45,19 @@ export default async function MapPage({ searchParams }: MapPageProps) {
           </p>
         </div>
 
-        {isFallback && (
+        {isFallback && source === "error" && (
           <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-4 text-sm leading-relaxed text-destructive/80 shadow-sm flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
             <p>
               현재 지도 데이터를 실시간으로 불러오는 중 통신 오류가 발생했거나 점검 중입니다.<br/>
               콘텐츠 이용에 참고 부탁드리며, 문제가 지속될 시 고객센터로 문의해 주세요.
             </p>
+          </div>
+        )}
+        {isFallback && source === "empty" && (
+          <div className="bg-muted/40 border border-muted rounded-xl p-4 text-sm leading-relaxed text-muted-foreground shadow-sm flex items-start gap-3">
+            <Info className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+            <p>현재 등록된 콘텐츠가 없습니다. 운영자가 준비 중입니다.</p>
           </div>
         )}
 
